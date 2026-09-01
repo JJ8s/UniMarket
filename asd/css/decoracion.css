@@ -1,0 +1,206 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Caacupe+One&display=swap');
+* {
+  /* Incluye el padding y el borde dentro del ancho/alto total del elemento */
+  box-sizing: border-box;
+  /* Elimina márgenes por defecto del navegador */
+  margin: 0;
+  /* Elimina rellenos por defecto del navegador */
+  padding: 0;
+  /* Define la fuente tipográfica predeterminada */
+  font-family: Arial, sans-serif;
+}
+
+
+
+/* ==========================================
+   ESTILOS DE LA PÁGINA (FONDO Y CENTRADO)
+   ========================================== */
+body {
+  /* Ruta de tu imagen de fondo */
+  background-image: url("../img/prueba.jpg"); 
+  
+  /* Ajustes esenciales para que la imagen se vea bien */
+  background-size: cover;       /* Cubre toda la pantalla sin deformarse */
+  background-position: center;  /* Centra la imagen */
+  background-repeat: no-repeat; /* Evita que la imagen se repita */
+  background-attachment: fixed; /* Mantiene el fondo fijo al hacer scroll */
+
+  /* Mantiene el centrado de tu tarjeta de login */
+  display: flex;
+  flex-direction: column;       /* Organiza el título arriba y el cuadro abajo */
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.tituloA {
+  font-family: "Caacupe One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: navy;          /* Color del texto (ajústalo según tu fondo) */
+  font-size: 70px;         /* Tamaño de letra más grande */
+  margin-bottom: 30px;     /* Separación entre el título y la tarjeta de login */
+  text-align: center;
+}
+/* ==========================================
+   TARJETA CONTENEDORA (LOGIN CONTAINER)
+   ========================================== */
+.login-container {
+  background-color: #ffffff;
+  /* Espacio interno entre el borde y el contenido */
+  padding: 40px;
+  /* Bordes redondeados en las esquinas */
+  border-radius: 8px;
+  /* Sombra suave alrededor de la tarjeta para dar efecto de elevación */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  /* Asegura que ocupe todo el ancho disponible si la pantalla es pequeña */
+  width: 90%;
+  /* Limita el ancho máximo para que no se extienda en pantallas grandes */
+  max-width: 400px;
+}
+
+/* Título principal dentro del contenedor */
+.login-container h2 {
+  /* Distancia con los elementos inferiores */
+  margin-bottom: 24px;
+  /* Color de texto gris oscuro */
+  color: #333333;
+  /* Centra el texto del título */
+  text-align: center;
+}
+
+/* ==========================================
+   GRUPOS DE CAMPOS DE ENTRADA (INPUTS)
+   ========================================== */
+/* Agrupador individual para cada label + input */
+.form-group {
+  /* Separa verticalmente los campos de entrada */
+  margin-bottom: 20px;
+}
+
+/* Etiquetas sobre los campos de texto */
+.form-group label {
+  /* Se comporta como bloque para ubicarse encima del campo input */
+  display: block;
+  /* Separación inferior respecto a su respectivo input */
+  margin-bottom: 8px;
+  /* Color de texto gris medio */
+  color: #555555;
+  /* Tamaño de la letra */
+  font-size: 14px;
+}
+
+/* Campos de texto (Email y Password) */
+.form-group input {
+  /* Ocupan todo el ancho disponible dentro del contenedor */
+  width: 100%;
+  /* Relleno interno para dar altura y espacio al escribir */
+  padding: 12px;
+  /* Borde delgado gris claro */
+  border: 1px solid #ccc;
+  /* Bordes ligeramente redondeados */
+  border-radius: 4px;
+  /* Tamaño de la letra que se escribe */
+  font-size: 14px;
+}
+
+/* Estado del input cuando el usuario hace clic o escribe en él */
+.form-group input:focus {
+  /* Elimina el contorno azul predeterminado de los navegadores */
+  outline: none;
+  /* Cambia el color del borde a un azul más llamativo */
+  border-color: #007bff;
+}
+
+/* ==========================================
+   BOTÓN DE ENVÍO
+   ========================================== */
+.btn-submit {
+  /* Ocupa el 100% del ancho del contenedor */
+  width: 100%;
+  /* Relleno interno vertical y horizontal */
+  padding: 12px;
+  /* Color azul de fondo */
+  background-color: #007bff;
+  /* Quita el borde nativo del botón */
+  border: none;
+  /* Redondea las esquinas del botón */
+  border-radius: 4px;
+  /* Color blanco para el texto "Ingresar" */
+  color: white;
+  /* Tamaño de la fuente */
+  font-size: 16px;
+  /* Texto en negrita */
+  font-weight: bold;
+  /* Transforma el cursor a una 'manita' al pasar por encima */
+  cursor: pointer;
+  /* Animación suave al cambiar de color al pasar el cursor */
+  transition: background-color 0.2s;
+}
+
+/* Estado interactivo al pasar el cursor sobre el botón */
+.btn-submit:hover {
+  /* Cambia el fondo a un azul más oscuro */
+  background-color: #0056b3;
+}
+
+/* ==========================================
+   PIE DEL FORMULARIO (ENLACES)
+   ========================================== */
+.form-footer {
+  /* Separación superior respecto al botón */
+  margin-top: 20px;
+  /* Centra el enlace */
+  text-align: center;
+  /* Tamaño de texto */
+  font-size: 14px;
+}
+
+/* Enlaces dentro del pie del formulario */
+.form-footer a {
+  /* Color del enlace en azul */
+  color: #007bff;
+  /* Elimina el subrayado predeterminado */
+  text-decoration: none;
+}
+
+/* Estado al pasar el cursor sobre el enlace */
+.form-footer a:hover {
+  /* Vuelve a mostrar el subrayado al pasar el cursor */
+  text-decoration: underline;
+}
+
+
+@media (max-width: 480px) {
+  body {
+    padding: 15px;            /* Evita que la tarjeta toque los bordes de la pantalla */
+  }
+
+  .login-container {
+    padding: 25px 20px;       /* Reduce el relleno interno en móviles */
+  }
+
+  .login-container h2 {
+    font-size: 20px;          /* Ajusta el tamaño del título */
+    margin-bottom: 18px;
+  }
+
+  .form-group input {
+    padding: 10px;            /* Tapa de entrada ligeramente más compacta */
+    font-size: 16px;          /* Evita el zoom automático no deseado en iOS */
+  }
+
+  .btn-submit {
+    padding: 14px;            /* Hace el botón fácil de presionar con el pulgar */
+    font-size: 16px;
+  }
+  
+
+}@media (max-width: 768px) {
+  .titulo-principal {
+    font-size: 45px;
+    margin-bottom: 30px;
+  }
+}
