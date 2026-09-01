@@ -4,12 +4,18 @@ Plataforma de comercio entre estudiantes para facilitar la compraventa de produc
 
 Partes:
 -login
+
 -perfil usuario
+
 -mis pedidos
+
 -panel vendedor
 
 jordy:
 -Dashboard principal de ventas
+
 -pasarela de pago(gen boleta)
+
 -supabase(base datos)
+
 -publicar ventas 
