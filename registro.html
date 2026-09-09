@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crear cuenta - UniMarket</title>
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body class="auth-body">
+
+  <div class="auth-logo">
+    <img src="img/logo.png" alt="UniMarket" />
+  </div>
+
+  <div class="login-container">
+    <h2>Crear cuenta</h2>
+
+    <form id="registro-form">
+      <div class="form-group">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required />
+      </div>
+      <div class="form-group">
+        <label for="usuario">Nombre de usuario</label>
+        <input type="text" id="usuario" name="usuario" placeholder="@usuario" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" placeholder="Ingresa tu correo" required />
+      </div>
+      <div class="form-group">
+        <label for="universidad">Universidad</label>
+        <select id="universidad" name="universidad" class="university-select" style="width:100%; padding:11px 12px; border:1px solid #CBD5E0; border-radius:8px; font-size:14px;">
+          <option value="">Selecciona tu universidad</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" placeholder="Mínimo 6 caracteres" minlength="6" required />
+      </div>
+      <div class="form-group">
+        <label for="password2">Confirmar contraseña</label>
+        <input type="password" id="password2" name="password2" placeholder="Repite tu contraseña" minlength="6" required />
+      </div>
+      <p id="registro-error" class="form-error hidden"></p>
+      <button type="submit" class="btn-submit">Crear cuenta</button>
+      <div class="form-footer">
+        <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+      </div>
+    </form>
+  </div>
+
+  <!-- datos.js aporta registrarUsuario(), iniciarSesion() y la lista de universidades -->
+  <script src="js/datos.js"></script>
+  <script>
+    // Llena el selector de universidad con la misma lista que usa
+    // publicar.html / index.html (definida en datos.js), para que el
+    // dato quede consistente con el resto del sitio.
+    (function pintarUniversidades() {
+      const select = document.getElementById('universidad');
+      const universidades = window.UNIVERSIDADES_DISPONIBLES || [];
+      universidades.forEach(function (universidad) {
+        const opcion = document.createElement('option');
+        opcion.value = universidad;
+        opcion.textContent = universidad;
+        select.appendChild(opcion);
+      });
+    })();
+
+    document.getElementById('registro-form').addEventListener('submit', function (evento) {
+      evento.preventDefault();
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const nombreUsuario = document.getElementById('usuario').value.trim();
+      const correo = document.getElementById('email').value.trim();
+      const universidad = document.getElementById('universidad').value;
+      const contrasena = document.getElementById('password').value;
+      const contrasena2 = document.getElementById('password2').value;
+      const errorEl = document.getElementById('registro-error');
+
+      if (contrasena !== contrasena2) {
+        errorEl.textContent = 'Las contraseñas no coinciden.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      const resultado = registrarUsuario({ nombre, nombreUsuario, correo, universidad, contrasena });
+
+      if (!resultado.ok) {
+        errorEl.textContent = resultado.mensaje;
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      errorEl.classList.add('hidden');
+      // Registro exitoso: inicia sesion automaticamente y entra al dashboard.
+      iniciarSesion(resultado.usuario);
+      window.location.href = 'index.html';
+    });
+
+    if (typeof haySesionActiva === 'function' && haySesionActiva()) {
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

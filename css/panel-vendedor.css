@@ -1,0 +1,333 @@
+/* ============================================================
+   panel-vendedor.css - Estilos para panel-vendedor.html
+   ============================================================ */
+
+.panel-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #1A365D;
+}
+
+.panel-titulo i {
+  font-size: 1.4rem;
+}
+
+/* ---------- Tarjetas de estadisticas ---------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.6rem;
+}
+
+.stat-value {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stat-value .fa-star {
+  color: #f59e0b;
+  font-size: 1.15rem;
+}
+
+.stat-icon-circle {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+.stat-icon-circle.verde { background-color: #d1fae5; color: #059669; }
+.stat-icon-circle.azul { background-color: #dbeafe; color: #2563eb; }
+.stat-icon-circle.ambar { background-color: #fef3c7; color: #d97706; }
+
+.stats-nota {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: -0.5rem;
+}
+
+/* ---------- Layout de dos columnas ---------- */
+.panel-layout {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.panel-seccion-titulo {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.9rem;
+}
+
+/* ---------- Tabla de pedidos activos ---------- */
+.tabla-wrapper {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.tabla-pedidos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-pedidos thead th {
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tabla-pedidos tbody td {
+  padding: 0.95rem 1.1rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.tabla-pedidos tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pedido-producto-nombre {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.pedido-producto-id {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.pedido-entrega {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #475569;
+}
+
+.pedido-entrega i {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.estado-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.estado-pill.pendiente {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.estado-pill.entregado {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.btn-accion-pedido {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: not-allowed;
+  font-size: 1rem;
+  padding: 0.3rem 0.5rem;
+}
+
+.tabla-pedidos-vacio {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* ---------- Inventario rapido ---------- */
+.inventario-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0.5rem 1.25rem;
+}
+
+.inventario-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.inventario-item:last-child {
+  border-bottom: none;
+}
+
+.inventario-swatch {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.inventario-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.inventario-nombre {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventario-precio {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.inventario-controles {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.inventario-estado-texto {
+  font-size: 0.78rem;
+  font-weight: 700;
+  min-width: 68px;
+  text-align: right;
+}
+
+.inventario-estado-texto.disponible { color: #16a34a; }
+.inventario-estado-texto.agotado { color: #94a3b8; }
+
+/* Interruptor tipo switch: SOLO cambia disponibilidad (stock), no borra nada. */
+.switch-disponibilidad {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch-disponibilidad input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+.switch-slider::before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.switch-disponibilidad input:checked + .switch-slider {
+  background-color: #1A365D;
+}
+
+.switch-disponibilidad input:checked + .switch-slider::before {
+  transform: translateX(18px);
+}
+
+/* Boton de borrar: separado a proposito del switch de arriba, para que
+   nunca se puedan confundir. Borrar elimina el producto por completo;
+   el switch solo lo marca sin stock. */
+.btn-borrar-inventario {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0.3rem;
+  transition: color 0.15s ease;
+}
+
+.btn-borrar-inventario:hover {
+  color: #dc2626;
+}
+
+.inventario-vacio {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .panel-layout {
+    grid-template-columns: 1fr;
+  }
+  .tabla-wrapper {
+    overflow-x: auto;
+  }
+  .tabla-pedidos {
+    min-width: 560px;
+  }
+}

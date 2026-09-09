@@ -1,0 +1,169 @@
+/* ============================================================
+   auth.css - Estilos para las pantallas de login y registro
+   ============================================================
+   Paleta alineada con el resto del dashboard (ver tailwind.config
+   en index.html): primary #1A365D, accent #F97316, surface #F7FAFC.
+============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+body.auth-body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #F7FAFC;
+  background-image: radial-gradient(circle at top left, rgba(26, 54, 93, 0.08), transparent 45%),
+                     radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.10), transparent 45%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.auth-logo img {
+  height: 42px;
+  width: auto;
+}
+
+.auth-logo span {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1A365D;
+}
+
+.login-container {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(26, 54, 93, 0.12);
+  width: 90%;
+  max-width: 400px;
+}
+
+.login-container h2 {
+  margin: 0 0 24px;
+  color: #1A365D;
+  text-align: center;
+  font-size: 1.4rem;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #4A5568;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #CBD5E0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #1A365D;
+  box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.12);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  background-color: #F97316;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+  background-color: #ea6a12;
+}
+
+.form-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #4A5568;
+}
+
+.form-footer p + p {
+  margin-top: 8px;
+}
+
+.form-footer a {
+  color: #1A365D;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.form-footer a:hover {
+  text-decoration: underline;
+}
+
+.form-error {
+  background-color: #FED7D7;
+  color: #C53030;
+  border: 1px solid #FEB2B2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.form-error.hidden {
+  display: none;
+}
+
+.form-hint {
+  background-color: #EBF8FF;
+  color: #2C5282;
+  border: 1px solid #BEE3F8;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 28px 20px;
+  }
+
+  .login-container h2 {
+    font-size: 1.2rem;
+  }
+
+  .form-group input {
+    padding: 12px;
+    font-size: 16px; /* evita el zoom automatico en iOS */
+  }
+
+  .btn-submit {
+    padding: 14px;
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi bolsa - UniMarket</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- perfil.css aporta .banner-card, .btn-ghost-on-dark y .empty-state;
+       bolsa.css tiene los estilos propios de esta pagina (items, stepper, resumen). -->
+  <link rel="stylesheet" href="css/perfil.css">
+  <link rel="stylesheet" href="css/bolsa.css">
+</head>
+<body class="bolsa-body">
+
+  <div class="bolsa-header-logo">
+    <img src="img/logo.png" alt="UniMarket" />
+  </div>
+
+  <main class="bolsa-wrapper">
+    <header class="banner-card">
+      <div>
+        <h1 style="font-size: 1.6rem; font-weight: 700;">Mi Bolsa</h1>
+        <p style="color: #93c5fd; font-size: 0.95rem; margin-top: 0.2rem;" id="bolsa-subtitulo">Revisa los artículos que agregaste</p>
+      </div>
+      <a href="index.html" class="btn-ghost-on-dark">
+        <i class="fa-solid fa-arrow-left"></i> Seguir comprando
+      </a>
+    </header>
+
+    <div class="bolsa-layout" id="bolsa-layout">
+      <div class="bolsa-lista" id="bolsa-lista"></div>
+
+      <aside class="bolsa-resumen" id="bolsa-resumen">
+        <h2>Resumen del pedido</h2>
+        <div class="resumen-linea">
+          <span id="resumen-cantidad-label">Artículos (0)</span>
+          <span id="resumen-subtotal">$0.00</span>
+        </div>
+        <div class="resumen-linea total">
+          <span>Total</span>
+          <span id="resumen-total">$0.00</span>
+        </div>
+        <button class="btn-checkout" id="btn-checkout" disabled>
+          <i class="fa-solid fa-lock"></i> Proceder al pago
+        </button>
+        <p class="checkout-nota">La pasarela de pago todavía no está disponible. Por ahora puedes armar y revisar tu bolsa.</p>
+      </aside>
+    </div>
+
+    <!-- Mensaje cuando la bolsa esta vacia -->
+    <div id="bolsa-vacia" class="empty-state hidden">
+      <p style="margin-bottom: 1rem;">Tu bolsa está vacía.</p>
+      <a href="index.html" class="btn-primary-orange" style="display:inline-flex; max-width: 260px; margin: 0 auto;">
+        <i class="fa-solid fa-store"></i> Ir al catálogo
+      </a>
+    </div>
+  </main>
+
+  <!-- datos.js aporta el control de sesion y el acceso a articulos/carrito -->
+  <script src="js/datos.js"></script>
+  <script>
+    // Si no hay sesion activa, no se puede ver la bolsa: al login.
+    if (typeof haySesionActiva === 'function' && !haySesionActiva()) {
+      window.location.href = 'login.html';
+    }
+
+    // Misma paleta de colores placeholder que usa catalogo.js, para que
+    // un articulo se vea del mismo color en la bolsa que en el catalogo.
+    const COLORES_IMAGEN = ['#FDF3D0', '#E7E9EC', '#DCEBFB', '#D9F5E3', '#FCE1E4'];
+    function obtenerColorImagen(idArticulo) {
+      return COLORES_IMAGEN[idArticulo % COLORES_IMAGEN.length];
+    }
+    function obtenerEstiloImagen(articulo) {
+      if (articulo.fotos && articulo.fotos.length > 0) {
+        return `background-image:url('${articulo.fotos[0]}'); background-size:cover; background-position:center;`;
+      }
+      return `background:${obtenerColorImagen(articulo.id)};`;
+    }
+
+    function escaparHtml(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto ?? '';
+      return div.innerHTML;
+    }
+
+    /**
+     * El carrito se guarda como un array simple de ids (uno por unidad
+     * agregada, ver agregarAlCarrito() en catalogo.js). Aqui se agrupa
+     * para poder mostrar una linea por producto con su cantidad.
+     * @returns {Array<{articulo:Object, cantidad:number}>}
+     */
+    function obtenerLineasDeBolsa() {
+      const idsEnCarrito = cargarCarrito();
+      const articulosDisponibles = cargarArticulos();
+
+      const conteoPorId = idsEnCarrito.reduce((mapa, id) => {
+        mapa[id] = (mapa[id] || 0) + 1;
+        return mapa;
+      }, {});
+
+      const lineas = [];
+      let huboArticulosFantasma = false;
+
+      Object.keys(conteoPorId).forEach(idTexto => {
+        const id = Number(idTexto);
+        const articulo = articulosDisponibles.find(a => a.id === id);
+        if (!articulo) {
+          // El articulo ya no existe (el vendedor lo borro): se limpia
+          // de la bolsa en vez de mostrar una linea rota.
+          huboArticulosFantasma = true;
+          return;
+        }
+        lineas.push({ articulo, cantidad: conteoPorId[id] });
+      });
+
+      // Si se limpiaron articulos fantasma, se persiste la bolsa ya sin ellos.
+      if (huboArticulosFantasma) {
+        const idsValidos = lineas.flatMap(linea => Array(linea.cantidad).fill(linea.articulo.id));
+        guardarCarrito(idsValidos);
+      }
+
+      return lineas;
+    }
+
+    /** Reemplaza por completo el carrito guardado con la cantidad exacta de cada id. */
+    function guardarLineasComoCarrito(lineas) {
+      const idsPlanos = lineas.flatMap(linea => Array(linea.cantidad).fill(linea.articulo.id));
+      guardarCarrito(idsPlanos);
+    }
+
+    function formatearPrecio(numero) {
+      return `$${numero.toFixed(2)}`;
+    }
+
+    /** Dibuja toda la pagina (lista de items + resumen) a partir del carrito guardado. */
+    function renderizarBolsa() {
+      const lineas = obtenerLineasDeBolsa();
+      const contenedorLista = document.getElementById('bolsa-lista');
+      const layout = document.getElementById('bolsa-layout');
+      const mensajeVacio = document.getElementById('bolsa-vacia');
+      const subtitulo = document.getElementById('bolsa-subtitulo');
+
+      if (lineas.length === 0) {
+        layout.classList.add('hidden');
+        mensajeVacio.classList.remove('hidden');
+        subtitulo.textContent = 'Tu bolsa está vacía';
+        actualizarBadgeCarritoLocal(0);
+        return;
+      }
+
+      layout.classList.remove('hidden');
+      mensajeVacio.classList.add('hidden');
+
+      const totalUnidades = lineas.reduce((suma, linea) => suma + linea.cantidad, 0);
+      subtitulo.textContent = `${totalUnidades} artículo${totalUnidades === 1 ? '' : 's'} en tu bolsa`;
+
+      contenedorLista.innerHTML = lineas.map(linea => {
+        const { articulo, cantidad } = linea;
+        const subtotal = articulo.precio * cantidad;
+        return `
+          <article class="bolsa-item" data-id="${articulo.id}">
+            <div class="bolsa-item-imagen" style="${obtenerEstiloImagen(articulo)}"></div>
+            <div class="bolsa-item-info">
+              <p class="bolsa-item-nombre">${escaparHtml(articulo.nombre)}</p>
+              <p class="bolsa-item-meta">${escaparHtml(articulo.vendedor || 'Vendedor')} · ${escaparHtml(articulo.universidad || '')}</p>
+              <p class="bolsa-item-precio-unitario">${formatearPrecio(articulo.precio)} c/u</p>
+            </div>
+            <div class="bolsa-item-acciones">
+              <p class="bolsa-item-subtotal">${formatearPrecio(subtotal)}</p>
+              <div class="stepper-cantidad">
+                <button type="button" data-restar="${articulo.id}" aria-label="Quitar una unidad">−</button>
+                <span>${cantidad}</span>
+                <button type="button" data-sumar="${articulo.id}" aria-label="Agregar una unidad">+</button>
+              </div>
+              <button type="button" class="bolsa-item-quitar" data-quitar="${articulo.id}">
+                <i class="fa-solid fa-trash"></i> Quitar
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      // Resumen
+      const subtotalGeneral = lineas.reduce((suma, linea) => suma + linea.articulo.precio * linea.cantidad, 0);
+      document.getElementById('resumen-cantidad-label').textContent = `Artículos (${totalUnidades})`;
+      document.getElementById('resumen-subtotal').textContent = formatearPrecio(subtotalGeneral);
+      document.getElementById('resumen-total').textContent = formatearPrecio(subtotalGeneral);
+
+      actualizarBadgeCarritoLocal(totalUnidades);
+      engancharEventosDeLinea(lineas);
+    }
+
+    /** Actualiza el numero del badge del carrito, por si el usuario vuelve a otra pagina. */
+    function actualizarBadgeCarritoLocal(totalUnidades) {
+      const badge = document.getElementById('badge');
+      if (badge) badge.textContent = totalUnidades;
+    }
+
+    /** Engancha los botones +/- y "Quitar" de cada linea recien pintada. */
+    function engancharEventosDeLinea(lineas) {
+      document.querySelectorAll('[data-sumar]').forEach(boton => {
+        boton.addEventListener('click', function () {
+          const id = Number(this.dataset.sumar);
+          const linea = lineas.find(l => l.articulo.id === id);
+          if (!linea) return;
+          linea.cantidad += 1;
+          guardarLineasComoCarrito(lineas);
+          renderizarBolsa();
+        });
+      });
+
+      document.querySelectorAll('[data-restar]').forEach(boton => {
+        boton.addEventListener('click', function () {
+          const id = Number(this.dataset.restar);
+          const linea = lineas.find(l => l.articulo.id === id);
+          if (!linea) return;
+          linea.cantidad -= 1;
+          const lineasRestantes = linea.cantidad > 0
+            ? lineas
+            : lineas.filter(l => l.articulo.id !== id);
+          guardarLineasComoCarrito(lineasRestantes);
+          renderizarBolsa();
+        });
+      });
+
+      document.querySelectorAll('[data-quitar]').forEach(boton => {
+        boton.addEventListener('click', function () {
+          const id = Number(this.dataset.quitar);
+          const lineasRestantes = lineas.filter(l => l.articulo.id !== id);
+          guardarLineasComoCarrito(lineasRestantes);
+          renderizarBolsa();
+        });
+      });
+    }
+
+    renderizarBolsa();
+  </script>
+</body>
+</html>

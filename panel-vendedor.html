@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Vendedor - UniMarket</title>
+
+  <!-- ===== TAILWIND CDN (igual que index.html / publicar.html) ===== -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1A365D',
+            accent: '#F97316',
+            surface: '#F7FAFC',
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/catalogo.css" />
+  <link rel="stylesheet" href="css/panel-vendedor.css" />
+</head>
+<body class="bg-surface">
+
+  <!-- ========================================================== -->
+  <!-- HEADER: igual que index.html / publicar.html                -->
+  <!-- ========================================================== -->
+  <header class="bg-white shadow-sm p-4 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-50">
+    <h1 class="text-2xl font-bold text-primary flex items-center">
+      <img src="img/logo.png" alt="UniMarket" class="h-10 w-auto" />
+    </h1>
+
+    <form id="search-form" class="search-form flex-1 max-w-xl">
+      <input type="search" name="q" id="search-input" placeholder="Buscar snacks, ropa, tecnología..." />
+      <button type="submit">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+      </button>
+    </form>
+
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <button id="profile-btn" class="flex items-center justify-center w-10 h-10 rounded-full bg-surface hover:bg-gray-200 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+        </button>
+
+        <div id="profile-dropdown" class="profile-dropdown hidden">
+          <div class="profile-info">
+            <p id="profile-name" class="profile-name"></p>
+            <p id="profile-username" class="profile-username"></p>
+            <p id="profile-email" class="profile-email"></p>
+          </div>
+          <hr class="profile-divider" />
+          <a href="perfil.html" target="_blank" class="profile-menu-item">Ver mi perfil</a>
+          <a href="pedidos.html" target="_blank" class="profile-menu-item">Mis pedidos</a>
+          <a href="panel-vendedor.html" class="profile-menu-item">Panel vendedor</a>
+          <hr class="profile-divider" />
+          <a href="#" id="logout-link" class="profile-menu-item profile-menu-item-danger">Salir de la sesión</a>
+        </div>
+      </div>
+
+      <a href="bolsa.html" id="cart-btn" class="relative">
+        <img src="img/ayqmoverelcacharro.png" alt="Carrito" class="w-7 h-7" />
+        <span id="badge" class="absolute -top-1 -right-2 bg-accent text-white text-xs font-bold rounded-full px-1.5">0</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================== -->
+  <!-- CONTENIDO DEL PANEL                                         -->
+  <!-- ========================================================== -->
+  <main class="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-8">
+
+    <h2 class="panel-titulo text-3xl font-bold">
+      <i class="fa-solid fa-shop"></i> Panel de Vendedor
+    </h2>
+
+    <!-- ----- Tarjetas de estadisticas ----- -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div>
+          <p class="stat-label">Ventas del mes</p>
+          <p class="stat-value" id="stat-ventas-mes">$0.00</p>
+        </div>
+        <div class="stat-icon-circle verde"><i class="fa-solid fa-arrow-trend-up"></i></div>
+      </div>
+
+      <div class="stat-card">
+        <div>
+          <p class="stat-label">Pedidos por entregar hoy</p>
+          <p class="stat-value" id="stat-pedidos-hoy">0</p>
+        </div>
+        <div class="stat-icon-circle azul"><i class="fa-regular fa-calendar"></i></div>
+      </div>
+
+      <div class="stat-card">
+        <div>
+          <p class="stat-label">Calificación promedio</p>
+          <p class="stat-value" id="stat-calificacion">Sin datos</p>
+        </div>
+        <div class="stat-icon-circle ambar"><i class="fa-solid fa-check"></i></div>
+      </div>
+    </section>
+    <p class="stats-nota">* "Ventas del mes" y "Pedidos por entregar hoy" son datos de ejemplo: se conectarán con datos reales cuando exista un sistema de pedidos/compras. "Calificación promedio" ya se calcula con tus artículos publicados.</p>
+
+    <div class="panel-layout">
+      <!-- ----- Pedidos activos ----- -->
+      <section>
+        <h3 class="panel-seccion-titulo">Pedidos Activos</h3>
+        <div class="tabla-wrapper">
+          <table class="tabla-pedidos">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Comprador</th>
+                <th>Entrega</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-pedidos-cuerpo">
+              <!-- Filas de ejemplo: todavia no existe un backend de pedidos
+                   real (el proyecto no tiene servidor ni checkout que
+                   registre compras entre distintos usuarios), asi que esta
+                   tabla queda con datos ilustrativos por ahora. -->
+              <tr>
+                <td>
+                  <p class="pedido-producto-nombre">Brownies de...</p>
+                  <p class="pedido-producto-id">ORD-001</p>
+                </td>
+                <td>Juan P.</td>
+                <td><span class="pedido-entrega"><i class="fa-solid fa-location-dot"></i> Patio de Ingeniería</span></td>
+                <td><span class="estado-pill pendiente"><i class="fa-regular fa-clock"></i> Pendiente</span></td>
+                <td><button class="btn-accion-pedido" title="Próximamente" disabled><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+              </tr>
+              <tr>
+                <td>
+                  <p class="pedido-producto-nombre">Calculadora...</p>
+                  <p class="pedido-producto-id">ORD-002</p>
+                </td>
+                <td>Ana L.</td>
+                <td><span class="pedido-entrega"><i class="fa-solid fa-location-dot"></i> Biblioteca Central</span></td>
+                <td><span class="estado-pill pendiente"><i class="fa-regular fa-clock"></i> Pendiente</span></td>
+                <td><button class="btn-accion-pedido" title="Próximamente" disabled><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ----- Inventario rapido (REAL: tus articulos publicados) ----- -->
+      <section>
+        <h3 class="panel-seccion-titulo">Inventario Rápido</h3>
+        <div class="inventario-card">
+          <div id="inventario-lista"></div>
+          <p id="inventario-vacio" class="inventario-vacio hidden">
+            Todavía no has publicado ningún artículo.<br />
+            <a href="publicar.html" style="color:#1A365D; font-weight:600;">Publica tu primer artículo</a>
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- datos.js aporta sesion y acceso a articulos -->
+  <script src="js/datos.js"></script>
+  <script>
+    // Si no hay sesion activa, no se puede ver el panel: al login.
+    if (typeof haySesionActiva === 'function' && !haySesionActiva()) {
+      window.location.href = 'login.html';
+    }
+
+    const usuarioSesion = (typeof obtenerSesion === 'function' && obtenerSesion()) || window.USUARIO_ACTUAL || {};
+
+    // "Ventas del mes" y "Pedidos por entregar hoy" son ilustrativos (ver
+    // nota debajo de las tarjetas): el proyecto todavia no tiene un
+    // sistema de pedidos/compras real entre distintos usuarios.
+    document.getElementById('stat-ventas-mes').textContent = '$145.00';
+    document.getElementById('stat-pedidos-hoy').textContent = '3';
+
+    // La barra de busqueda de este header es solo visual en esta pagina
+    // (no filtra nada aqui); evita que un Enter recargue la pantalla.
+    const formBusqueda = document.getElementById('search-form');
+    if (formBusqueda) {
+      formBusqueda.addEventListener('submit', function (evento) {
+        evento.preventDefault();
+      });
+    }
+
+    // Menu de perfil (clase compartida definida en interfaz.js)
+    const menuPerfil = new MenuPerfil('profile-btn', 'profile-dropdown', usuarioSesion);
+    menuPerfil.inicializar();
+
+    // Numero del carrito en el header, igual que en el resto de paginas
+    const badgeCarrito = document.getElementById('badge');
+    if (badgeCarrito) badgeCarrito.textContent = cargarCarrito().length;
+
+    // Misma paleta de colores placeholder que usa catalogo.js
+    const COLORES_IMAGEN = ['#FDF3D0', '#E7E9EC', '#DCEBFB', '#D9F5E3', '#FCE1E4'];
+    function obtenerColorImagen(idArticulo) {
+      return COLORES_IMAGEN[idArticulo % COLORES_IMAGEN.length];
+    }
+    function obtenerEstiloSwatch(articulo) {
+      if (articulo.fotos && articulo.fotos.length > 0) {
+        return `background-image:url('${articulo.fotos[0]}');`;
+      }
+      return `background:${obtenerColorImagen(articulo.id)};`;
+    }
+
+    function escaparHtml(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto ?? '';
+      return div.innerHTML;
+    }
+
+    /** Devuelve solo los articulos publicados por el usuario con sesion activa. */
+    function obtenerMisArticulos() {
+      return cargarArticulos().filter(articulo => articulo.vendedor === usuarioSesion.nombre);
+    }
+
+    /** Calcula la calificacion promedio de los articulos del vendedor actual. */
+    function pintarCalificacionPromedio(misArticulos) {
+      const elemento = document.getElementById('stat-calificacion');
+      const conCalificacion = misArticulos.filter(a => typeof a.calificacion === 'number' && a.calificacion > 0);
+      if (conCalificacion.length === 0) {
+        elemento.textContent = 'Sin datos';
+        return;
+      }
+      const promedio = conCalificacion.reduce((suma, a) => suma + a.calificacion, 0) / conCalificacion.length;
+      elemento.innerHTML = `${promedio.toFixed(1)} <i class="fa-solid fa-star"></i>`;
+    }
+
+    /**
+     * Cambia la disponibilidad de un articulo SIN borrarlo:
+     *   - Pasar a "Agotado": guarda el stock actual en stockGuardado y
+     *     deja stock en 0.
+     *   - Volver a "Disponible": restaura stockGuardado (o usa 1 si no
+     *     habia ninguno guardado).
+     * Este switch es una accion totalmente distinta al boton de borrar.
+     * @param {number} idArticulo
+     */
+    function alternarDisponibilidad(idArticulo) {
+      const articulos = cargarArticulos();
+      const articulo = articulos.find(a => a.id === idArticulo);
+      if (!articulo) return;
+
+      if ((articulo.stock ?? 0) > 0) {
+        // Disponible -> Agotado
+        articulo.stockGuardado = articulo.stock;
+        articulo.stock = 0;
+      } else {
+        // Agotado -> Disponible
+        articulo.stock = articulo.stockGuardado && articulo.stockGuardado > 0 ? articulo.stockGuardado : 1;
+      }
+
+      guardarArticulos(articulos);
+      renderizarInventario();
+    }
+
+    /**
+     * Borra un articulo por completo (accion distinta e independiente
+     * del switch de disponibilidad de arriba). Pide confirmacion antes.
+     * @param {number} idArticulo
+     */
+    function borrarArticuloInventario(idArticulo) {
+      const confirmado = window.confirm('¿Seguro que quieres borrar esta publicación por completo? Esta acción no se puede deshacer.');
+      if (!confirmado) return;
+
+      const articulos = cargarArticulos().filter(a => a.id !== idArticulo);
+      guardarArticulos(articulos);
+      renderizarInventario();
+    }
+
+    function renderizarInventario() {
+      const misArticulos = obtenerMisArticulos().sort((a, b) => b.creadoEn - a.creadoEn);
+      const contenedor = document.getElementById('inventario-lista');
+      const vacio = document.getElementById('inventario-vacio');
+
+      pintarCalificacionPromedio(misArticulos);
+
+      if (misArticulos.length === 0) {
+        contenedor.innerHTML = '';
+        vacio.classList.remove('hidden');
+        return;
+      }
+
+      vacio.classList.add('hidden');
+      contenedor.innerHTML = misArticulos.map(articulo => {
+        const disponible = (articulo.stock ?? 0) > 0;
+        return `
+          <div class="inventario-item" data-id="${articulo.id}">
+            <div class="inventario-swatch" style="${obtenerEstiloSwatch(articulo)}"></div>
+            <div class="inventario-info">
+              <p class="inventario-nombre">${escaparHtml(articulo.nombre)}</p>
+              <p class="inventario-precio">$${Number(articulo.precio).toFixed(2)}</p>
+            </div>
+            <div class="inventario-controles">
+              <span class="inventario-estado-texto ${disponible ? 'disponible' : 'agotado'}">
+                ${disponible ? 'Disponible' : 'Agotado'}
+              </span>
+              <label class="switch-disponibilidad" title="Marcar como ${disponible ? 'agotado' : 'disponible'} (no borra el producto)">
+                <input type="checkbox" data-toggle-disponibilidad="${articulo.id}" ${disponible ? 'checked' : ''} />
+                <span class="switch-slider"></span>
+              </label>
+              <button type="button" class="btn-borrar-inventario" data-borrar-articulo="${articulo.id}" title="Borrar publicación por completo">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      contenedor.querySelectorAll('[data-toggle-disponibilidad]').forEach(input => {
+        input.addEventListener('change', function () {
+          alternarDisponibilidad(Number(this.dataset.toggleDisponibilidad));
+        });
+      });
+
+      contenedor.querySelectorAll('[data-borrar-articulo]').forEach(boton => {
+        boton.addEventListener('click', function () {
+          borrarArticuloInventario(Number(this.dataset.borrarArticulo));
+        });
+      });
+    }
+
+    renderizarInventario();
+  </script>
+</body>
+</html>

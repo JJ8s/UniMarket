@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi perfil - UniMarket</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/perfil.css">
+</head>
+<body class="perfil-body">
+
+  <div class="perfil-header-logo">
+    <img src="img/logo.png" alt="UniMarket" />
+  </div>
+
+  <main class="dashboard-container">
+    <a href="index.html" class="btn-volver-inicio">
+      <i class="fa-solid fa-arrow-left"></i> Volver al inicio
+    </a>
+
+    <header class="banner-card">
+      <div class="user-profile-summary">
+        <div class="avatar-wrapper">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=160&auto=format&fit=crop&q=80" alt="Foto de perfil">
+          <span class="edit-badge"><i class="fa-solid fa-pen"></i></span>
+        </div>
+        <div class="user-meta">
+          <h1 id="perfil-nombre-completo">Usuario</h1>
+          <p class="user-handle" id="perfil-handle">@usuario</p>
+          <div class="tags-row">
+            <span class="tag-pill" id="perfil-universidad-tag"><i class="fa-solid fa-graduation-cap"></i> Sin universidad</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-counters">
+        <div class="counter-block">
+          <span class="counter-number" id="perfil-ventas">0</span>
+          <span class="counter-label">Ventas</span>
+        </div>
+        <div class="counter-block">
+          <span class="counter-number" id="perfil-compras">0</span>
+          <span class="counter-label">Compras</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid-content">
+      <section class="card info-card">
+        <div class="card-header-action">
+          <h2 class="card-title">Información Personal</h2>
+          <button class="btn-edit-outline"><i class="fa-solid fa-pen"></i> Editar</button>
+        </div>
+
+        <div class="field-list">
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-regular fa-user"></i></div>
+            <div class="field-content">
+              <span class="field-label">Nombre</span>
+              <span class="field-value" id="perfil-nombre">-</span>
+            </div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-regular fa-user"></i></div>
+            <div class="field-content">
+              <span class="field-label">Apellido</span>
+              <span class="field-value" id="perfil-apellido">-</span>
+            </div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-solid fa-at"></i></div>
+            <div class="field-content">
+              <span class="field-label">Nombre de usuario</span>
+              <span class="field-value" id="perfil-usuario">-</span>
+            </div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-solid fa-book-open"></i></div>
+            <div class="field-content">
+              <span class="field-label">Universidad</span>
+              <span class="field-value" id="perfil-universidad">-</span>
+            </div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-regular fa-envelope"></i></div>
+            <div class="field-content">
+              <span class="field-label">Correo de la cuenta</span>
+              <!-- Este es el campo que antes no reflejaba el correo real de la
+                   cuenta con la que se inicio sesion; ahora se llena siempre
+                   desde la sesion activa (ver script al final del archivo). -->
+              <span class="field-value" id="perfil-correo">-</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="right-sidebar">
+        <section class="card actions-card">
+          <h2 class="card-title">Acciones rápidas</h2>
+          <div class="actions-group">
+            <a href="publicar.html" class="btn-primary-orange"><i class="fa-solid fa-plus"></i> Publicar nuevo artículo</a>
+            <a href="pedidos.html" class="btn-outline-blue"><i class="fa-solid fa-boxes-stacked"></i> Mis pedidos</a>
+            <a href="panel-vendedor.html" class="btn-outline-blue"><i class="fa-solid fa-shop"></i> Panel de vendedor</a>
+          </div>
+        </section>
+
+        <section class="card activity-card">
+          <h2 class="card-title">Actividad reciente</h2>
+          <div class="activity-list" id="perfil-actividad">
+            <p style="font-size:0.85rem; color:#94a3b8;">Aún no tienes actividad registrada.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- datos.js aporta obtenerSesion() / USUARIO_ACTUAL -->
+  <script src="js/datos.js"></script>
+  <script>
+    // Si no hay sesion activa, no se puede ver el perfil: al login.
+    if (typeof haySesionActiva === 'function' && !haySesionActiva()) {
+      window.location.href = 'login.html';
+    }
+
+    // Se usan siempre los datos de la sesion real; USUARIO_ACTUAL solo
+    // queda como respaldo por si algo saliera mal leyendo la sesion.
+    const usuario = (typeof obtenerSesion === 'function' && obtenerSesion()) || window.USUARIO_ACTUAL || {};
+
+    const nombreCompleto = (usuario.nombre || 'Usuario').trim();
+    const partesNombre = nombreCompleto.split(' ').filter(Boolean);
+    const nombre = partesNombre[0] || nombreCompleto;
+    const apellido = partesNombre.slice(1).join(' ') || '-';
+
+    document.getElementById('perfil-nombre-completo').textContent = nombreCompleto;
+    document.getElementById('perfil-handle').textContent = usuario.nombreUsuario || '';
+    document.getElementById('perfil-nombre').textContent = nombre;
+    document.getElementById('perfil-apellido').textContent = apellido;
+    document.getElementById('perfil-usuario').textContent = usuario.nombreUsuario || '-';
+    document.getElementById('perfil-universidad').textContent = usuario.universidad || 'Sin universidad registrada';
+
+    // Correo: se muestra exactamente el de la cuenta con la que se
+    // inicio sesion (antes este campo quedaba fijo con un correo de
+    // ejemplo que no correspondia a la cuenta real).
+    document.getElementById('perfil-correo').textContent = usuario.correo || 'Sin correo registrado';
+
+    const tagUniversidad = document.getElementById('perfil-universidad-tag');
+    if (usuario.universidad) {
+      tagUniversidad.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> ' + usuario.universidad;
+    }
+  </script>
+</body>
+</html>
