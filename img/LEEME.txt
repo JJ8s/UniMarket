@@ -1,0 +1,12 @@
+Coloca aqui tus imagenes ya existentes (logo.png, ayqmoverelcacharro.png,
+logo-uni.jpe) y los 6 iconos nuevos que usa publicar.html:
+
+  icono-camara.png         -> encabezado "Fotos del Producto"
+  icono-subir-imagen.png   -> icono grande dentro del cuadro punteado
+  icono-info.png           -> encabezado "Informacion del Producto"
+  icono-dolar.png          -> encabezado "Precio e Inventario"
+  icono-entrega.png        -> encabezado "Punto de Entrega"
+  icono-universidad.png    -> encabezado "Universidades donde vendes"
+
+Mientras no existan, el navegador va a mostrar el icono de imagen rota
+en su lugar; el resto de la pagina funciona igual.

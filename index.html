@@ -24,7 +24,8 @@
   </script>
 
   <!-- ===== ESTILOS PERSONALIZADOS (tarjetas en bloques) ===== -->
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/catalogo.css" />
 </head>
 <body>
 
@@ -121,24 +122,31 @@
           <h3 class="text-xl font-bold text-white">¿Quieres vender lo que ya no usas?</h3>
           <p class="text-white/80 text-sm">Publica tus artículos y gana dinero extra en tu comunidad.</p>
         </div>
-        <button id="publish-btn" class="bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 transition">
+        <a href="publicar.html" id="publish-btn" class="bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           Publicar artículo
-        </button>
+        </a>
       </div>
     </div>
 
     <!-- ===== SECCIÓN DE FILTROS Y PRODUCTOS ===== -->
     <section class="max-w-7xl mx-auto px-6 pb-12">
-      <!-- Filtros por categoría -->
-      <div class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-        <button class="filter-btn active" data-filter="todos">Todos</button>
-        <button class="filter-btn" data-filter="snacks">Snacks & Dulces</button>
-        <button class="filter-btn" data-filter="ropa">Ropa 2da Mano</button>
-        <button class="filter-btn" data-filter="tecnologia">Tecnología Usada</button>
-        <button class="filter-btn" data-filter="otros">Otros</button>
+      <!-- Filtros por categoría y universidad -->
+      <div class="flex flex-wrap items-center gap-3 pb-4">
+        <div class="flex gap-3 overflow-x-auto scrollbar-hide">
+          <button class="filter-btn active" data-filter="todos">Todos</button>
+          <button class="filter-btn" data-filter="snacks">Snacks & Dulces</button>
+          <button class="filter-btn" data-filter="ropa">Ropa 2da Mano</button>
+          <button class="filter-btn" data-filter="tecnologia">Tecnología Usada</button>
+          <button class="filter-btn" data-filter="libros">Libros y Material</button>
+          <button class="filter-btn" data-filter="otros">Otros</button>
+        </div>
+
+        <select id="filtro-universidad" class="university-select">
+          <option value="todas">Filtrar por Universidad</option>
+        </select>
       </div>
 
       <!-- Grid de productos -->
@@ -155,7 +163,7 @@
         </div>
         <!-- Contenedor donde se renderizan las tarjetas -->
         <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <!-- Los productos se inyectan desde script.js -->
+          <!-- Los productos se inyectan desde catalogo.js -->
         </div>
         <!-- Mensaje cuando no hay productos -->
         <div id="empty-message" class="hidden text-center py-12 bg-surface rounded-xl border border-dashed border-gray-300">
@@ -167,7 +175,7 @@
   </main>
 
   <!-- ========================================================== -->
-  <!-- MODAL: vista previa de un producto (se llena desde script.js) -->
+  <!-- MODAL: vista previa de un producto (se llena desde catalogo.js) -->
   <!-- ========================================================== -->
   <div id="product-modal" class="modal-overlay hidden">
     <div class="modal-content">
@@ -198,15 +206,21 @@
           </div>
         </div>
 
+        <div class="modal-entrega">
+          <span class="info-label">Punto de entrega</span>
+          <span id="modal-entrega" class="info-value"></span>
+        </div>
+
         <button id="modal-add-cart" class="modal-cart-btn">Agregar a la bolsa</button>
       </div>
     </div>
   </div>
 
   <!-- ========================================================== -->
-  <!-- SCRIPTS: data.js (persistencia) y script.js (backend)     -->
+  <!-- SCRIPTS: datos.js (persistencia) y catalogo.js (backend)     -->
   <!-- ========================================================== -->
-  <script src="js/data.js"></script>
-  <script src="js/script.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/interfaz.js"></script>
+  <script src="js/catalogo.js"></script>
 </body>
 </html>

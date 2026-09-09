@@ -1,0 +1,348 @@
+/* ============================================================
+   publicar.css - Estilos propios de publicar.html (Crear Publicacion)
+   ============================================================
+   Depende de base.css (debe cargarse antes, ver el <link> en
+   publicar.html), porque el selector de Categoria/Estado usa el
+   cascaron generico .modal-overlay / .modal-content definido ahi.
+
+   Contiene:
+     1. El formulario completo (fotos, informacion, precio, entrega,
+        universidades y el boton final)
+     2. Contenido especifico del modal de Categoria / Estado
+     3. Checklist de universidades donde vende
+     4. Vista previa de fotos subidas
+   ============================================================ */
+
+
+/* ============================================================
+   1. FORMULARIO "CREAR PUBLICACION"
+   Pertenece a: publicar.html completo (el formulario de arriba a
+   abajo: fotos, informacion, precio, entrega, universidades).
+   ============================================================ */
+
+/* Enlace "Volver al panel de vendedor", arriba del todo */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #5a6c7d;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: #1A365D;
+}
+
+/* Caja blanca de cada bloque del formulario (Fotos, Informacion,
+   Precio e Inventario, Punto de Entrega, Universidades) */
+.form-section {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #edf2f9;
+  padding: 1.4rem 1.4rem 1.6rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Titulo de cada bloque, con su icono a la izquierda */
+.form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0b1b32;
+  margin: 0 0 1rem;
+}
+
+/* Tamano fijo para los iconos de encabezado (camara, dolar, info, etc) */
+.form-section-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* Texto explicativo debajo del titulo de un bloque (ej: en Punto de Entrega) */
+.form-section-description {
+  font-size: 0.9rem;
+  color: #5a6c7d;
+  margin: -0.4rem 0 1rem;
+}
+
+/* Etiqueta de cada campo del formulario ("Titulo del producto", "Precio", etc) */
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0b1b32;
+  margin: 1rem 0 0.4rem;
+}
+
+/* Texto secundario dentro de una etiqueta */
+.form-label-nota {
+  font-weight: 400;
+  color: #7a8b9f;
+  margin-left: 0.3rem;
+}
+
+/* Estilo compartido de todos los campos de texto/numero/select del formulario */
+.form-input,
+.form-textarea,
+.form-select,
+.form-input-adornado input {
+  width: 100%;
+  border: 1px solid #dfe6ee;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: #0b1b32;
+  background: white;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+/* Borde azul cuando el campo tiene el foco (esta seleccionado) */
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus,
+.form-input-adornado input:focus {
+  border-color: #1A365D;
+}
+
+/* Los textarea (Descripcion, Punto de Entrega) permiten cambiar su alto */
+.form-textarea {
+  resize: vertical;
+}
+
+/* Boton que abre el selector de Categoria/Estado (parece un <select> pero es un <button>) */
+.form-select {
+  text-align: left;
+  color: #9aa8b8;
+  cursor: pointer;
+}
+
+/* Cuando ya se eligio una opcion, el texto se ve oscuro en vez de gris placeholder */
+.form-select.has-value {
+  color: #0b1b32;
+}
+
+/* Contenedor de un campo con prefijo fijo, como "$ 0.00" */
+.form-input-adornado {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dfe6ee;
+  border-radius: 12px;
+  padding: 0 0.9rem;
+}
+
+/* El input dentro de un contenedor con prefijo no necesita su propio borde */
+.form-input-adornado input {
+  border: none;
+  padding: 0.75rem 0.3rem;
+}
+
+/* El simbolo fijo antes del input (el signo "$") */
+.form-input-prefijo {
+  color: #7a8b9f;
+  font-weight: 600;
+}
+
+/* Texto de ayuda pequeno debajo de un campo (ej: aviso del SKU automatico) */
+.form-hint {
+  font-size: 0.8rem;
+  color: #7a8b9f;
+  margin: 0.4rem 0 0;
+}
+
+/* Variante del texto de ayuda alineada a la derecha (contador de caracteres) */
+.form-hint-derecha {
+  text-align: right;
+}
+
+/* ---- Caja punteada para subir fotos (dentro de "Fotos del Producto") ---- */
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 2.5rem 1.5rem;
+  background: #f7fafc;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.upload-box:hover {
+  border-color: #1A365D;
+}
+
+/* Icono grande de "subir imagen" dentro de la caja punteada */
+.upload-box-icon {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  margin-bottom: 0.4rem;
+}
+
+.upload-box-title {
+  font-weight: 700;
+  color: #0b1b32;
+}
+
+.upload-box-subtitle {
+  font-size: 0.85rem;
+  color: #7a8b9f;
+  max-width: 320px;
+}
+
+/* Boton azul "Publicar Producto" al final del formulario */
+.submit-btn {
+  width: 100%;
+  background: #1A365D;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.submit-btn:hover {
+  background: #12294a;
+}
+
+
+/* ============================================================
+   2. CONTENIDO ESPECIFICO DEL MODAL DE CATEGORIA / ESTADO
+   Pertenece a: publicar.html, adentro del <div id="option-modal">.
+   El cascaron (.modal-overlay / .modal-content) esta en base.css;
+   aqui solo va lo propio de esta lista de opciones. Lo maneja la
+   clase SelectorModal en publicar.js.
+   ============================================================ */
+
+/* Ajustes propios de este modal sobre .modal-content (mismo tamano
+   base, pero sin padding porque cada opcion pone el suyo) */
+.option-modal-content {
+  max-width: 480px;
+  padding: 0;
+}
+
+/* Titulo gris arriba de la lista ("Seleccionar categoria") */
+.option-modal-title {
+  font-size: 1.4rem;
+  color: #9aa8b8;
+  font-weight: 400;
+  padding: 1.3rem 1.4rem 0.8rem;
+  margin: 0;
+}
+
+/* Cada fila seleccionable de la lista (una categoria o un estado) */
+.option-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  border-top: 1px solid #edf2f9;
+  padding: 1.1rem 1.4rem;
+  font-size: 1.05rem;
+  color: #0b1b32;
+  text-align: left;
+  cursor: pointer;
+}
+
+.option-item:hover {
+  background: #f7fafc;
+}
+
+/* Circulo de radio button (vacio) a la derecha de cada opcion */
+.option-radio {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  flex-shrink: 0;
+}
+
+/* Circulo relleno cuando esa opcion es la que ya estaba elegida */
+.option-radio-selected {
+  border-color: #1A365D;
+  background: #1A365D;
+  box-shadow: inset 0 0 0 3px white;
+}
+
+
+/* ============================================================
+   3. CHECKLIST DE UNIVERSIDADES DONDE VENDE
+   Pertenece a: publicar.html, el <div id="lista-universidades">
+   dentro de la seccion "Universidades donde vendes". Lo pinta la
+   funcion pintarListaUniversidades() en publicar.js.
+   ============================================================ */
+
+/* Contenedor de todas las casillas de universidad, una debajo de otra */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Cada fila: checkbox + nombre de la universidad, dentro de una
+   caja con borde para que sea facil de tocar en mobile */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid #dfe6ee;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  color: #0b1b32;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.checklist-item:hover {
+  border-color: #1A365D;
+}
+
+.checklist-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #1A365D;
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   4. VISTA PREVIA DE FOTOS SUBIDAS
+   Pertenece a: publicar.html, el <div id="fotos-preview"> dentro
+   de la caja punteada de "Fotos del Producto". Lo pinta la clase
+   CargadorFotos en publicar.js.
+   ============================================================ */
+
+/* Fila de miniaturas debajo del icono/texto de la caja de subida */
+.upload-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.6rem;
+}
+
+/* Cada miniatura individual de foto ya subida */
+.upload-preview-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #dfe6ee;
+}
