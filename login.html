@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar sesión - UniMarket</title>
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body class="auth-body">
+
+  <div class="auth-logo">
+    <img src="img/logo.png" alt="UniMarket" />
+  </div>
+
+  <div class="login-container">
+    <h2>Inicia sesión</h2>
+    <p class="form-hint">Cuenta de prueba: juan.perez@unimarket.edu / 123456</p>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" placeholder="Ingresa tu correo" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" required />
+      </div>
+      <p id="login-error" class="form-error hidden"></p>
+      <button type="submit" class="btn-submit">Ingresar</button>
+      <div class="form-footer">
+        <p><a href="#">¿Olvidaste tu contraseña?</a></p>
+        <p>¿No tienes cuenta? <a href="registro.html">Regístrate</a></p>
+      </div>
+    </form>
+  </div>
+
+  <!-- datos.js aporta validarCredenciales() e iniciarSesion() -->
+  <script src="js/datos.js"></script>
+  <script>
+    // Todavia no hay backend real: se valida el correo y la contraseña
+    // contra los usuarios guardados en localStorage (ver registrarUsuario()
+    // en datos.js / registro.html).
+    document.getElementById('login-form').addEventListener('submit', function (evento) {
+      evento.preventDefault();
+
+      const correo = document.getElementById('email').value;
+      const contrasena = document.getElementById('password').value;
+      const errorEl = document.getElementById('login-error');
+
+      const usuario = validarCredenciales(correo, contrasena);
+
+      if (!usuario) {
+        errorEl.textContent = 'Correo o contraseña incorrectos.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      errorEl.classList.add('hidden');
+      iniciarSesion(usuario);
+      window.location.href = 'index.html';
+    });
+
+    // Si ya hay una sesion activa, no tiene sentido mostrar el login.
+    if (typeof haySesionActiva === 'function' && haySesionActiva()) {
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

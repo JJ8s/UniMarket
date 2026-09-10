@@ -1,0 +1,261 @@
+/* ============================================================
+     1. Base de la pagina
+     2. Lista de productos en la bolsa (columna izquierda)
+     3. Resumen de compra (columna derecha, sticky)
+============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+body.bolsa-body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #F7FAFC;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem 3rem;
+  color: #1e293b;
+}
+
+/* ============================================================
+   1. BASE DE LA PAGINA
+   ============================================================ */
+
+/* Logo pequeno arriba de todo */
+.bolsa-header-logo {
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 1.25rem;
+}
+
+.bolsa-header-logo img {
+  height: 38px;
+  width: auto;
+}
+
+.bolsa-wrapper {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Layout de dos columnas: lista de productos + resumen */
+.bolsa-layout {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ============================================================
+   2. LISTA DE PRODUCTOS EN LA BOLSA
+   Pertenece a: cada fila de producto en la columna izquierda,
+   con imagen, cantidad y subtotal.
+   ============================================================ */
+.bolsa-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bolsa-item {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bolsa-item-imagen {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.bolsa-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.bolsa-item-nombre {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.15rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bolsa-item-meta {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.bolsa-item-precio-unitario {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+.bolsa-item-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+/* Selector de cantidad ("- 2 +") dentro de cada producto */
+.stepper-cantidad {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #F7FAFC;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.2rem 0.4rem;
+}
+
+.stepper-cantidad button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background-color: #ffffff;
+  border-radius: 6px;
+  color: #1A365D;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.15s ease;
+}
+
+.stepper-cantidad button:hover {
+  background-color: #eef2f7;
+}
+
+.stepper-cantidad span {
+  min-width: 18px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.bolsa-item-subtotal {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1A365D;
+}
+
+.bolsa-item-quitar {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0;
+}
+
+.bolsa-item-quitar:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   3. RESUMEN DE COMPRA
+   Pertenece a: la tarjeta de la columna derecha con subtotal,
+   total y el boton de pagar.
+   ============================================================ */
+.bolsa-resumen {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  position: sticky;
+  top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bolsa-resumen h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.resumen-linea {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.resumen-linea.total {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1A365D;
+}
+
+.btn-checkout {
+  width: 100%;
+  padding: 0.85rem;
+  background-color: #F97316;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-checkout:hover {
+  background-color: #ea580c;
+}
+
+.checkout-nota {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .bolsa-layout {
+    grid-template-columns: 1fr;
+  }
+  .bolsa-resumen {
+    position: static;
+  }
+  .bolsa-item {
+    flex-wrap: wrap;
+  }
+  .bolsa-item-acciones {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

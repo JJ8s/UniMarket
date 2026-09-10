@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis pedidos - UniMarket</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/perfil.css">
+</head>
+<body class="perfil-body">
+
+  <div class="perfil-header-logo">
+    <img src="img/logo.png" alt="UniMarket" />
+  </div>
+
+  <main class="orders-wrapper">
+    <header class="banner-card">
+      <div>
+        <h1 style="font-size: 1.6rem; font-weight: 700;">Mis Pedidos</h1>
+        <p style="color: #93c5fd; font-size: 0.95rem; margin-top: 0.2rem;">Publicaciones que has creado en UniMarket</p>
+      </div>
+      <!-- Antes este enlace usaba .btn-outline-blue (fondo blanco) con las
+           letras forzadas a blanco por encima -> texto invisible sobre
+           fondo blanco. .btn-ghost-on-dark esta pensado para usarse
+           sobre el banner azul y siempre deja las letras legibles. -->
+      <a href="perfil.html" class="btn-ghost-on-dark">
+        <i class="fa-solid fa-arrow-left"></i> Volver al perfil
+      </a>
+    </header>
+
+    <!-- Aqui se listan, en tiempo real, los articulos que el usuario con
+         sesion activa ha publicado desde publicar.html. Se llenan desde
+         el script al final del archivo, usando cargarArticulos() de datos.js. -->
+    <div id="publicaciones-lista"></div>
+
+    <!-- Mensaje cuando el usuario todavia no ha publicado nada -->
+    <div id="publicaciones-vacio" class="empty-state hidden">
+      <p style="margin-bottom: 1rem;">Todavía no has publicado ningún artículo.</p>
+      <a href="publicar.html" class="btn-primary-orange" style="display:inline-flex; max-width: 260px; margin: 0 auto;">
+        <i class="fa-solid fa-plus"></i> Publicar mi primer artículo
+      </a>
+    </div>
+  </main>
+
+  <!-- datos.js aporta el control de sesion y el acceso a los articulos -->
+  <script src="js/datos.js"></script>
+  <script>
+    // Si no hay sesion activa, no se pueden ver los pedidos: al login.
+    if (typeof haySesionActiva === 'function' && !haySesionActiva()) {
+      window.location.href = 'login.html';
+    }
+
+    const usuarioSesion = (typeof obtenerSesion === 'function' && obtenerSesion()) || window.USUARIO_ACTUAL || {};
+
+    /** Escapa texto para insertarlo de forma segura en innerHTML. */
+    function escaparHtml(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto ?? '';
+      return div.innerHTML;
+    }
+
+    /** Formatea la fecha de creacion de un articulo para mostrarla en la tarjeta. */
+    function formatearFecha(marcaDeTiempo) {
+      if (!marcaDeTiempo) return '';
+      return new Date(marcaDeTiempo).toLocaleDateString('es-ES', {
+        day: 'numeric', month: 'short', year: 'numeric',
+      });
+    }
+
+    /**
+     * Dibuja la lista de publicaciones del usuario actual (aquellas cuyo
+     * campo "vendedor" coincide con el nombre de la sesion activa) y
+     * muestra el mensaje de "vacio" cuando corresponda.
+     */
+    function renderizarPublicaciones() {
+      const contenedor = document.getElementById('publicaciones-lista');
+      const mensajeVacio = document.getElementById('publicaciones-vacio');
+
+      const todosLosArticulos = cargarArticulos();
+      const misPublicaciones = todosLosArticulos
+        .filter(articulo => articulo.vendedor === usuarioSesion.nombre)
+        .sort((a, b) => b.creadoEn - a.creadoEn);
+
+      if (misPublicaciones.length === 0) {
+        contenedor.innerHTML = '';
+        mensajeVacio.classList.remove('hidden');
+        return;
+      }
+
+      mensajeVacio.classList.add('hidden');
+      contenedor.innerHTML = misPublicaciones.map(articulo => `
+        <section class="publicacion-card" data-id="${articulo.id}">
+          <div class="publicacion-header">
+            <span class="order-id">${escaparHtml(articulo.sku) || 'Sin SKU'}</span>
+            <span class="order-date">Publicado el ${formatearFecha(articulo.creadoEn)}</span>
+          </div>
+          <div class="publicacion-body">
+            <div class="order-details">
+              <h3>${escaparHtml(articulo.nombre)}</h3>
+              <p class="publicacion-meta">
+                ${escaparHtml(articulo.condicion || 'Sin condición')} ·
+                Stock: ${articulo.stock ?? 0} ·
+                Punto de entrega: ${escaparHtml(articulo.entrega || 'A convenir')}
+              </p>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.85rem;">
+              <p class="publicacion-precio">$${Number(articulo.precio).toFixed(2)}</p>
+              <button class="btn-delete-outline" data-borrar="${articulo.id}">
+                <i class="fa-solid fa-trash"></i> Borrar
+              </button>
+            </div>
+          </div>
+        </section>
+      `).join('');
+
+      // Engancha el boton de borrar de cada tarjeta recien pintada.
+      contenedor.querySelectorAll('[data-borrar]').forEach(boton => {
+        boton.addEventListener('click', function () {
+          const id = Number(this.dataset.borrar);
+          borrarPublicacion(id);
+        });
+      });
+    }
+
+    /**
+     * Borra una publicacion del usuario actual: pide confirmacion,
+     * la quita del array de articulos, persiste el cambio en
+     * localStorage (mismo almacen que usa publicar.html) y vuelve
+     * a pintar la lista.
+     * @param {number} idArticulo
+     */
+    function borrarPublicacion(idArticulo) {
+      const confirmado = window.confirm('¿Seguro que quieres borrar esta publicación? Esta acción no se puede deshacer.');
+      if (!confirmado) return;
+
+      const articulosActuales = cargarArticulos();
+      const articulosRestantes = articulosActuales.filter(articulo => articulo.id !== idArticulo);
+      guardarArticulos(articulosRestantes);
+      renderizarPublicaciones();
+    }
+
+    renderizarPublicaciones();
+  </script>
+</body>
+</html>

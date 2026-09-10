@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi perfil - UniMarket</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/perfil.css">
+</head>
+<body class="perfil-body">
+
+  <div class="perfil-header-logo">
+    <img src="img/logo.png" alt="UniMarket" />
+  </div>
+
+  <main class="dashboard-container">
+    <a href="index.html" class="btn-volver-inicio">
+      <i class="fa-solid fa-arrow-left"></i> Volver al inicio
+    </a>
+
+    <header class="banner-card">
+      <div class="user-profile-summary">
+        <div class="avatar-wrapper">
+          <img id="perfil-foto" class="hidden" alt="Foto de perfil" />
+          <div id="perfil-foto-placeholder" class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+          <button type="button" class="edit-badge" id="btn-cambiar-foto" title="Cambiar foto de perfil"><i class="fa-solid fa-camera"></i></button>
+          <input type="file" id="input-foto-perfil" accept="image/*" class="hidden" />
+        </div>
+        <div class="user-meta">
+          <h1 id="perfil-nombre-completo">Usuario</h1>
+          <p class="user-handle" id="perfil-handle">@usuario</p>
+          <div class="tags-row">
+            <span class="tag-pill" id="perfil-universidad-tag"><i class="fa-solid fa-graduation-cap"></i> Sin universidad</span>
+          </div>
+          <button type="button" id="btn-quitar-foto" class="quitar-foto-link hidden">Quitar foto</button>
+        </div>
+      </div>
+
+      <div class="stats-counters">
+        <div class="counter-block">
+          <span class="counter-number" id="perfil-ventas">0</span>
+          <span class="counter-label">Ventas</span>
+        </div>
+        <div class="counter-block">
+          <span class="counter-number" id="perfil-compras">0</span>
+          <span class="counter-label">Compras</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid-content">
+      <section class="card info-card">
+        <div class="card-header-action">
+          <h2 class="card-title">Información Personal</h2>
+          <div id="acciones-ver-perfil">
+            <button type="button" class="btn-edit-outline" id="btn-editar-perfil"><i class="fa-solid fa-pen"></i> Editar</button>
+          </div>
+          <div id="acciones-editar-perfil" class="hidden acciones-editar-grupo">
+            <button type="button" class="btn-edit-outline" id="btn-cancelar-edicion">Cancelar</button>
+            <button type="button" class="btn-guardar-perfil" id="btn-guardar-edicion"><i class="fa-solid fa-check"></i> Guardar</button>
+          </div>
+        </div>
+
+        <p id="perfil-editar-error" class="perfil-error hidden"></p>
+
+        <div class="field-list">
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-regular fa-user"></i></div>
+            <div class="field-content">
+              <span class="field-label">Nombre</span>
+              <span class="field-value" id="perfil-nombre">-</span>
+              <input type="text" class="campo-editable-input hidden" id="perfil-nombre-input" placeholder="Nombre" />
+            </div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-regular fa-user"></i></div>
+            <div class="field-content">
+              <span class="field-label">Apellido</span>
+              <span class="field-value" id="perfil-apellido">-</span>
+              <input type="text" class="campo-editable-input hidden" id="perfil-apellido-input" placeholder="Apellido" />
+            </div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-solid fa-at"></i></div>
+            <div class="field-content">
+              <span class="field-label">Nombre de usuario</span>
+              <span class="field-value" id="perfil-usuario">-</span>
+              <span class="field-subvalue">El nombre de usuario no se puede editar</span>
+            </div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-solid fa-book-open"></i></div>
+            <div class="field-content">
+              <span class="field-label">Universidad</span>
+              <span class="field-value" id="perfil-universidad">-</span>
+              <select class="campo-editable-input hidden" id="perfil-universidad-input"></select>
+            </div>
+          </div>
+
+          <div class="field-item">
+            <div class="field-icon"><i class="fa-regular fa-envelope"></i></div>
+            <div class="field-content">
+              <span class="field-label">Correo de la cuenta</span>
+              <!-- Este es el campo que antes no reflejaba el correo real de la
+                   cuenta con la que se inicio sesion; ahora se llena siempre
+                   desde la sesion activa (ver script al final del archivo). -->
+              <span class="field-value" id="perfil-correo">-</span>
+              <input type="email" class="campo-editable-input hidden" id="perfil-correo-input" placeholder="correo@universidad.edu" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="right-sidebar">
+        <section class="card actions-card">
+          <h2 class="card-title">Acciones rápidas</h2>
+          <div class="actions-group">
+            <a href="publicar.html" class="btn-primary-orange"><i class="fa-solid fa-plus"></i> Publicar nuevo artículo</a>
+            <a href="pedidos.html" class="btn-outline-blue"><i class="fa-solid fa-boxes-stacked"></i> Mis pedidos</a>
+            <a href="panel-vendedor.html" class="btn-outline-blue"><i class="fa-solid fa-shop"></i> Panel de vendedor</a>
+          </div>
+        </section>
+
+        <section class="card activity-card">
+          <h2 class="card-title">Actividad reciente</h2>
+          <div class="activity-list" id="perfil-actividad">
+            <p style="font-size:0.85rem; color:#94a3b8;">Aún no tienes actividad registrada.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- datos.js aporta obtenerSesion() / USUARIO_ACTUAL -->
+  <script src="js/datos.js"></script>
+  <script>
+    // Si no hay sesion activa, no se puede ver el perfil: al login.
+    if (typeof haySesionActiva === 'function' && !haySesionActiva()) {
+      window.location.href = 'login.html';
+    }
+
+    // Se usan siempre los datos de la sesion real; USUARIO_ACTUAL solo
+    // queda como respaldo por si algo saliera mal leyendo la sesion.
+    const usuario = (typeof obtenerSesion === 'function' && obtenerSesion()) || window.USUARIO_ACTUAL || {};
+
+    const nombreCompleto = (usuario.nombre || 'Usuario').trim();
+    const partesNombre = nombreCompleto.split(' ').filter(Boolean);
+    const nombre = partesNombre[0] || nombreCompleto;
+    const apellido = partesNombre.slice(1).join(' ') || '-';
+
+    document.getElementById('perfil-nombre-completo').textContent = nombreCompleto;
+    document.getElementById('perfil-handle').textContent = usuario.nombreUsuario || '';
+    document.getElementById('perfil-nombre').textContent = nombre;
+    document.getElementById('perfil-apellido').textContent = apellido;
+    document.getElementById('perfil-usuario').textContent = usuario.nombreUsuario || '-';
+    document.getElementById('perfil-universidad').textContent = usuario.universidad || 'Sin universidad registrada';
+
+    // Correo: se muestra exactamente el de la cuenta con la que se
+    // inicio sesion (antes este campo quedaba fijo con un correo de
+    // ejemplo que no correspondia a la cuenta real).
+    document.getElementById('perfil-correo').textContent = usuario.correo || 'Sin correo registrado';
+
+    const tagUniversidad = document.getElementById('perfil-universidad-tag');
+    if (usuario.universidad) {
+      tagUniversidad.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> ' + usuario.universidad;
+    }
+
+    // ---------------------------------------------------------------
+    // Foto de perfil: opcional. Si no hay ninguna guardada, se ve el
+    // placeholder (icono de persona), nunca una foto de otra persona.
+    // La imagen se redimensiona/comprime en el navegador ANTES de
+    // guardarla, para no llenar el localStorage con fotos pesadas.
+    // ---------------------------------------------------------------
+    const TAMANIO_MAX_FOTO = 240; // px del lado mas largo
+
+    function mostrarFotoPerfil(dataUrl) {
+      const img = document.getElementById('perfil-foto');
+      const placeholder = document.getElementById('perfil-foto-placeholder');
+      const botonQuitar = document.getElementById('btn-quitar-foto');
+
+      if (dataUrl) {
+        img.src = dataUrl;
+        img.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        botonQuitar.classList.remove('hidden');
+      } else {
+        img.classList.add('hidden');
+        img.removeAttribute('src');
+        placeholder.classList.remove('hidden');
+        botonQuitar.classList.add('hidden');
+      }
+    }
+
+    function manejarSeleccionDeFoto(evento) {
+      const archivo = evento.target.files[0];
+      if (!archivo) return;
+
+      if (!archivo.type.startsWith('image/')) {
+        alert('Por favor selecciona un archivo de imagen.');
+        return;
+      }
+
+      const lector = new FileReader();
+      lector.onload = function (eventoLectura) {
+        const imagen = new Image();
+        imagen.onload = function () {
+          // Redimensiona manteniendo la proporcion para que el lado mas
+          // largo no supere TAMANIO_MAX_FOTO, y comprime a JPEG 75%.
+          let ancho = imagen.width;
+          let alto = imagen.height;
+          if (ancho > alto && ancho > TAMANIO_MAX_FOTO) {
+            alto = Math.round(alto * (TAMANIO_MAX_FOTO / ancho));
+            ancho = TAMANIO_MAX_FOTO;
+          } else if (alto >= ancho && alto > TAMANIO_MAX_FOTO) {
+            ancho = Math.round(ancho * (TAMANIO_MAX_FOTO / alto));
+            alto = TAMANIO_MAX_FOTO;
+          }
+
+          const lienzo = document.createElement('canvas');
+          lienzo.width = ancho;
+          lienzo.height = alto;
+          lienzo.getContext('2d').drawImage(imagen, 0, 0, ancho, alto);
+          const dataUrlComprimido = lienzo.toDataURL('image/jpeg', 0.75);
+
+          guardarFotoPerfil(usuario.correo, dataUrlComprimido);
+          mostrarFotoPerfil(dataUrlComprimido);
+        };
+        imagen.src = eventoLectura.target.result;
+      };
+      lector.readAsDataURL(archivo);
+    }
+
+    document.getElementById('btn-cambiar-foto').addEventListener('click', function () {
+      document.getElementById('input-foto-perfil').click();
+    });
+    document.getElementById('input-foto-perfil').addEventListener('change', manejarSeleccionDeFoto);
+    document.getElementById('btn-quitar-foto').addEventListener('click', function () {
+      borrarFotoPerfil(usuario.correo);
+      mostrarFotoPerfil(null);
+    });
+
+    mostrarFotoPerfil(obtenerFotoPerfil(usuario.correo));
+
+    // ---------------------------------------------------------------
+    // Edicion de perfil: solo Nombre, Apellido, Universidad y Correo.
+    // El nombre de usuario NO se puede editar desde aqui.
+    // ---------------------------------------------------------------
+    const inputNombre = document.getElementById('perfil-nombre-input');
+    const inputApellido = document.getElementById('perfil-apellido-input');
+    const selectUniversidad = document.getElementById('perfil-universidad-input');
+    const inputCorreo = document.getElementById('perfil-correo-input');
+    const mensajeError = document.getElementById('perfil-editar-error');
+
+    // Llena el select de universidad con la misma lista que usa registro.html
+    (window.UNIVERSIDADES_DISPONIBLES || []).forEach(function (universidadDisponible) {
+      const opcion = document.createElement('option');
+      opcion.value = universidadDisponible;
+      opcion.textContent = universidadDisponible;
+      selectUniversidad.appendChild(opcion);
+    });
+
+    // Todos los pares [span visible, control editable] que se alternan al editar.
+    const camposEditables = [
+      [document.getElementById('perfil-nombre'), inputNombre],
+      [document.getElementById('perfil-apellido'), inputApellido],
+      [document.getElementById('perfil-universidad'), selectUniversidad],
+      [document.getElementById('perfil-correo'), inputCorreo],
+    ];
+
+    function entrarModoEdicion() {
+      inputNombre.value = nombre;
+      inputApellido.value = apellido === '-' ? '' : apellido;
+      selectUniversidad.value = usuario.universidad || '';
+      inputCorreo.value = usuario.correo || '';
+      mensajeError.classList.add('hidden');
+
+      camposEditables.forEach(([span, control]) => {
+        span.classList.add('hidden');
+        control.classList.remove('hidden');
+      });
+
+      document.getElementById('acciones-ver-perfil').classList.add('hidden');
+      document.getElementById('acciones-editar-perfil').classList.remove('hidden');
+    }
+
+    function salirModoEdicion() {
+      camposEditables.forEach(([span, control]) => {
+        control.classList.add('hidden');
+        span.classList.remove('hidden');
+      });
+      mensajeError.classList.add('hidden');
+
+      document.getElementById('acciones-editar-perfil').classList.add('hidden');
+      document.getElementById('acciones-ver-perfil').classList.remove('hidden');
+    }
+
+    document.getElementById('btn-editar-perfil').addEventListener('click', entrarModoEdicion);
+    document.getElementById('btn-cancelar-edicion').addEventListener('click', salirModoEdicion);
+
+    document.getElementById('btn-guardar-edicion').addEventListener('click', function () {
+      const nombreNuevo = inputNombre.value.trim();
+      const apellidoNuevo = inputApellido.value.trim();
+      const correoNuevo = inputCorreo.value.trim();
+      const universidadNueva = selectUniversidad.value;
+      const nombreCompletoNuevo = [nombreNuevo, apellidoNuevo].filter(Boolean).join(' ');
+
+      if (!nombreNuevo) {
+        mensajeError.textContent = 'El nombre no puede quedar vacío.';
+        mensajeError.classList.remove('hidden');
+        return;
+      }
+      if (!/^\S+@\S+\.\S+$/.test(correoNuevo)) {
+        mensajeError.textContent = 'Ingresa un correo válido.';
+        mensajeError.classList.remove('hidden');
+        return;
+      }
+
+      const resultado = actualizarUsuario(usuario.correo, {
+        nombre: nombreCompletoNuevo,
+        correo: correoNuevo,
+        universidad: universidadNueva,
+      });
+
+      if (!resultado.ok) {
+        mensajeError.textContent = resultado.mensaje;
+        mensajeError.classList.remove('hidden');
+        return;
+      }
+
+      // Si el nombre cambio, los articulos que este usuario ya publico
+      // quedan con el "vendedor" antiguo; se actualizan para que
+      // pedidos.html y panel-vendedor.html los sigan reconociendo
+      // como propios.
+      if (nombreCompletoNuevo !== nombreCompleto) {
+        const articulos = cargarArticulos();
+        let huboCambios = false;
+        articulos.forEach(articulo => {
+          if (articulo.vendedor === nombreCompleto) {
+            articulo.vendedor = nombreCompletoNuevo;
+            huboCambios = true;
+          }
+        });
+        if (huboCambios) guardarArticulos(articulos);
+      }
+
+      // Si el correo cambio, la foto de perfil estaba guardada bajo el
+      // correo anterior: se traslada al correo nuevo para no perderla.
+      if (correoNuevo.trim().toLowerCase() !== usuario.correo.trim().toLowerCase()) {
+        const fotoActual = obtenerFotoPerfil(usuario.correo);
+        if (fotoActual) {
+          guardarFotoPerfil(correoNuevo, fotoActual);
+          borrarFotoPerfil(usuario.correo);
+        }
+      }
+
+      // Refresca la sesion con los datos nuevos y vuelve a cargar la
+      // pagina para que todo (encabezado, tarjetas, etc.) se pinte
+      // con la informacion actualizada.
+      iniciarSesion(resultado.usuario);
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>

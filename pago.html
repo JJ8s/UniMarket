@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagar - UniMarket</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/perfil.css"> <!-- solo para la clase .hidden compartida -->
+  <link rel="stylesheet" href="css/auth.css"> <!-- reutiliza .form-group, .btn-submit, .form-error -->
+  <link rel="stylesheet" href="css/pago.css">
+</head>
+<body class="pago-body">
+
+  <div class="pago-header-logo">
+    <img src="img/logo.png" alt="UniMarket" style="height:40px;" />
+  </div>
+
+  <div class="pago-container">
+
+    <!-- Stepper: se le agrega/quita "activo"/"completado" por JS -->
+    <div class="stepper-pago" id="stepper-pago">
+      <div class="stepper-paso activo" data-paso="1">
+        <div class="stepper-circulo">1</div>
+        <span class="stepper-etiqueta">Método</span>
+        <div class="stepper-linea"></div>
+      </div>
+      <div class="stepper-paso" data-paso="2">
+        <div class="stepper-circulo">2</div>
+        <span class="stepper-etiqueta">Datos</span>
+        <div class="stepper-linea"></div>
+      </div>
+      <div class="stepper-paso" data-paso="3">
+        <div class="stepper-circulo">3</div>
+        <span class="stepper-etiqueta">Confirmación</span>
+        <div class="stepper-linea"></div>
+      </div>
+    </div>
+
+    <!-- ===== PASO 1: elegir credito o debito ===== -->
+    <section id="paso-metodo">
+      <p class="pago-titulo-paso">¿Cómo quieres pagar?</p>
+      <div class="metodo-grid">
+        <div class="metodo-card" data-metodo="credito">
+          <i class="fa-solid fa-credit-card"></i>
+          <span>Crédito</span>
+        </div>
+        <div class="metodo-card" data-metodo="debito">
+          <i class="fa-solid fa-money-check-dollar"></i>
+          <span>Débito</span>
+        </div>
+      </div>
+      <button type="button" class="btn-submit" id="btn-continuar-metodo" disabled>Continuar</button>
+    </section>
+
+    <!-- ===== PASO 2: datos de la tarjeta ===== -->
+    <section id="paso-datos" class="hidden">
+      <div class="tarjeta-preview">
+        <div class="tarjeta-preview-top">
+          <div class="tarjeta-preview-chip"></div>
+          <span class="tarjeta-preview-metodo" id="preview-metodo">Crédito</span>
+        </div>
+        <p class="tarjeta-preview-numero" id="preview-numero">•••• •••• •••• ••••</p>
+        <div class="tarjeta-preview-bottom">
+          <div>
+            Titular
+            <strong id="preview-nombre">NOMBRE APELLIDO</strong>
+          </div>
+          <div>
+            Vence
+            <strong id="preview-vencimiento">MM/AA</strong>
+          </div>
+        </div>
+      </div>
+
+      <form id="form-tarjeta" novalidate>
+        <div class="form-group">
+          <label for="numero-tarjeta">Número de tarjeta</label>
+          <input type="text" id="numero-tarjeta" inputmode="numeric" placeholder="1234 5678 9012 3456" maxlength="19" required />
+        </div>
+        <div class="form-group">
+          <label for="nombre-titular">Nombre del titular</label>
+          <input type="text" id="nombre-titular" placeholder="Como aparece en la tarjeta" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="vencimiento-tarjeta">Vencimiento</label>
+            <input type="text" id="vencimiento-tarjeta" inputmode="numeric" placeholder="MM/AA" maxlength="5" required />
+          </div>
+          <div class="form-group">
+            <label for="cvv-tarjeta">CVV</label>
+            <input type="password" id="cvv-tarjeta" inputmode="numeric" placeholder="123" maxlength="4" required />
+          </div>
+        </div>
+        <p id="pago-error" class="form-error hidden"></p>
+        <div class="form-actions">
+          <button type="button" class="btn-secundario" id="btn-atras-datos">Atrás</button>
+          <button type="submit" class="btn-submit" id="btn-pagar">Pagar <span id="btn-pagar-monto"></span></button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== PASO 3: procesando (delay simulado) ===== -->
+    <section id="paso-procesando" class="hidden">
+      <div class="pago-procesando">
+        <div class="spinner-pago"></div>
+        <p>Procesando tu pago, no cierres esta ventana...</p>
+      </div>
+    </section>
+
+    <!-- ===== PASO 4: boleta ===== -->
+    <section id="paso-boleta" class="hidden">
+      <div class="boleta">
+        <div class="boleta-encabezado">
+          <div class="boleta-check"><i class="fa-solid fa-check"></i></div>
+          <h2>¡Pago exitoso!</h2>
+          <p id="boleta-fecha"></p>
+        </div>
+
+        <div class="boleta-datos">
+          <div class="boleta-linea-dato"><span>N° de boleta</span><strong id="boleta-folio"></strong></div>
+          <div class="boleta-linea-dato"><span>Cliente</span><strong id="boleta-cliente"></strong></div>
+          <div class="boleta-linea-dato"><span>Método de pago</span><strong id="boleta-metodo"></strong></div>
+          <div class="boleta-linea-dato"><span>Código de autorización</span><strong id="boleta-autorizacion"></strong></div>
+        </div>
+
+        <div class="boleta-items" id="boleta-items"></div>
+
+        <div class="boleta-total">
+          <span>Total pagado</span>
+          <span id="boleta-total"></span>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secundario" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir</button>
+          <a href="index.html" class="btn-submit" style="flex:2; text-align:center; text-decoration:none; display:flex; align-items:center; justify-content:center;">Volver al inicio</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- datos.js aporta sesion, carrito y articulos -->
+  <script src="js/datos.js"></script>
+  <script>
+    if (typeof haySesionActiva === 'function' && !haySesionActiva()) {
+      window.location.href = 'login.html';
+    }
+
+    const usuarioSesion = (typeof obtenerSesion === 'function' && obtenerSesion()) || window.USUARIO_ACTUAL || {};
+
+    /** Agrupa el carrito (array de ids) en lineas {articulo, cantidad}, igual que en bolsa.html. */
+    function obtenerLineasDeBolsa() {
+      const idsEnCarrito = cargarCarrito();
+      const articulosDisponibles = cargarArticulos();
+      const conteoPorId = idsEnCarrito.reduce((mapa, id) => { mapa[id] = (mapa[id] || 0) + 1; return mapa; }, {});
+      const lineas = [];
+      Object.keys(conteoPorId).forEach(idTexto => {
+        const id = Number(idTexto);
+        const articulo = articulosDisponibles.find(a => a.id === id);
+        if (articulo) lineas.push({ articulo, cantidad: conteoPorId[id] });
+      });
+      return lineas;
+    }
+
+    const lineasCompra = obtenerLineasDeBolsa();
+    const totalCompra = lineasCompra.reduce((suma, l) => suma + l.articulo.precio * l.cantidad, 0);
+
+    // Si no hay nada que pagar, no tiene sentido estar en esta pantalla.
+    if (lineasCompra.length === 0) {
+      window.location.href = 'bolsa.html';
+    }
+
+    document.getElementById('btn-pagar-monto').textContent = `$${totalCompra.toFixed(2)}`;
+
+    function escaparHtml(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto ?? '';
+      return div.innerHTML;
+    }
+
+    // ---------------------------------------------------------------
+    // Navegacion entre pasos
+    // ---------------------------------------------------------------
+    function irAlPaso(numeroPaso) {
+      document.getElementById('paso-metodo').classList.toggle('hidden', numeroPaso !== 1);
+      document.getElementById('paso-datos').classList.toggle('hidden', numeroPaso !== 2);
+      document.getElementById('paso-procesando').classList.toggle('hidden', numeroPaso !== 3);
+      document.getElementById('paso-boleta').classList.toggle('hidden', numeroPaso !== 4);
+
+      document.querySelectorAll('.stepper-paso').forEach(el => {
+        const paso = Number(el.dataset.paso);
+        el.classList.remove('activo', 'completado');
+        // Los pasos 3 y 4 (procesando/boleta) se muestran como el paso 3 del stepper ("Confirmación")
+        const pasoStepperEquivalente = numeroPaso >= 3 ? 3 : numeroPaso;
+        if (paso < pasoStepperEquivalente) el.classList.add('completado');
+        if (paso === pasoStepperEquivalente) el.classList.add('activo');
+      });
+    }
+
+    // ---------------------------------------------------------------
+    // Paso 1: metodo de pago
+    // ---------------------------------------------------------------
+    let metodoSeleccionado = null;
+    document.querySelectorAll('.metodo-card').forEach(tarjetaMetodo => {
+      tarjetaMetodo.addEventListener('click', function () {
+        document.querySelectorAll('.metodo-card').forEach(el => el.classList.remove('seleccionado'));
+        this.classList.add('seleccionado');
+        metodoSeleccionado = this.dataset.metodo;
+        document.getElementById('btn-continuar-metodo').disabled = false;
+      });
+    });
+
+    document.getElementById('btn-continuar-metodo').addEventListener('click', function () {
+      document.getElementById('preview-metodo').textContent = metodoSeleccionado === 'credito' ? 'Crédito' : 'Débito';
+      irAlPaso(2);
+    });
+
+    document.getElementById('btn-atras-datos').addEventListener('click', function () {
+      irAlPaso(1);
+    });
+
+    // ---------------------------------------------------------------
+    // Paso 2: datos de la tarjeta (con formato en vivo y vista previa)
+    // ---------------------------------------------------------------
+    const inputNumero = document.getElementById('numero-tarjeta');
+    const inputNombre = document.getElementById('nombre-titular');
+    const inputVencimiento = document.getElementById('vencimiento-tarjeta');
+    const inputCvv = document.getElementById('cvv-tarjeta');
+
+    inputNumero.addEventListener('input', function () {
+      const soloDigitos = this.value.replace(/\D/g, '').slice(0, 16);
+      this.value = soloDigitos.replace(/(\d{4})(?=\d)/g, '$1 ');
+      const grupos = soloDigitos.padEnd(16, '•').match(/.{1,4}/g);
+      document.getElementById('preview-numero').textContent = grupos.join(' ');
+    });
+
+    inputNombre.addEventListener('input', function () {
+      document.getElementById('preview-nombre').textContent = this.value.trim() || 'NOMBRE APELLIDO';
+    });
+
+    inputVencimiento.addEventListener('input', function () {
+      let soloDigitos = this.value.replace(/\D/g, '').slice(0, 4);
+      if (soloDigitos.length >= 3) {
+        soloDigitos = `${soloDigitos.slice(0, 2)}/${soloDigitos.slice(2)}`;
+      }
+      this.value = soloDigitos;
+      document.getElementById('preview-vencimiento').textContent = soloDigitos || 'MM/AA';
+    });
+
+    inputCvv.addEventListener('input', function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    // ---------------------------------------------------------------
+    // Envio del formulario: validar, mostrar el paso de "procesando"
+    // con un delay simulado de 4.5s y despues generar la boleta.
+    // ---------------------------------------------------------------
+    document.getElementById('form-tarjeta').addEventListener('submit', function (evento) {
+      evento.preventDefault();
+
+      const numeroLimpio = inputNumero.value.replace(/\s/g, '');
+      const errorEl = document.getElementById('pago-error');
+
+      const errores = [];
+      if (numeroLimpio.length !== 16) errores.push('El número de tarjeta debe tener 16 dígitos.');
+      if (inputNombre.value.trim().length < 3) errores.push('Ingresa el nombre del titular.');
+      if (!/^\d{2}\/\d{2}$/.test(inputVencimiento.value)) errores.push('La fecha de vencimiento debe tener el formato MM/AA.');
+      if (inputCvv.value.length < 3) errores.push('El CVV debe tener 3 o 4 dígitos.');
+
+      if (errores.length > 0) {
+        errorEl.textContent = errores[0];
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      errorEl.classList.add('hidden');
+
+      irAlPaso(3);
+
+      // Delay simulado de la pasarela de pago (4.5 segundos).
+      setTimeout(function () {
+        generarBoleta(numeroLimpio);
+        irAlPaso(4);
+        // La "compra" quedo confirmada: se vacia la bolsa.
+        guardarCarrito([]);
+      }, 4500);
+    });
+
+    // ---------------------------------------------------------------
+    // Paso 4: generar y pintar la boleta con lo comprado
+    // ---------------------------------------------------------------
+    function generarBoleta(numeroTarjeta) {
+      const ahora = new Date();
+      const folio = 'BOL-' + Math.floor(100000 + Math.random() * 900000);
+      const autorizacion = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const ultimosDigitos = numeroTarjeta.slice(-4);
+
+      document.getElementById('boleta-fecha').textContent = ahora.toLocaleString('es-ES', {
+        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+      });
+      document.getElementById('boleta-folio').textContent = folio;
+      document.getElementById('boleta-cliente').textContent = usuarioSesion.correo || usuarioSesion.nombre || 'Cliente UniMarket';
+      document.getElementById('boleta-metodo').textContent =
+        `${metodoSeleccionado === 'credito' ? 'Crédito' : 'Débito'} terminada en ${ultimosDigitos}`;
+      document.getElementById('boleta-autorizacion').textContent = autorizacion;
+
+      document.getElementById('boleta-items').innerHTML = lineasCompra.map(linea => `
+        <div class="boleta-item">
+          <div>
+            <p class="boleta-item-nombre">${escaparHtml(linea.articulo.nombre)}</p>
+            <p class="boleta-item-cantidad">${linea.cantidad} × $${linea.articulo.precio.toFixed(2)}</p>
+          </div>
+          <span class="boleta-item-subtotal">$${(linea.articulo.precio * linea.cantidad).toFixed(2)}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('boleta-total').textContent = `$${totalCompra.toFixed(2)}`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+/* ============================================================
+     1. Tarjetas de producto
+     2. Botones de filtro de categoria
+     3. Selector de universidad
+     4. Buscador
+     5. Contenido especifico del modal de detalle de producto
+   ============================================================ */
+
+
+/* ============================================================
+   1. TARJETAS DE PRODUCTO
+   Pertenece a: index.html, dentro de #product-grid.
+   Cada tarjeta la genera catalogo.js (funcion renderizarArticulos).
+   ============================================================ */
+
+/* Caja blanca de cada tarjeta: borde redondeado, sombra suave y
+   efecto de "levantarse" al pasar el mouse (ver :hover mas abajo). */
+#product-grid .card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;           /* recorta la imagen a las esquinas redondeadas */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid #edf2f9;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Efecto hover: la tarjeta sube un poco y la sombra se hace mas marcada */
+#product-grid .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+/* Bloque superior de la tarjeta: ahi va la foto real del producto
+   (si el vendedor subio una) o, si no hay foto, un color solido de
+   relleno (ver obtenerEstiloImagen en catalogo.js). */
+#product-grid .card .card-image {
+  position: relative;
+  height: 150px;
+  width: 100%;
+}
+
+/* Etiqueta de condicion ("Nuevo", "Usado - Buen estado", etc), flotando
+   sobre la esquina superior derecha de la imagen. Si el texto es muy
+   largo se recorta con "..." para no romper el diseno de la tarjeta. */
+#product-grid .card .badge-condition {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  max-width: calc(100% - 1.2rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0b1b32;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.7rem;
+  border-radius: 40px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Etiqueta de distancia ("0.5 km"), flotando sobre la esquina
+   inferior izquierda de la imagen. */
+#product-grid .card .badge-distance {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 0.6rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0b1b32;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.7rem;
+  border-radius: 40px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+/* Zona blanca debajo de la imagen: aqui va nombre, vendedor,
+   rating y precio. */
+#product-grid .card .card-body {
+  padding: 1rem 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* Nombre del producto (titulo de la tarjeta) */
+#product-grid .card .product-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0b1b32;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Linea "Vendedor - Categoria" debajo del nombre */
+#product-grid .card .seller-name {
+  font-size: 0.85rem;
+  color: #5a6c7d;
+  margin: 0 0 0.3rem;
+}
+
+/* Fila inferior de la tarjeta: rating a la izquierda, precio a la derecha */
+#product-grid .card .card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.1rem;
+}
+
+/* Bloque de la calificacion (estrella + numero) */
+#product-grid .card .rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0b1b32;
+}
+
+/* Color naranja de la estrella de calificacion */
+#product-grid .card .rating .star {
+  color: #F97316;
+}
+
+/* Precio del producto, en grande a la derecha de la tarjeta */
+#product-grid .card .product-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0b1b32;
+  margin: 0;
+}
+
+
+/* ============================================================
+   2. BOTONES DE FILTRO DE CATEGORIA
+   Pertenece a: index.html, fila "Todos / Snacks / Ropa / ..." arriba
+   de la grilla de productos. La clase "active" la agrega catalogo.js
+   sobre el boton que esta seleccionado.
+   ============================================================ */
+
+.filter-btn {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #5a6c7d;
+  border-radius: 40px;
+  transition: all 0.15s;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+
+.filter-btn:hover {
+  color: #1A365D;
+  background: #f0f4fe;
+}
+
+/* Boton de categoria actualmente seleccionado */
+.filter-btn.active {
+  background: #1A365D;
+  color: white;
+  border-color: #1A365D;
+  font-weight: 600;
+}
+
+
+/* ============================================================
+   3. SELECTOR DE UNIVERSIDAD
+   Pertenece a: index.html, el <select id="filtro-universidad">
+   junto a los botones de filtro de categoria.
+   ============================================================ */
+
+.university-select {
+  border: 1px solid #e2e8f0;
+  border-radius: 40px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: #5a6c7d;
+  background: white;
+  cursor: pointer;
+  outline: none;
+}
+
+.university-select:hover {
+  border-color: #1A365D;
+  color: #1A365D;
+}
+
+
+/* ============================================================
+   4. BUSCADOR
+   Pertenece a: index.html, el <form id="search-form"> del header.
+   ============================================================ */
+
+/* Contenedor ovalado gris que envuelve el input y el boton de la lupa */
+.search-form {
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  border-radius: 40px;
+  padding: 0.3rem 0.3rem 0.3rem 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+/* Campo de texto del buscador, sin borde propio (el borde lo pone el contenedor) */
+.search-form input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  padding: 0.4rem 0;
+}
+
+/* Boton circular/ovalado de la lupa */
+.search-form button {
+  background: #1A365D;
+  border: none;
+  border-radius: 40px;
+  padding: 0.5rem 1rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-form button:hover {
+  background: #2a4a7f;
+}
+
+
+/* ============================================================
+   5. CONTENIDO ESPECIFICO DEL MODAL DE DETALLE DE PRODUCTO
+   Pertenece a: index.html, adentro del <div id="product-modal">.
+   El cascaron (.modal-overlay / .modal-content / .modal-close) esta
+   en base.css; aqui solo va lo que es propio de este modal en
+   particular. Se abre al hacer click en una tarjeta (ver
+   abrirModalDeProducto en catalogo.js).
+   ============================================================ */
+
+/* Bloque de imagen del modal (foto real o color, igual que en la tarjeta) */
+.modal-image {
+  height: 180px;
+  width: 100%;
+  border-radius: 20px 20px 0 0;
+}
+
+/* Zona blanca debajo de la imagen del modal, con todo el detalle */
+.modal-body {
+  padding: 1.2rem 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Pildora con la condicion del producto ("Usado", "Nuevo", etc) */
+.modal-condition {
+  display: inline-block;
+  align-self: flex-start;
+  background: #eef6ff;
+  color: #1A365D;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.7rem;
+  border-radius: 40px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Nombre del producto dentro del modal */
+.modal-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0b1b32;
+  margin: 0.2rem 0 0;
+}
+
+/* Linea "Vendedor - Categoria" dentro del modal */
+.modal-seller {
+  font-size: 0.9rem;
+  color: #5a6c7d;
+  margin: 0;
+}
+
+/* Parrafo de descripcion del producto dentro del modal */
+.modal-description {
+  font-size: 0.9rem;
+  color: #45525f;
+  margin: 0.4rem 0 0.2rem;
+  line-height: 1.4;
+}
+
+/* Cuadricula gris con Precio / Universidad / Distancia / Calificacion */
+.modal-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  background: #f7fafc;
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+  margin: 0.4rem 0 0.6rem;
+}
+
+/* Cada casilla individual dentro de la cuadricula (ej: "Precio: $2.50") */
+.modal-info-grid .info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Etiqueta pequena de cada dato ("PRECIO", "DISTANCIA", etc) */
+.modal-info-grid .info-label {
+  font-size: 0.7rem;
+  color: #7a8b9f;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Valor de cada dato, mas grande y en negrita */
+.modal-info-grid .info-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0b1b32;
+}
+
+/* Bloque gris con el punto de entrega, debajo de la cuadricula de info.
+   Reutiliza .info-label / .info-value de arriba para el texto interno. */
+.modal-entrega {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  background: #f7fafc;
+  border-radius: 14px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 0.4rem;
+}
+
+/* Boton naranja "Agregar a la bolsa" al final del modal */
+.modal-cart-btn {
+  background: #F97316;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 0.3rem;
+}
+
+.modal-cart-btn:hover {
+  background: #ea6a0c;
+}
+
+/* Estado momentaneo del boton justo despues de agregar al carrito */
+.modal-cart-btn.added {
+  background: #16a34a;
+}
