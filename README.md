@@ -1,3 +1,4 @@
+[Pruebas_Unitarias_UniMarket.pdf](https://github.com/user-attachments/files/33785400/Pruebas_Unitarias_UniMarket.pdf)
 # UniMarket (React)
 
 Marketplace estudiantil migrado de HTML + JS puro a **React + Vite + React Router + Tailwind**.
