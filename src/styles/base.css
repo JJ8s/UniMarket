@@ -1,0 +1,145 @@
+/* ============================================================
+     1. Modal generico (el cascaron: fondo oscuro + caja blanca +
+        boton de cerrar). Cada pagina le agrega su propio contenido
+        adentro con clases especificas (ver catalogo.css y publicar.css).
+     2. Menu desplegable de perfil (usado en el header de ambas paginas).
+   ============================================================ */
+
+
+/* ============================================================
+   1. MODAL GENERICO (cascaron reutilizable)
+   Lo usan: el modal de detalle de producto en index.html, y el
+   modal de Categoria/Estado en publicar.html. Cada uno pone su
+   propio contenido adentro; este archivo solo define el fondo,
+   la caja blanca y el boton de cerrar.
+   ============================================================ */
+
+/* Fondo oscuro semitransparente que cubre toda la pantalla */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 27, 50, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+
+/* Estado oculto del modal (el JS de cada pagina agrega/quita esta clase) */
+.modal-overlay.hidden {
+  display: none;
+}
+
+/* Caja blanca del modal, centrada sobre el fondo oscuro */
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+/* Boton circular "X" para cerrar el modal (lo usa el modal de detalle
+   de producto; el modal de Categoria/Estado se cierra tocando afuera
+   o con Escape, sin este boton) */
+.modal-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.8rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: #0b1b32;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.modal-close:hover {
+  background: #f0f4fe;
+}
+
+
+/* ============================================================
+   2. MENU DESPLEGABLE DE PERFIL
+   Pertenece a: el header de index.html Y de publicar.html (mismo
+   header en ambas paginas). Lo controla la clase MenuPerfil,
+   definida en interfaz.js.
+   ============================================================ */
+
+/* Panel blanco que cae debajo del icono de perfil */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid #edf2f9;
+  width: 240px;
+  padding: 0.9rem 0;
+  z-index: 60;
+}
+
+/* Estado oculto del menu (MenuPerfil.cerrar() agrega esta clase) */
+.profile-dropdown.hidden {
+  display: none;
+}
+
+/* Bloque superior del menu: nombre, usuario y correo */
+.profile-info {
+  padding: 0 1.1rem 0.7rem;
+}
+
+.profile-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0b1b32;
+  margin: 0;
+}
+
+.profile-username {
+  font-size: 0.8rem;
+  color: #7a8b9f;
+  margin: 0.1rem 0 0;
+}
+
+.profile-email {
+  font-size: 0.8rem;
+  color: #7a8b9f;
+  margin: 0.1rem 0 0;
+  word-break: break-all;
+}
+
+/* Lineas divisorias dentro del menu de perfil */
+.profile-divider {
+  border: none;
+  border-top: 1px solid #edf2f9;
+  margin: 0.4rem 0;
+}
+
+/* Cada opcion del menu ("Ver mi perfil", "Mis pedidos", etc) */
+.profile-menu-item {
+  display: block;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9rem;
+  color: #1A365D;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.profile-menu-item:hover {
+  background: #f0f4fe;
+}
+
+/* Opcion "Salir de la sesion", en rojo para distinguirla del resto */
+.profile-menu-item-danger {
+  color: #dc2626;
+}

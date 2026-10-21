@@ -1,0 +1,404 @@
+/* ============================================================
+     1. Base de la pagina y contenedor blanco
+     2. Stepper de progreso (Metodo / Datos / Confirmacion)
+     3. Paso 1: seleccion de metodo de pago
+     4. Paso 2: datos de la tarjeta (con vista previa)
+     5. Paso 3: pantalla de "procesando pago"
+     6. Paso 4: boleta final de compra
+============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+body.pago-body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #F7FAFC;
+  background-image: radial-gradient(circle at top left, rgba(26, 54, 93, 0.06), transparent 45%),
+                     radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.08), transparent 45%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem 1rem 3rem;
+  color: #1e293b;
+}
+
+.pago-header-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.75rem;
+}
+
+.pago-header-logo img {
+  height: 40px;
+  width: auto;
+}
+
+/* Recuadro blanco central que contiene todo el flujo de pago */
+.pago-container {
+  background-color: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(26, 54, 93, 0.12);
+  width: 92%;
+  max-width: 520px;
+  padding: 2rem;
+}
+
+/* ---------- Stepper (Método / Datos / Confirmación) ---------- */
+.stepper-pago {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.stepper-paso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  position: relative;
+}
+
+.stepper-circulo {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.stepper-paso.activo .stepper-circulo {
+  background-color: #1A365D;
+  color: #ffffff;
+}
+
+.stepper-paso.completado .stepper-circulo {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+.stepper-etiqueta {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-align: center;
+}
+
+.stepper-paso.activo .stepper-etiqueta {
+  color: #1A365D;
+}
+
+.stepper-linea {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background-color: #e2e8f0;
+  z-index: -1;
+}
+
+.stepper-paso.completado .stepper-linea {
+  background-color: #16a34a;
+}
+
+.stepper-paso:last-child .stepper-linea {
+  display: none;
+}
+
+/* ---------- Paso 1: metodo de pago ---------- */
+.pago-titulo-paso {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1A365D;
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.metodo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.metodo-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.metodo-card:hover {
+  border-color: #94a3b8;
+}
+
+.metodo-card.seleccionado {
+  border-color: #1A365D;
+  background-color: #EBF4FF;
+}
+
+.metodo-card i {
+  font-size: 1.6rem;
+  color: #1A365D;
+}
+
+.metodo-card span {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+/* ---------- Paso 2: datos de la tarjeta ---------- */
+.tarjeta-preview {
+  background: linear-gradient(135deg, #1A365D, #2c5282);
+  border-radius: 14px;
+  padding: 1.35rem 1.5rem;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tarjeta-preview-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.tarjeta-preview-chip {
+  width: 34px;
+  height: 24px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #F97316, #fbbf24);
+}
+
+.tarjeta-preview-metodo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #cbd5e1;
+}
+
+.tarjeta-preview-numero {
+  font-size: 1.15rem;
+  letter-spacing: 0.12em;
+  font-family: "Courier New", monospace;
+  margin: 0.75rem 0 0;
+}
+
+.tarjeta-preview-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  text-transform: uppercase;
+}
+
+.tarjeta-preview-bottom strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #ffffff;
+  text-transform: none;
+  font-family: inherit;
+  margin-top: 0.15rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.form-actions .btn-secundario {
+  flex: 1;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.form-actions .btn-secundario:hover {
+  background-color: #f8fafc;
+}
+
+.form-actions .btn-submit {
+  flex: 2;
+}
+
+#btn-continuar-metodo:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+#btn-continuar-metodo:disabled:hover {
+  background-color: #cbd5e1;
+}
+
+/* ---------- Paso 3: procesando pago ---------- */
+.pago-procesando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+.spinner-pago {
+  width: 52px;
+  height: 52px;
+  border: 5px solid #e2e8f0;
+  border-top-color: #F97316;
+  border-radius: 50%;
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+.pago-procesando p {
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+/* ---------- Paso 4: boleta ---------- */
+.boleta {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.boleta-encabezado {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.boleta-check {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #d1fae5;
+  color: #16a34a;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.85rem;
+}
+
+.boleta-encabezado h2 {
+  font-size: 1.2rem;
+  color: #1e293b;
+  margin: 0 0 0.2rem;
+}
+
+.boleta-encabezado p {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.boleta-datos {
+  border-top: 1px dashed #cbd5e1;
+  border-bottom: 1px dashed #cbd5e1;
+  padding: 1rem 0;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.boleta-linea-dato {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.83rem;
+  color: #475569;
+}
+
+.boleta-linea-dato strong {
+  color: #1e293b;
+}
+
+.boleta-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.boleta-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.boleta-item-nombre {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.boleta-item-cantidad {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+.boleta-item-subtotal {
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.boleta-total {
+  border-top: 2px solid #1A365D;
+  padding-top: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1A365D;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 480px) {
+  .pago-container {
+    padding: 1.5rem 1.25rem;
+  }
+  .metodo-grid, .form-row {
+    grid-template-columns: 1fr;
+  }
+  .stepper-etiqueta {
+    font-size: 0.62rem;
+  }
+}
