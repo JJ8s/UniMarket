@@ -1,4 +1,3 @@
-[Pruebas_Unitarias_UniMarket.pdf](https://github.com/user-attachments/files/33785400/Pruebas_Unitarias_UniMarket.pdf)
 # UniMarket (React)
 
 Marketplace estudiantil migrado de HTML + JS puro a **React + Vite + React Router + Tailwind**.
@@ -97,3 +96,5 @@ npm run test:karma      # Jasmine + Karma (las mismas 75 pruebas, en Chrome real
 ```
 
 Detalle y guía paso a paso en `TESTING.md`.
+
+[Ver PDF de pruebas unitarias](https://github.com/JJ8s/UniMarket/blob/main/Pruebas_Unitarias_UniMarket.pdf)
