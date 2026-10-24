@@ -1,13 +1,4 @@
--- ============================================================
--- UniMarket - esquema de base de datos para Supabase (PostgreSQL)
--- Pegar completo en: Supabase -> SQL Editor -> New query -> Run.
--- Se puede ejecutar mas de una vez (usa IF NOT EXISTS / OR REPLACE).
--- ============================================================
 
--- ---------- TABLAS ----------
-
--- Un perfil por cada cuenta de Supabase Auth (auth.users). El login y las
--- contrasenas los maneja Supabase Auth; aqui van los datos de la aplicacion.
 create table if not exists public.perfiles (
   id             uuid primary key references auth.users (id) on delete cascade,
   nombre         text not null default '',
@@ -31,7 +22,6 @@ create table if not exists public.articulos (
   descripcion         text not null default '',
   precio              numeric(12, 2) not null check (precio >= 0),
   calificacion        numeric(2, 1) not null default 0 check (calificacion between 0 and 5),
-  -- no se puede borrar una categoria que tenga articulos (restrict)
   categoria           text not null references public.categorias (valor) on update cascade on delete restrict,
   universidad         text not null default '',
   vendedor            text not null default 'UniMarket',
@@ -60,17 +50,12 @@ create table if not exists public.ordenes (
   metodo_pago     text not null default '',
   ultimos_digitos text not null default '',
   autorizacion    text not null default '',
-  -- copia de lo comprado: [{idArticulo, nombre, categoria, vendedor, precio, cantidad}]
-  -- (si el articulo se edita o borra despues, la boleta no cambia)
   lineas          jsonb not null default '[]',
   total           numeric(12, 2) not null default 0,
   creada_en       timestamptz not null default now()
 );
 create index if not exists ordenes_correo_idx on public.ordenes (lower(cliente_correo));
 
--- ---------- FUNCIONES Y TRIGGERS ----------
-
--- Es administrador quien llama? (security definer: lee perfiles sin pasar por RLS)
 create or replace function public.es_admin()
 returns boolean
 language sql stable security definer set search_path = public
@@ -78,8 +63,6 @@ as $$
   select exists (select 1 from public.perfiles where id = auth.uid() and rol = 'admin');
 $$;
 
--- Al registrarse en Supabase Auth se crea el perfil. El rol SIEMPRE parte
--- como 'cliente' (un admin se asigna despues, ver el final de este archivo).
 create or replace function public.crear_perfil_al_registrarse()
 returns trigger
 language plpgsql security definer set search_path = public
@@ -103,11 +86,6 @@ create trigger al_registrarse
   after insert on auth.users
   for each row execute function public.crear_perfil_al_registrarse();
 
--- Reglas de integridad sobre perfiles:
---  * solo un admin puede cambiar el rol de alguien (desde el SQL Editor, donde
---    no hay sesion de usuario, si se permite: asi se asigna el primer admin);
---  * el correo no se cambia desde la app (lo manda Supabase Auth);
---  * nunca puede quedar el sistema sin administradores.
 create or replace function public.proteger_perfiles()
 returns trigger
 language plpgsql security definer set search_path = public
@@ -131,7 +109,6 @@ begin
     return new;
   end if;
 
-  -- DELETE
   if old.rol = 'admin' then
     select count(*) into admins from public.perfiles where rol = 'admin';
     if admins <= 1 then
@@ -147,7 +124,6 @@ create trigger proteger_perfiles_trg
   before update or delete on public.perfiles
   for each row execute function public.proteger_perfiles();
 
--- Borrar una cuenta completa (auth + perfil). Solo la puede llamar un admin.
 create or replace function public.eliminar_usuario(p_id uuid)
 returns void
 language plpgsql security definer set search_path = public, auth
@@ -160,13 +136,11 @@ begin
 end;
 $$;
 
--- ---------- SEGURIDAD A NIVEL DE FILA (RLS) ----------
 alter table public.perfiles   enable row level security;
 alter table public.categorias enable row level security;
 alter table public.articulos  enable row level security;
 alter table public.ordenes    enable row level security;
 
--- perfiles: cada uno ve y edita el suyo; el admin ve y edita todos.
 drop policy if exists perfiles_ver on public.perfiles;
 create policy perfiles_ver on public.perfiles for select to authenticated
   using (id = auth.uid() or public.es_admin());
@@ -176,7 +150,6 @@ create policy perfiles_editar on public.perfiles for update to authenticated
   using (id = auth.uid() or public.es_admin())
   with check (id = auth.uid() or public.es_admin());
 
--- categorias: lectura publica; solo el admin escribe.
 drop policy if exists categorias_ver on public.categorias;
 create policy categorias_ver on public.categorias for select using (true);
 
@@ -184,8 +157,6 @@ drop policy if exists categorias_admin on public.categorias;
 create policy categorias_admin on public.categorias for all to authenticated
   using (public.es_admin()) with check (public.es_admin());
 
--- articulos: lectura publica; publica quien tiene sesion (a su nombre);
--- edita o borra el dueno o un admin.
 drop policy if exists articulos_ver on public.articulos;
 create policy articulos_ver on public.articulos for select using (true);
 
@@ -202,7 +173,6 @@ drop policy if exists articulos_borrar on public.articulos;
 create policy articulos_borrar on public.articulos for delete to authenticated
   using (vendedor_id = auth.uid() or public.es_admin());
 
--- ordenes: el cliente ve y crea las suyas; solo el admin ve todas y cambia el estado.
 drop policy if exists ordenes_ver on public.ordenes;
 create policy ordenes_ver on public.ordenes for select to authenticated
   using (user_id = auth.uid() or public.es_admin());
@@ -215,12 +185,10 @@ drop policy if exists ordenes_admin_editar on public.ordenes;
 create policy ordenes_admin_editar on public.ordenes for update to authenticated
   using (public.es_admin()) with check (public.es_admin());
 
--- Permisos de las funciones
 revoke all on function public.eliminar_usuario(uuid) from public;
 grant execute on function public.eliminar_usuario(uuid) to authenticated;
 grant execute on function public.es_admin() to anon, authenticated;
 
--- ---------- DATOS DE EJEMPLO ----------
 insert into public.categorias (valor, etiqueta, descripcion) values
   ('snacks',     'Snacks & Comida',              'Comida casera, dulces y bebidas.'),
   ('ropa',       'Ropa & Accesorios',            'Ropa de segunda mano y accesorios.'),
@@ -251,11 +219,3 @@ select * from (values
 ) as v(cliente_nombre, cliente_correo, estado, metodo_pago, ultimos_digitos, autorizacion, lineas, total, creada_en)
 where not exists (select 1 from public.ordenes);
 
--- ============================================================
--- PRIMER ADMINISTRADOR
--- 1) Registrate normalmente en la app (o crea el usuario en
---    Supabase -> Authentication -> Users) con el correo del admin.
--- 2) Ejecuta esto con ese correo:
---
---   update public.perfiles set rol = 'admin' where correo = 'admin@unimarket.edu';
--- ============================================================
