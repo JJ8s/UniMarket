@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* React monta la app dentro de #root. Con display: contents ese div no
+   genera caja propia, asi que el centrado de las paginas (login, registro,
+   perfil, bolsa...) funciona igual que en el HTML original. */
+#root {
+  display: contents;
+}

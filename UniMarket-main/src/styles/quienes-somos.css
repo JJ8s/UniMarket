@@ -1,0 +1,170 @@
+/* ============================================================
+   PAGINA "QUIENES SOMOS"
+   Todas las clases empiezan con "qs-" para no chocar con otras.
+   Colores de marca: azul #1A365D, naranja #F97316.
+   ============================================================ */
+
+.qs-contenedor {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+.qs-seccion { padding-top: 3.5rem; }
+
+.qs-titulo-seccion {
+  text-align: center;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1A365D;
+  margin: 0 0 2rem;
+}
+
+.qs-icono {
+  font-size: 2rem;
+  color: #F97316;
+  margin-bottom: 0.9rem;
+}
+
+/* ---- Hero ---- */
+.qs-hero {
+  background: linear-gradient(135deg, #1A365D 0%, #234876 100%);
+  color: #fff;
+  text-align: center;
+  padding: 4.5rem 0;
+}
+.qs-etiqueta {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border-radius: 9999px;
+  background: rgba(249, 115, 22, 0.18);
+  color: #fdba74;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 1.1rem;
+}
+.qs-hero h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 auto 1rem;
+  max-width: 22ch;
+}
+.qs-hero p {
+  max-width: 60ch;
+  margin: 0 auto;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: #cbd5e0;
+}
+
+/* ---- Grillas ---- */
+.qs-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.qs-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.qs-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+
+/* ---- Tarjetas ---- */
+.qs-tarjeta,
+.qs-paso,
+.qs-valor,
+.qs-persona {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: 0 2px 8px rgba(26, 54, 93, 0.04);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.qs-tarjeta:hover,
+.qs-paso:hover,
+.qs-valor:hover,
+.qs-persona:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(26, 54, 93, 0.1);
+}
+.qs-tarjeta h2 { font-size: 1.3rem; font-weight: 700; color: #1A365D; margin: 0 0 0.6rem; }
+.qs-paso h3,
+.qs-valor h3,
+.qs-persona h3 { font-size: 1.05rem; font-weight: 700; color: #1A365D; margin: 0 0 0.4rem; }
+.qs-tarjeta p,
+.qs-paso p,
+.qs-valor p,
+.qs-persona p { margin: 0; color: #475569; font-size: 0.92rem; line-height: 1.6; }
+
+.qs-paso, .qs-valor { text-align: center; }
+
+/* Numerito del paso */
+.qs-paso { position: relative; }
+.qs-paso-numero {
+  position: absolute;
+  top: 0.9rem;
+  left: 1rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1A365D;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- Cifras ---- */
+.qs-cifras { margin-top: 3.5rem; background: #fff; border-block: 1px solid #e2e8f0; }
+.qs-cifras-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  padding-top: 2.2rem;
+  padding-bottom: 2.2rem;
+}
+.qs-cifras-grid > div + div { border-left: 1px solid #e2e8f0; }
+.qs-cifras strong { display: block; font-size: 2.3rem; font-weight: 800; color: #F97316; }
+.qs-cifras span { color: #475569; font-size: 0.9rem; }
+
+/* ---- Equipo ---- */
+.qs-persona { text-align: center; }
+
+.qs-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---- Llamado a la accion ---- */
+.qs-cta {
+  background: #1A365D;
+  color: #fff;
+  border-radius: 20px;
+  text-align: center;
+  padding: 3rem 1.5rem;
+}
+.qs-cta h2 { font-size: 1.7rem; font-weight: 700; margin: 0 0 0.5rem; }
+.qs-cta p { margin: 0 0 1.5rem; color: #cbd5e0; }
+.qs-cta-botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; }
+.qs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.qs-btn-principal { background: #F97316; color: #fff; }
+.qs-btn-principal:hover { background: #ea580c; }
+.qs-btn-fantasma { border: 1.5px solid rgba(255, 255, 255, 0.5); color: #fff; }
+.qs-btn-fantasma:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* ---- Responsivo ---- */
+@media (max-width: 900px) {
+  .qs-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .qs-grid-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .qs-grid-2, .qs-grid-4 { grid-template-columns: 1fr; }
+  .qs-hero { padding: 3rem 0; }
+  .qs-cifras-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+  .qs-cifras-grid > div + div { border-left: none; border-top: 1px solid #e2e8f0; padding-top: 1.2rem; }
+}
