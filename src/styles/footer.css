@@ -1,0 +1,155 @@
+.pagina-con-footer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.pagina-con-footer > main { flex: 1; }
+
+.site-footer {
+  margin-top: 3rem;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+/* Beneficios: 3 columnas centradas */
+.footer-beneficios {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.footer-beneficio {
+  padding: 0 2rem;
+  text-align: center;
+}
+.footer-beneficio + .footer-beneficio { border-left: 1px solid #e2e8f0; }
+
+.footer-beneficio-icono {
+  font-size: 2.25rem;
+  color: #1A365D;
+  margin-bottom: 1rem;
+}
+.footer-beneficio h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1A365D;
+}
+.footer-beneficio p {
+  margin: 0 auto;
+  max-width: 26ch;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+/* Enlaces rapidos */
+.footer-enlaces {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+.footer-enlaces h5 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+.footer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.footer-chip {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 9999px;
+  background: #fff;
+  color: #475569;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.footer-chip:hover {
+  border-color: #F97316;
+  color: #F97316;
+  background: #FFF7ED;
+}
+.footer-chip:focus-visible { outline: 2px solid #1A365D; outline-offset: 2px; }
+
+/* Tu espacio */
+.footer-espacio {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+}
+.footer-espacio:not(:empty) {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+.footer-columna {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 140px;
+}
+.footer-columna h5 {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+.footer-columna a {
+  color: #475569;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+.footer-columna a:hover { color: #F97316; }
+
+/* Barra inferior */
+.footer-inferior { background: #1A365D; }
+.footer-inferior-contenido {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.1rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.footer-inferior p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+.footer-logo-link {
+  display: inline-flex;
+  padding: 5px 12px;
+  background: #fff;
+  border-radius: 8px;
+}
+.footer-logo-link img {
+  height: 24px;
+  width: auto;
+}
+
+/* Celular: beneficios */
+@media (max-width: 720px) {
+  .footer-beneficios { grid-template-columns: 1fr; gap: 2rem; padding-top: 2rem; }
+  .footer-beneficio { padding: 0; }
+  .footer-beneficio + .footer-beneficio {
+    border-left: none;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 2rem;
+  }
+}

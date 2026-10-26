@@ -1,0 +1,117 @@
+/* Fondo oscuro semitransparente */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 27, 50, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+
+/* Estado oculto */
+.modal-overlay.hidden {
+  display: none;
+}
+
+/* Caja blanca */
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.8rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: #0b1b32;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.modal-close:hover {
+  background: #f0f4fe;
+}
+
+/* Panel blanco */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid #edf2f9;
+  width: 240px;
+  padding: 0.9rem 0;
+  z-index: 60;
+}
+
+/* Estado oculto */
+.profile-dropdown.hidden {
+  display: none;
+}
+
+/* Bloque superior */
+.profile-info {
+  padding: 0 1.1rem 0.7rem;
+}
+
+.profile-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0b1b32;
+  margin: 0;
+}
+
+.profile-username {
+  font-size: 0.8rem;
+  color: #7a8b9f;
+  margin: 0.1rem 0 0;
+}
+
+.profile-email {
+  font-size: 0.8rem;
+  color: #7a8b9f;
+  margin: 0.1rem 0 0;
+  word-break: break-all;
+}
+
+/* Lineas divisorias */
+.profile-divider {
+  border: none;
+  border-top: 1px solid #edf2f9;
+  margin: 0.4rem 0;
+}
+
+/* Opcion del menu */
+.profile-menu-item {
+  display: block;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9rem;
+  color: #1A365D;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.profile-menu-item:hover {
+  background: #f0f4fe;
+}
+
+.profile-menu-item-danger {
+  color: #dc2626;
+}

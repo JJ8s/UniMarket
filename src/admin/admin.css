@@ -1,0 +1,160 @@
+/* Fondo gris claro */
+body.admin-body {
+  background: #f1f4f9;
+  min-height: 100vh;
+}
+
+/* Barra superior oscura */
+.admin-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: #1b2433;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+  z-index: 1030;
+}
+
+.admin-marca {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Menu lateral */
+.admin-sidebar {
+  position: fixed;
+  top: 56px;
+  bottom: 0;
+  left: 0;
+  width: 240px;
+  background: #fff;
+  border-right: 1px solid #dde3ec;
+  padding: 1rem;
+  overflow-y: auto;
+  z-index: 1020;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+}
+
+.admin-sidebar.abierto {
+  transform: translateX(0);
+}
+
+/* Fondo oscuro detras */
+.admin-fondo-menu {
+  position: fixed;
+  inset: 56px 0 0 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1010;
+}
+
+.admin-enlace {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  color: #344054;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.admin-enlace i {
+  width: 1.25rem;
+  text-align: center;
+  margin-right: 0.35rem;
+}
+
+.admin-enlace:hover {
+  background: #eef2f8;
+}
+
+/* Enlace activo */
+.admin-enlace.active {
+  background: #0d6efd;
+  color: #fff;
+}
+
+/* Contenido */
+.admin-contenido {
+  padding: 72px 1rem 2rem;
+}
+
+/* Tarjetas de metricas */
+.admin-metrica {
+  color: #fff;
+  border: 0;
+  border-radius: 0.75rem;
+}
+
+.admin-metrica .admin-metrica-icono {
+  font-size: 2rem;
+  opacity: 0.85;
+}
+
+/* Tarjetas de modulos */
+.admin-modulo {
+  display: block;
+  height: 100%;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e3e8f0;
+  border-radius: 0.75rem;
+  text-align: center;
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.admin-modulo:hover {
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.1);
+  transform: translateY(-2px);
+  color: inherit;
+}
+
+.admin-modulo i {
+  font-size: 1.5rem;
+  color: #0d6efd;
+}
+
+/* Miniatura de producto */
+.admin-miniatura {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.4rem;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+/* Barras simples */
+.admin-barra {
+  height: 0.6rem;
+}
+
+/* Escritorio: el menu queda fijo */
+@media (min-width: 992px) {
+  .admin-sidebar {
+    transform: none;
+  }
+
+  .admin-contenido {
+    margin-left: 240px;
+    padding: 72px 1.5rem 2rem;
+  }
+}
+
+/* Impresion */
+@media print {
+  body.admin-body {
+    background: #fff;
+  }
+
+  .admin-contenido {
+    margin: 0;
+    padding: 0;
+  }
+}
