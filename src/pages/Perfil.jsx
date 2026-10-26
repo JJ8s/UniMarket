@@ -6,7 +6,7 @@ import { UNIVERSIDADES_DISPONIBLES, actualizarUsuario, borrarFotoPerfil, guardar
 import useBodyClass from '../hooks/useBodyClass';
 import { comprimirImagen } from '../utils/utilidades';
 
-const TAMANIO_MAX_FOTO = 240; // px del lado mas largo
+const TAMANIO_MAX_FOTO = 240;
 
 export default function Perfil() {
   useBodyClass('perfil-body');
@@ -17,8 +17,7 @@ export default function Perfil() {
   const nombre = partesNombre[0] || nombreCompleto;
   const apellido = partesNombre.slice(1).join(' ') || '-';
 
-  // ---- Foto de perfil (opcional; se comprime antes de guardarla) ----
-  const foto = usuario.foto; // viene del perfil guardado en la base
+  const foto = usuario.foto;
   const inputFotoRef = useRef(null);
 
   const manejarSeleccionDeFoto = async (evento) => {
@@ -32,7 +31,7 @@ export default function Perfil() {
     const resultado = await guardarFotoPerfil(usuario.id, dataUrl);
     if (!resultado.ok) alert(resultado.mensaje);
     await refrescarUsuario();
-    evento.target.value = ''; // permite volver a elegir el mismo archivo
+    evento.target.value = '';
   };
 
   const quitarFoto = async () => {
@@ -40,7 +39,6 @@ export default function Perfil() {
     await refrescarUsuario();
   };
 
-  // ---- Edicion: nombre, apellido y universidad (el correo lo maneja Supabase Auth) ----
   const [editando, setEditando] = useState(false);
   const [formulario, setFormulario] = useState({ nombre: '', apellido: '', universidad: '' });
   const [error, setError] = useState('');
@@ -67,8 +65,6 @@ export default function Perfil() {
       return;
     }
 
-    // Si cambia el nombre, actualizarUsuario tambien renombra al vendedor de
-    // sus articulos publicados.
     const resultado = await actualizarUsuario(usuario.id, {
       nombre: nombreCompletoNuevo,
       nombreUsuario: usuario.nombreUsuario,
@@ -79,7 +75,6 @@ export default function Perfil() {
       return;
     }
 
-    // Refresca la sesion: toda la app (header, tarjetas...) se actualiza sola.
     await refrescarUsuario();
     setError('');
     setEditando(false);
@@ -200,6 +195,9 @@ export default function Perfil() {
                   {editando ? (
                     <select className="campo-editable-input" value={formulario.universidad}
                             onChange={(e) => cambiarCampo('universidad', e.target.value)}>
+                      {formulario.universidad && !UNIVERSIDADES_DISPONIBLES.includes(formulario.universidad) && (
+                        <option value={formulario.universidad}>{formulario.universidad}</option>
+                      )}
                       {UNIVERSIDADES_DISPONIBLES.map((uni) => (
                         <option key={uni} value={uni}>{uni}</option>
                       ))}

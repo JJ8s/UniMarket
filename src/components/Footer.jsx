@@ -2,7 +2,7 @@ import Logo from './Logo';
 import { UNIVERSIDADES_DISPONIBLES } from '../data/datos';
 import { useCategorias } from '../context/CategoriasContext';
 
-// Los 3 mensajes de la franja de arriba. Edita los textos aqui.
+// Beneficios
 const BENEFICIOS = [
   {
     icono: 'fa-shield-halved',
@@ -21,27 +21,16 @@ const BENEFICIOS = [
   },
 ];
 
-// "Instituto Profesional DUOC UC - Sede Alameda" -> "DUOC UC · Alameda"
+// Nombre corto de la sede
 const acortarUniversidad = (nombre) => nombre.replace('Instituto Profesional DUOC UC - Sede ', 'DUOC UC · ');
 
-/**
- * Footer del sitio, pegado al final de la pagina. Tiene 4 partes:
- *   1. Beneficios: 3 columnas con icono, titulo y texto (lista BENEFICIOS)
- *   2. Enlaces rapidos: categorias y universidades (filtran el catalogo)
- *   3. TU ESPACIO: bloque vacio para que agregues lo que quieras
- *   4. Barra inferior con logo y copyright
- *
- * Props (opcionales): si las pasas, las categorias y universidades se
- * muestran como botones que filtran el catalogo. Sin ellas, esa seccion se oculta.
- *   onElegirCategoria(valor)    onElegirUniversidad(nombre)
- */
 export default function Footer({ onElegirCategoria, onElegirUniversidad }) {
   const hayEnlaces = onElegirCategoria || onElegirUniversidad;
-  const { opciones: categorias } = useCategorias(); // vienen de la base (editables desde el admin)
+  const { opciones: categorias } = useCategorias();
 
   return (
     <footer className="site-footer">
-      {/* 1. BENEFICIOS */}
+      {/* BENEFICIOS */}
       <div className="footer-beneficios">
         {BENEFICIOS.map((beneficio) => (
           <div className="footer-beneficio" key={beneficio.titulo}>
@@ -52,7 +41,7 @@ export default function Footer({ onElegirCategoria, onElegirUniversidad }) {
         ))}
       </div>
 
-      {/* 2. ENLACES RAPIDOS (filtran el catalogo) */}
+      {/* ENLACES RAPIDOS */}
       {hayEnlaces && (
         <div className="footer-enlaces">
           {onElegirCategoria && (
@@ -89,18 +78,10 @@ export default function Footer({ onElegirCategoria, onElegirUniversidad }) {
         </div>
       )}
 
-      {/* 3. TU ESPACIO: agrega aqui lo que quieras (vacio por defecto, no ocupa lugar).
-          Ejemplos: columnas de enlaces, correo de contacto, redes sociales, terminos...
-          Usa <Link to="/ruta"> para paginas internas o <a href="..."> para externas. */}
       <div className="footer-espacio">
-        {/* <div className="footer-columna">
-              <h5>Ayuda</h5>
-              <a href="#">Preguntas frecuentes</a>
-              <a href="#">Contacto</a>
-            </div> */}
       </div>
 
-      {/* 4. BARRA INFERIOR */}
+      {/* BARRA INFERIOR */}
       <div className="footer-inferior">
         <div className="footer-inferior-contenido">
           <Logo className="footer-logo-link" />

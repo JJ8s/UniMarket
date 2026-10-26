@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { actualizarArticulo, articulosDeVendedor, eliminarArticulo } from '../data/datos';
 
-/**
- * Articulos publicados por la cuenta con sesion (los que tienen
- * `vendedorId === idVendedor`). Lo usan Pedidos y Panel de vendedor.
- * Los datos vienen de Supabase, asi que `cargando` es true hasta que llegan.
- */
 export default function useMisArticulos(idVendedor) {
   const [misArticulos, setMisArticulos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -19,7 +14,7 @@ export default function useMisArticulos(idVendedor) {
     recargar();
   }, [recargar]);
 
-  /** Borra un articulo por completo (pide confirmacion). */
+  /** Borra un articulo por completo */
   const borrarArticulo = useCallback(
     async (idArticulo, mensaje) => {
       if (!window.confirm(mensaje)) return;
@@ -30,11 +25,6 @@ export default function useMisArticulos(idVendedor) {
     [recargar]
   );
 
-  /**
-   * Disponible <-> Agotado sin borrar:
-   *  - a Agotado: guarda el stock en stockGuardado y deja stock en 0.
-   *  - a Disponible: restaura stockGuardado (o 1 si no habia).
-   */
   const alternarDisponibilidad = useCallback(
     async (idArticulo) => {
       const articulo = misArticulos.find((a) => a.id === idArticulo);

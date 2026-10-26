@@ -26,7 +26,7 @@ export default function Login() {
       return;
     }
     setError('');
-    navigate(resultado.usuario.rol === ROL_ADMIN ? '/admin' : '/'); // el admin entra directo a su panel
+    navigate(resultado.usuario.rol === ROL_ADMIN ? '/admin' : '/');
   };
 
   return (
@@ -68,6 +68,7 @@ export default function Login() {
           <div className="form-footer">
             <p><a href="#">¿Olvidaste tu contraseña?</a></p>
             <p>¿No tienes cuenta? <Link to="/registro">Regístrate</Link></p>
+            <p><Link to="/quienes-somos">Conoce UniMarket</Link></p>
           </div>
         </form>
       </div>

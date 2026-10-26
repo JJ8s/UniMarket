@@ -19,10 +19,9 @@ export default function Registro() {
     contrasena2: '',
   });
   const [error, setError] = useState('');
-  const [aviso, setAviso] = useState(''); // ej. "revisa tu correo"
+  const [aviso, setAviso] = useState('');
   const [enviando, setEnviando] = useState(false);
 
-  // Un solo handler para todos los inputs (usa el atributo name).
   const cambiarCampo = (evento) => {
     const { name, value } = evento.target;
     setCampos((anterior) => ({ ...anterior, [name]: value }));
@@ -54,11 +53,9 @@ export default function Registro() {
 
     setError('');
     if (resultado.requiereConfirmacion) {
-      // El proyecto de Supabase exige confirmar el correo antes de entrar.
       setAviso('Cuenta creada. Revisa tu correo y confirma tu cuenta para poder iniciar sesión.');
       return;
     }
-    // Registro exitoso: Supabase ya dejo la sesion iniciada; se carga el perfil y se entra al catalogo.
     await refrescarUsuario();
     navigate('/');
   };
@@ -119,6 +116,7 @@ export default function Registro() {
           <button type="submit" className="btn-submit" disabled={enviando}>{enviando ? 'Creando...' : 'Crear cuenta'}</button>
           <div className="form-footer">
             <p>¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link></p>
+            <p><Link to="/quienes-somos">Conoce UniMarket</Link></p>
           </div>
         </form>
       </div>

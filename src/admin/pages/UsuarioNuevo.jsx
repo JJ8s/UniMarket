@@ -3,7 +3,7 @@ import { crearUsuario } from '../../data/datos';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import FormularioUsuario from '../components/FormularioUsuario';
 
-/** "Nuevo usuario". */
+/** "Nuevo usuario" */
 export default function UsuarioNuevo() {
   const navigate = useNavigate();
 

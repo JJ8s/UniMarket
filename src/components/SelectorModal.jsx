@@ -1,16 +1,5 @@
 import { useEffect, useState } from 'react';
 
-/**
- * Selector de una sola opcion que se elige desde un modal (Categoria,
- * Estado). Muestra un boton con el valor actual; al tocarlo abre el modal
- * con radio buttons. (Reemplaza la clase SelectorModal de publicar.js.)
- *
- * @param {string} valor            valor elegido ('' si ninguno)
- * @param {Function} onCambio       recibe el valor nuevo
- * @param {string} titulo           encabezado del modal
- * @param {string} textoVacio       texto del boton cuando no hay valor
- * @param {Array<{valor,etiqueta}>} opciones
- */
 export default function SelectorModal({ valor, onCambio, titulo, textoVacio, opciones }) {
   const [abierto, setAbierto] = useState(false);
   const elegida = opciones.find((opcion) => opcion.valor === valor);

@@ -4,10 +4,6 @@ import { actualizarUsuario } from '../../data/datos';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import MensajeError from '../components/MensajeError';
 
-/**
- * Perfil del administrador: editar su nombre y su nombre de usuario.
- * El correo y la contraseña los maneja Supabase Auth, no se cambian aqui.
- */
 export default function PerfilAdmin() {
   const { usuario: sesion, refrescarUsuario } = useAuth();
 
@@ -27,7 +23,7 @@ export default function PerfilAdmin() {
       setError(resultado.mensaje);
       return;
     }
-    await refrescarUsuario(); // refresca el nombre en la sesion
+    await refrescarUsuario();
     setError('');
     setExito(true);
   };
@@ -39,16 +35,16 @@ export default function PerfilAdmin() {
         <div className="card-body">
           <MensajeError mensaje={error} />
           {exito && <div className="alert alert-success py-2">Cambios guardados.</div>}
-          <div className="row g-3">
-            <div className="col-12 col-md-6">
+          <div className="d-flex flex-wrap gap-3">
+            <div className="flex-grow-1" style={{ minWidth: "240px" }}>
               <label className="form-label" htmlFor="perfil-nombre">Nombre</label>
               <input id="perfil-nombre" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} />
             </div>
-            <div className="col-12 col-md-6">
+            <div className="flex-grow-1" style={{ minWidth: "240px" }}>
               <label className="form-label" htmlFor="perfil-usuario">Nombre de usuario</label>
               <input id="perfil-usuario" className="form-control" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} />
             </div>
-            <div className="col-12">
+            <div className="flex-grow-1" style={{ minWidth: "100%" }}>
               <label className="form-label" htmlFor="perfil-correo">Correo</label>
               <input id="perfil-correo" className="form-control" value={sesion.correo} readOnly disabled />
             </div>

@@ -1,5 +1,3 @@
-// Pruebas Jasmine (ejecutadas por Karma): npm run test:karma
-// Mismos casos que utilidades.test.js (Vitest), con sintaxis Jasmine.
 import {
   agruparCarrito,
   formatearPrecio,
@@ -8,9 +6,7 @@ import {
   obtenerColorImagen,
 } from '../utils/utilidades';
 
-// ------------------------------------------------------------
-// formatearPrecio: numero -> texto con simbolo $ y 2 decimales
-// ------------------------------------------------------------
+// FormatearPrecio: numero
 describe('formatearPrecio', () => {
   it('agrega el simbolo $ y dos decimales', () => {
     expect(formatearPrecio(2.5)).toBe('$2.50');
@@ -25,9 +21,7 @@ describe('formatearPrecio', () => {
   });
 });
 
-// ------------------------------------------------------------
-// normalizarTexto: minusculas y sin acentos, para comparar busquedas
-// ------------------------------------------------------------
+// NormalizarTexto: minusculas
 describe('normalizarTexto', () => {
   it('pasa el texto a minusculas', () => {
     expect(normalizarTexto('CALCULADORA')).toBe('calculadora');
@@ -43,9 +37,7 @@ describe('normalizarTexto', () => {
   });
 });
 
-// ------------------------------------------------------------
-// obtenerColorImagen: siempre devuelve un color de la paleta
-// ------------------------------------------------------------
+// ObtenerColorImagen: siempre devuelve un color
 describe('obtenerColorImagen', () => {
   it('devuelve el mismo color para el mismo id (es determinista)', () => {
     expect(obtenerColorImagen(7)).toBe(obtenerColorImagen(7));
@@ -58,10 +50,6 @@ describe('obtenerColorImagen', () => {
   });
 });
 
-// ------------------------------------------------------------
-// agruparCarrito / lineasAIds: ida y vuelta entre el array plano de
-// ids del carrito y las lineas agrupadas {articulo, cantidad}
-// ------------------------------------------------------------
 describe('agruparCarrito', () => {
   const articulosDisponibles = [
     { id: 1, nombre: 'Brownie', precio: 2.5 },
@@ -80,7 +68,7 @@ describe('agruparCarrito', () => {
   it('marca hayFantasmas cuando un id del carrito ya no existe como articulo', () => {
     const { lineas, hayFantasmas } = agruparCarrito([1, 999], articulosDisponibles);
 
-    expect(lineas.length).toBe(1); // el id 999 (fantasma) se descarta
+    expect(lineas.length).toBe(1);
     expect(hayFantasmas).toBe(true);
   });
 

@@ -5,7 +5,7 @@ import useConsulta from '../../hooks/useConsulta';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import FormularioCategoria from '../components/FormularioCategoria';
 
-/** "Editar categoria". */
+/** "Editar categoria" */
 export default function CategoriaEditar() {
   const { valor } = useParams();
   const navigate = useNavigate();

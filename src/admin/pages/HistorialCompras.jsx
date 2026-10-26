@@ -6,7 +6,6 @@ import { formatearFechaHora, formatearPrecio } from '../../utils/utilidades';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import InsigniaEstadoOrden from '../components/InsigniaEstadoOrden';
 
-/** "Historial de compras" de un usuario: todas sus ordenes, de la mas nueva a la mas vieja. */
 export default function HistorialCompras() {
   const { correo } = useParams();
   const { datos: ficha, cargando } = useConsulta(async () => {

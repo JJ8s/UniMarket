@@ -6,7 +6,7 @@ import useConsulta from '../../hooks/useConsulta';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import MensajeError from '../components/MensajeError';
 
-/** Listado de categorias con la cantidad de productos de cada una. */
+/** Listado de categorias */
 export default function Categorias() {
   const { recargar: recargarCategoriasTienda } = useCategorias();
   const { datos: categorias, cargando, recargar } = useConsulta(cargarCategorias, [], []);

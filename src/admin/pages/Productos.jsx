@@ -12,7 +12,6 @@ import InsigniaStock from '../components/InsigniaStock';
 import MensajeError from '../components/MensajeError';
 import Miniatura from '../components/Miniatura';
 
-/** Listado de productos con busqueda, filtro por categoria y acciones ver / editar / eliminar. */
 export default function Productos() {
   const { datos: articulos, cargando, recargar } = useConsulta(cargarArticulos, [], []);
   const { categorias, etiquetaCategoria } = useCategorias();
@@ -65,7 +64,7 @@ export default function Productos() {
       <MensajeError mensaje={error} />
 
       <BuscadorFiltros busqueda={busqueda} onBusqueda={setBusqueda} placeholder="Buscar por nombre, vendedor o SKU">
-        <div className="col-12 col-md-4 col-lg-3">
+        <div className="flex-grow-1" style={{ minWidth: "150px" }}>
           <select className="form-select" value={categoria} onChange={(e) => setCategoria(e.target.value)} aria-label="Filtrar por categoría">
             <option value="todas">Todas las categorías</option>
             {categorias.map((c) => <option key={c.valor} value={c.valor}>{c.etiqueta}</option>)}

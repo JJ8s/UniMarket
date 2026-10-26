@@ -1,9 +1,3 @@
-// Pruebas de la capa de datos del panel de administracion (usuarios y roles,
-// categorias, articulos y ordenes) contra un Supabase FALSO en memoria.
-// Las politicas RLS NO se prueban aqui (el falso no las imita): se probaron
-// contra un PostgreSQL real con supabase/esquema.sql.
-// Usa solo sintaxis comun a Vitest y Jasmine; existe una copia identica como
-// datosAdmin.test.js (la que corre Vitest).
 import {
   ROL_ADMIN,
   ROL_CLIENTE,
@@ -31,15 +25,12 @@ import {
 import { usarCliente } from '../data/supabase';
 import { crearSupabaseFalso } from '../tests/supabaseFalso';
 
-// OJO: en Karma todos los .spec.js comparten pagina y modulos, asi que esto NO
-// va en un beforeEach global (pisaria el Supabase falso de las demas pruebas):
-// se registra dentro de cada describe.
 let falso;
 const preparar = () => {
   localStorage.clear();
   falso = crearSupabaseFalso();
   usarCliente(falso.cliente);
-  falso.iniciarComo('admin@unimarket.edu'); // el panel lo usa un administrador con sesion
+  falso.iniciarComo('admin@unimarket.edu');
 };
 
 describe('Admin - usuarios y roles', () => {
@@ -171,7 +162,7 @@ describe('Admin - articulos (productos)', () => {
   it('crearArticulo asigna el siguiente id y completa los valores por defecto', async () => {
     const resultado = await crearArticulo(datosValidos);
     expect(resultado.ok).toBe(true);
-    expect(resultado.articulo.id).toBe(5); // los 4 de ejemplo usan 1 a 4
+    expect(resultado.articulo.id).toBe(5);
     expect(resultado.articulo.precio).toBe(12.5);
     expect(resultado.articulo.stock).toBe(3);
     expect(resultado.articulo.vendedor).toBe('UniMarket');
@@ -207,22 +198,21 @@ describe('Admin - articulos (productos)', () => {
   it('eliminarArticulo borra el articulo', async () => {
     expect((await eliminarArticulo(1)).ok).toBe(true);
     expect((await cargarArticulos()).some((a) => a.id === 1)).toBe(false);
-    expect((await eliminarArticulo(1)).ok).toBe(false); // ya no existe
+    expect((await eliminarArticulo(1)).ok).toBe(false);
   });
 
   it('obtenerArticulosCriticos devuelve los de poco stock, del mas urgente al menos', async () => {
     falso.db.articulos.forEach((a, i) => { a.stock = [5, 0, 6, 2][i]; });
     const criticos = await obtenerArticulosCriticos();
     expect(UMBRAL_STOCK_CRITICO).toBe(5);
-    expect(criticos.map((a) => a.id)).toEqual([2, 4, 1]); // el de stock 6 queda fuera
-    expect((await obtenerArticulosCriticos(0)).map((a) => a.id)).toEqual([2]); // umbral personalizado
+    expect(criticos.map((a) => a.id)).toEqual([2, 4, 1]);
+    expect((await obtenerArticulosCriticos(0)).map((a) => a.id)).toEqual([2]);
   });
 });
 
 describe('Admin - ordenes y boletas', () => {
   beforeEach(preparar);
   const nueva = {
-    cliente: { nombre: 'Ana', correo: 'ANA@correo.cl' },
     lineas: [
       { idArticulo: 1, nombre: 'Brownies', categoria: 'snacks', vendedor: 'M', precio: 2.5, cantidad: 2 },
       { idArticulo: 4, nombre: 'Monster', categoria: 'snacks', vendedor: 'K', precio: 3, cantidad: 1 },
@@ -236,19 +226,45 @@ describe('Admin - ordenes y boletas', () => {
     expect(ordenes[0].creadaEn).toBeGreaterThan(ordenes[5].creadaEn);
   });
 
-  it('crearOrden calcula el total, asigna el siguiente folio y guarda el correo en minusculas', async () => {
+  it('crearOrden asigna el siguiente folio y usa los datos de la cuenta con sesion', async () => {
+    falso.iniciarComo('juan.perez@unimarket.edu');
     const resultado = await crearOrden(nueva);
     expect(resultado.ok).toBe(true);
-    expect(resultado.orden.folio).toBe('BOL-100007'); // las 6 de ejemplo llegan hasta BOL-100006
-    expect(resultado.orden.total).toBe(8);
+    expect(resultado.orden.folio).toBe('BOL-100007');
     expect(resultado.orden.estado).toBe('Pagada');
-    expect(resultado.orden.cliente.correo).toBe('ana@correo.cl');
+    expect(resultado.orden.cliente.correo).toBe('juan.perez@unimarket.edu');
+    expect(resultado.orden.userId).toBe(falso.ID_JUAN);
     expect(await obtenerOrden('BOL-100007')).not.toBeNull();
   });
 
-  it('la orden queda asociada a la cuenta con sesion', async () => {
-    const resultado = await crearOrden(nueva);
-    expect(resultado.orden.userId).toBe(falso.ID_ADMIN);
+  it('crearOrden calcula el total con los precios de la base, no con los que manda el cliente', async () => {
+    const manipulada = { ...nueva, lineas: nueva.lineas.map((l) => ({ ...l, precio: 0.01 })) };
+    const resultado = await crearOrden(manipulada);
+    expect(resultado.orden.total).toBe(8);
+    expect(resultado.orden.lineas[0].precio).toBe(2.5);
+  });
+
+  it('crearOrden descuenta el stock de cada producto comprado', async () => {
+    await crearOrden(nueva);
+    const articulos = await cargarArticulos();
+    expect(articulos.find((a) => a.id === 1).stock).toBe(8);
+    expect(articulos.find((a) => a.id === 4).stock).toBe(24);
+  });
+
+  it('crearOrden rechaza la compra si falta stock y no cambia nada', async () => {
+    const demasiado = { ...nueva, lineas: [{ idArticulo: 4, cantidad: 1 }, { idArticulo: 2, cantidad: 5 }] };
+    const resultado = await crearOrden(demasiado);
+    expect(resultado.ok).toBe(false);
+    expect(resultado.mensaje).toMatch(/Stock insuficiente/);
+    const articulos = await cargarArticulos();
+    expect(articulos.find((a) => a.id === 4).stock).toBe(25);
+    expect((await cargarOrdenes()).length).toBe(6);
+  });
+
+  it('crearOrden exige tener sesion y una bolsa con productos', async () => {
+    expect((await crearOrden({ ...nueva, lineas: [] })).ok).toBe(false);
+    await falso.cliente.auth.signOut();
+    expect((await crearOrden(nueva)).ok).toBe(false);
   });
 
   it('ordenesDeUsuario filtra por correo (sin distinguir mayusculas) y ordena de nueva a vieja', async () => {

@@ -25,17 +25,16 @@ export default function Publicar() {
   useBodyClass('bg-surface');
   const { usuario } = useAuth();
   const navigate = useNavigate();
-  const { opciones: opcionesCategoria } = useCategorias(); // las edita el administrador
+  const { opciones: opcionesCategoria } = useCategorias();
   const [guardando, setGuardando] = useState(false);
 
   const [campos, setCampos] = useState(FORMULARIO_INICIAL);
-  const [fotos, setFotos] = useState([]); // data URLs ya comprimidas
-  const [universidadesVenta, setUniversidadesVenta] = useState([]); // [] = todas
+  const [fotos, setFotos] = useState([]);
+  const [universidadesVenta, setUniversidadesVenta] = useState([]);
 
   const cambiarCampo = (nombre, valor) => setCampos((anterior) => ({ ...anterior, [nombre]: valor }));
   const manejarInput = (evento) => cambiarCampo(evento.target.name, evento.target.value);
 
-  // ---- Fotos: lee, comprime (480px, JPEG 70%) y muestra miniaturas ----
   const manejarFotos = async (evento) => {
     const archivos = Array.from(evento.target.files).slice(0, MAX_FOTOS);
     const comprimidas = await Promise.all(archivos.map((archivo) => comprimirImagen(archivo, 480, 0.7)));
@@ -50,7 +49,6 @@ export default function Publicar() {
     );
   };
 
-  // ---- Validacion: devuelve un mensaje de error o null ----
   const validar = () => {
     if (!campos.categoria) return 'Selecciona una categoria.';
     if (!campos.estado) return 'Selecciona el estado del producto.';
@@ -98,7 +96,6 @@ export default function Publicar() {
     setGuardando(false);
 
     if (!resultado.ok) {
-      // Puede fallar por permisos, conexion o fotos demasiado pesadas
       alert(resultado.mensaje || 'No se pudo guardar la publicacion. Intenta con fotos mas livianas o menos fotos.');
       return;
     }
@@ -120,7 +117,7 @@ export default function Publicar() {
         <h2 className="text-3xl font-bold text-primary mt-4 mb-6">Crear Publicación</h2>
 
         <form onSubmit={manejarEnvio}>
-          {/* ===== FOTOS ===== */}
+          {/* FOTOS */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-camara.png" alt="camara" className="form-section-icon" />
@@ -147,7 +144,7 @@ export default function Publicar() {
             />
           </section>
 
-          {/* ===== INFORMACION ===== */}
+          {/* INFORMACION */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-info.png" alt="informacion" className="form-section-icon" />
@@ -184,7 +181,7 @@ export default function Publicar() {
             />
           </section>
 
-          {/* ===== PRECIO E INVENTARIO ===== */}
+          {/* PRECIO E INVENTARIO */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-dolar.png" alt="precio" className="form-section-icon" />
@@ -204,7 +201,7 @@ export default function Publicar() {
             <p className="form-hint">El código SKU para tu inventario lo genera Unimarket automáticamente al publicar.</p>
           </section>
 
-          {/* ===== PUNTO DE ENTREGA ===== */}
+          {/* PUNTO DE ENTREGA */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-entrega.png" alt="entrega" className="form-section-icon" />
@@ -220,7 +217,7 @@ export default function Publicar() {
             <p className="form-hint form-hint-derecha">{campos.entrega.length}/{MAX_ENTREGA}</p>
           </section>
 
-          {/* ===== UNIVERSIDADES ===== */}
+          {/* UNIVERSIDADES */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-universidad.png" alt="universidad" className="form-section-icon" />

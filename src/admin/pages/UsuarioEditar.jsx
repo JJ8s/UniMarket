@@ -5,9 +5,9 @@ import useConsulta from '../../hooks/useConsulta';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import FormularioUsuario from '../components/FormularioUsuario';
 
-/** "Editar usuario". */
+/** "Editar usuario" */
 export default function UsuarioEditar() {
-  const { correo } = useParams(); // React Router ya lo entrega decodificado
+  const { correo } = useParams();
   const navigate = useNavigate();
   const { usuario: sesion, refrescarUsuario } = useAuth();
   const { datos: usuario, cargando } = useConsulta(() => obtenerUsuario(correo), null, [correo]);
@@ -27,7 +27,6 @@ export default function UsuarioEditar() {
     const resultado = await actualizarUsuarioAdmin(usuario.correo, datos);
     if (!resultado.ok) return resultado;
 
-    // Si el admin se edito a si mismo, se refresca su perfil en la sesion (nombre, rol).
     if (usuario.id === sesion.id) await refrescarUsuario();
     navigate(`/admin/usuarios/${encodeURIComponent(resultado.usuario.correo)}`);
     return resultado;

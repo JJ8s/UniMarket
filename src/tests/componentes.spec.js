@@ -1,15 +1,3 @@
-// ============================================================
-// PRUEBAS DE COMPONENTES REACT (las 10 pruebas de la evaluacion)
-// Siguen los 5 tipos que pide el anexo (pagina 11):
-//   1. Renderizado correcto      (pruebas 1 y 2)
-//   2. Renderizado condicional   (pruebas 3 y 4)
-//   3. Propiedades (props)       (pruebas 5 y 6)
-//   4. Estado (state)            (pruebas 7 y 8)
-//   5. Eventos                   (pruebas 9 y 10)
-// Solo se prueba el front-end: nada de Supabase ni de la base de datos.
-// Usa sintaxis comun a Jasmine y Vitest; este archivo existe como
-// componentes.spec.js (Karma) y componentes.test.jsx (Vitest), con el mismo contenido.
-// ============================================================
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import SelectorModal from '../components/SelectorModal';
@@ -21,11 +9,9 @@ import InsigniaEstadoOrden from '../admin/components/InsigniaEstadoOrden';
 import BuscadorFiltros from '../admin/components/BuscadorFiltros';
 import FormularioCategoria from '../admin/components/FormularioCategoria';
 
-// React le avisa a Testing Library que el entorno soporta act().
+// Ajuste para Testing Library
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-// En Karma todos los .spec comparten la pagina (y Jasmine mezcla el orden): se limpia
-// el DOM despues de cada prueba para que una no vea lo que dejo otra.
 afterEach(() => cleanup());
 
 const OPCIONES = [
@@ -34,7 +20,6 @@ const OPCIONES = [
   { valor: 'libros', etiqueta: 'Libros & Material de Estudio' },
 ];
 
-// Registra las llamadas a una funcion (sirve igual en Jasmine y en Vitest).
 const espiar = () => {
   const llamadas = [];
   const fn = (...args) => { llamadas.push(args); };
@@ -92,7 +77,7 @@ describe('3. Propiedades (props)', () => {
     );
 
     expect(getByText('Tu bolsa está vacía.')).toBeTruthy();
-    const enlace = container.querySelector('a'); // dentro del componente (el reporte de Karma tambien trae enlaces)
+    const enlace = container.querySelector('a');
     expect(enlace.textContent).toContain('Ir al catálogo');
     expect(enlace.getAttribute('href')).toBe('/');
   });
@@ -129,9 +114,9 @@ describe('4. Estado (state)', () => {
     const { getByText, container } = render(
       <SelectorModal valor="ropa" onCambio={espiar()} titulo="Seleccionar categoria" textoVacio="Seleccionar..." opciones={OPCIONES} />
     );
-    expect(container.querySelector('.modal-overlay')).toBeNull(); // empieza cerrado
+    expect(container.querySelector('.modal-overlay')).toBeNull();
 
-    fireEvent.click(getByText('Ropa & Accesorios')); // el boton muestra la opcion elegida
+    fireEvent.click(getByText('Ropa & Accesorios'));
     expect(container.querySelector('.modal-overlay')).not.toBeNull();
 
     fireEvent.keyDown(document, { key: 'Escape' });
@@ -159,7 +144,7 @@ describe('5. Eventos', () => {
     );
 
     fireEvent.change(getByLabelText('Nombre *'), { target: { name: 'etiqueta', value: 'Otros' } });
-    fireEvent.click(getByText('Crear categoría')); // clic en el boton de enviar
+    fireEvent.click(getByText('Crear categoría'));
 
     const alerta = await findByRole('alert');
     expect(onGuardar.recibido.etiqueta).toBe('Otros');

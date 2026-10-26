@@ -3,11 +3,6 @@ import { cargarCarrito, guardarCarrito } from '../data/datos';
 
 const CarritoContext = createContext(null);
 
-/**
- * Carrito ("bolsa") compartido: array de ids de articulos (uno por unidad).
- * Cada cambio se persiste en localStorage. El header lee `carrito.length`
- * para el numerito del icono, asi se actualiza solo en todas las paginas.
- */
 export function CarritoProvider({ children }) {
   const [carrito, setCarrito] = useState(() => cargarCarrito());
 

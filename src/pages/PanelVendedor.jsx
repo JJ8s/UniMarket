@@ -5,7 +5,6 @@ import useBodyClass from '../hooks/useBodyClass';
 import useMisArticulos from '../hooks/useMisArticulos';
 import { obtenerEstiloImagen } from '../utils/utilidades';
 
-// Pedidos de ejemplo: todavia no existe un sistema real de pedidos/compras.
 const PEDIDOS_EJEMPLO = [
   { id: 'ORD-001', producto: 'Brownies de...', comprador: 'Juan P.', entrega: 'Patio de Ingeniería' },
   { id: 'ORD-002', producto: 'Calculadora...', comprador: 'Ana L.', entrega: 'Biblioteca Central' },
@@ -16,7 +15,6 @@ export default function PanelVendedor() {
   const { usuario } = useAuth();
   const { misArticulos, borrarArticulo, alternarDisponibilidad, cargando } = useMisArticulos(usuario.id);
 
-  // Calificacion promedio de los articulos del vendedor (solo los calificados)
   const conCalificacion = misArticulos.filter((a) => typeof a.calificacion === 'number' && a.calificacion > 0);
   const promedio = conCalificacion.length
     ? conCalificacion.reduce((suma, a) => suma + a.calificacion, 0) / conCalificacion.length
@@ -31,7 +29,7 @@ export default function PanelVendedor() {
           <i className="fa-solid fa-shop"></i> Panel de Vendedor
         </h2>
 
-        {/* ----- Estadisticas ----- */}
+        {/* Estadisticas */}
         <section className="stats-grid">
           <div className="stat-card">
             <div>
@@ -62,7 +60,7 @@ export default function PanelVendedor() {
         <p className="stats-nota">* "Ventas del mes" y "Pedidos por entregar hoy" son datos de ejemplo: se conectarán con datos reales cuando exista un sistema de pedidos/compras. "Calificación promedio" ya se calcula con tus artículos publicados.</p>
 
         <div className="panel-layout">
-          {/* ----- Pedidos activos (ejemplo) ----- */}
+          {/* Pedidos activos */}
           <section>
             <h3 className="panel-seccion-titulo">Pedidos Activos</h3>
             <div className="tabla-wrapper">
@@ -94,7 +92,7 @@ export default function PanelVendedor() {
             </div>
           </section>
 
-          {/* ----- Inventario rapido (real) ----- */}
+          {/* Inventario rapido */}
           <section>
             <h3 className="panel-seccion-titulo">Inventario Rápido</h3>
             <div className="inventario-card">

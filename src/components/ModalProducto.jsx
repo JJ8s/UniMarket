@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { useCategorias } from '../context/CategoriasContext';
 import { obtenerEstiloImagen } from '../utils/utilidades';
 
-/** Ventana con el detalle de un producto y el boton "Agregar a la bolsa". */
+/** Ventana con el detalle */
 export default function ModalProducto({ articulo, onCerrar, onAgregar }) {
   const { etiquetaCategoria } = useCategorias();
   const [agregado, setAgregado] = useState(false);
 
-  // Escape cierra el modal
   useEffect(() => {
     const alPresionarTecla = (evento) => {
       if (evento.key === 'Escape') onCerrar();
@@ -16,7 +15,6 @@ export default function ModalProducto({ articulo, onCerrar, onAgregar }) {
     return () => document.removeEventListener('keydown', alPresionarTecla);
   }, [onCerrar]);
 
-  // Tras agregar, se cierra solo a los 700 ms
   useEffect(() => {
     if (!agregado) return undefined;
     const temporizador = setTimeout(onCerrar, 700);

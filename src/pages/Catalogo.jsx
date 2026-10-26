@@ -10,8 +10,7 @@ import useConsulta from '../hooks/useConsulta';
 import { UNIVERSIDADES_DISPONIBLES, cargarArticulos } from '../data/datos';
 import { normalizarTexto } from '../utils/utilidades';
 
-
-const UBICACION_SIMULADA = { lat: 19.4326, lng: -99.1332 }; // CDMX
+const UBICACION_SIMULADA = { lat: 19.4326, lng: -99.1332 };
 
 const IconoUbicacion = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -25,16 +24,14 @@ export default function Catalogo() {
 
   const { datos: articulos, cargando } = useConsulta(cargarArticulos, []);
   const { opciones, etiquetaCategoria } = useCategorias();
-  // "Todos" + las categorias de la base (las edita el administrador)
   const filtrosCategoria = useMemo(() => [{ valor: 'todos', etiqueta: 'Todos' }, ...opciones], [opciones]);
   const [categoria, setCategoria] = useState('todos');
   const [universidad, setUniversidad] = useState('todas');
   const [busqueda, setBusqueda] = useState('');
   const [radio, setRadio] = useState(5);
-  const [ubicacion, setUbicacion] = useState(null); // { lat, lng, simulada }
+  const [ubicacion, setUbicacion] = useState(null);
   const [articuloModal, setArticuloModal] = useState(null);
 
-  // ---- Filtrado (categoria + radio + universidad + busqueda) y orden ----
   const articulosFiltrados = useMemo(() => {
     const termino = normalizarTexto(busqueda.trim());
     let lista = [...articulos];
@@ -46,7 +43,6 @@ export default function Catalogo() {
       lista = lista.filter((a) => a.distancia <= radio);
     }
     if (universidad !== 'todas') {
-      // universidadesVenta vacio = vende a todas las universidades
       lista = lista.filter((a) => {
         const unis = a.universidadesVenta;
         return !unis || unis.length === 0 || unis.includes(universidad);
@@ -64,7 +60,6 @@ export default function Catalogo() {
     return lista;
   }, [articulos, categoria, universidad, busqueda, radio, ubicacion, etiquetaCategoria]);
 
-  // ---- Atajos del footer: aplican el filtro y suben a la lista de productos ----
   const irAProductos = () =>
     document.getElementById('seccion-productos')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
 
@@ -77,7 +72,6 @@ export default function Catalogo() {
     irAProductos();
   };
 
-  // ---- Ubicacion ----
   const detectarUbicacion = () => {
     const usarSimulada = (avisar) => {
       setUbicacion({ ...UBICACION_SIMULADA, simulada: true });
@@ -111,7 +105,7 @@ export default function Catalogo() {
       <Header conBusqueda busqueda={busqueda} onBusqueda={setBusqueda} />
 
       <main>
-        {/* ===== HERO: ubicacion y radio ===== */}
+        {/* HERO: ubicacion */}
         <section className="bg-surface py-16 px-6 text-center border-b border-gray-200">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">Encuentra lo que necesitas en tu campus</h2>
@@ -143,7 +137,7 @@ export default function Catalogo() {
           </div>
         </section>
 
-        {/* ===== CTA PUBLICAR ===== */}
+        {/* CTA PUBLICAR */}
         <div className="max-w-7xl mx-auto px-6 pt-8 pb-4">
           <div className="bg-primary rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
             <div>
@@ -159,7 +153,7 @@ export default function Catalogo() {
           </div>
         </div>
 
-        {/* ===== FILTROS Y PRODUCTOS ===== */}
+        {/* FILTROS Y PRODUCTOS */}
         <section id="seccion-productos" style={{ scrollMarginTop: '90px' }} className="max-w-7xl mx-auto px-6 pb-12">
           <div className="flex flex-wrap items-center gap-3 pb-4">
             <div className="flex gap-3 overflow-x-auto scrollbar-hide">

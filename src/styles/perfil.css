@@ -1,21 +1,7 @@
-/* ============================================================
-     1. Base de la pagina y boton "Volver al inicio"
-     2. Banner azul superior (avatar, nombre, tags, contadores)
-     3. Grilla de contenido (tarjetas de info + barra lateral)
-     4. Campos editables (modo edicion de datos del perfil)
-     5. Botones reutilizables (naranja, azul, fantasma, borrar)
-     6. Tarjeta de publicacion propia (dentro de la barra lateral)
-     7. Actividad reciente (barra lateral)
-     8. Mis pedidos (pedidos.html)
-     9. Estado vacio generico
-   ============================================================ */
-
 * {
   box-sizing: border-box;
 }
 
-/* Regla generica de "ocultar" usada por perfil.html, pedidos.html y
-   bolsa.html para sus estados vacios (toggle vía classList). */
 .hidden {
   display: none !important;
 }
@@ -31,11 +17,7 @@ body.perfil-body {
   color: #1e293b;
 }
 
-/* ============================================================
-   1. BASE DE LA PAGINA
-   ============================================================ */
-
-/* Logo pequeno arriba a la izquierda, fuera del contenedor blanco */
+/* Logo pequeno */
 .perfil-header-logo {
   width: 100%;
   max-width: 860px;
@@ -56,7 +38,7 @@ body.perfil-body {
   gap: 1.5rem;
 }
 
-/* Boton "Volver al inicio", arriba del banner */
+/* Boton "Volver al inicio" */
 .btn-volver-inicio {
   align-self: flex-start;
   display: inline-flex;
@@ -77,11 +59,6 @@ body.perfil-body {
   background-color: #f1f5f9;
 }
 
-/* ============================================================
-   2. BANNER AZUL SUPERIOR
-   Pertenece a: el recuadro azul con la foto de perfil, nombre,
-   tags y los contadores de la derecha (ventas/compras).
-   ============================================================ */
 .banner-card {
   background-color: #1A365D;
   border-radius: 16px;
@@ -101,7 +78,7 @@ body.perfil-body {
   gap: 1.5rem;
 }
 
-/* Circulo de la foto de perfil, dentro del banner */
+/* Foto de perfil */
 .avatar-wrapper {
   position: relative;
   width: 86px;
@@ -119,7 +96,7 @@ body.perfil-body {
   object-fit: cover;
 }
 
-/* Boton circular naranja de camara, sobre la foto de perfil */
+/* Boton circular naranja */
 .edit-badge {
   position: absolute;
   bottom: 0;
@@ -179,7 +156,7 @@ body.perfil-body {
   margin-top: 0.2rem;
 }
 
-/* Fila de tags debajo del nombre (universidad, calificacion, etc) */
+/* Fila de tags */
 .tags-row {
   display: flex;
   gap: 0.5rem;
@@ -203,7 +180,7 @@ body.perfil-body {
   color: #F59E0B;
 }
 
-/* Contadores de la derecha del banner (ventas, compras) */
+/* Contadores de la derecha */
 .stats-counters {
   display: flex;
   flex-direction: column;
@@ -228,11 +205,6 @@ body.perfil-body {
   margin-top: 0.2rem;
 }
 
-/* ============================================================
-   3. GRILLA DE CONTENIDO
-   Pertenece a: el area debajo del banner, dividida en tarjeta de
-   info (izquierda, mas ancha) y barra lateral (derecha).
-   ============================================================ */
 .grid-content {
   display: grid;
   grid-template-columns: 1.35fr 1fr;
@@ -246,7 +218,7 @@ body.perfil-body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-/* Tarjeta de "Informacion personal" (izquierda) */
+/* Tarjeta de "Informacion personal" */
 .info-card {
   padding: 1.75rem;
   display: flex;
@@ -310,7 +282,7 @@ body.perfil-body {
   background-color: #ea580c;
 }
 
-/* Mensaje de error al guardar cambios del perfil */
+/* Mensaje de error */
 .perfil-error {
   background-color: #FED7D7;
   color: #C53030;
@@ -321,13 +293,6 @@ body.perfil-body {
   margin: -0.5rem 0 1rem;
 }
 
-/* ============================================================
-   4. CAMPOS EDITABLES
-   Pertenece a: cada fila de dato en la tarjeta de info (email,
-   telefono, universidad, etc) y su version en modo edicion.
-   ============================================================ */
-
-/* Input/select que reemplazan al valor de un campo cuando esta en modo edicion. */
 .campo-editable-input {
   font-size: 0.95rem;
   font-weight: 600;
@@ -346,7 +311,7 @@ body.perfil-body {
   border-color: #1A365D;
 }
 
-/* Lista de filas de datos (email, telefono, universidad, etc) */
+/* Lista de filas de datos */
 .field-list {
   display: flex;
   flex-direction: column;
@@ -404,7 +369,7 @@ body.perfil-body {
   margin-top: 0.15rem;
 }
 
-/* Columna derecha de la grilla (acciones + actividad reciente) */
+/* Columna derecha */
 .right-sidebar {
   display: flex;
   flex-direction: column;
@@ -422,12 +387,7 @@ body.perfil-body {
   margin-top: 1rem;
 }
 
-/* ============================================================
-   5. BOTONES REUTILIZABLES
-   Usados en varias partes de perfil.html y pedidos.html.
-   ============================================================ */
-
-/* Boton naranja principal (ej: "Publicar producto") */
+/* Boton naranja */
 .btn-primary-orange {
   background-color: #F97316;
   color: #ffffff;
@@ -449,7 +409,7 @@ body.perfil-body {
   background-color: #ea580c;
 }
 
-/* Boton con borde azul, fondo blanco (ej: "Editar perfil") */
+/* Boton con borde azul */
 .btn-outline-blue {
   background-color: #ffffff;
   color: #1A365D;
@@ -471,10 +431,6 @@ body.perfil-body {
   background-color: #f8fafc;
 }
 
-/* Boton "fantasma" para usar SOBRE fondos oscuros (ej. banner-card azul).
-   A diferencia de .btn-outline-blue (fondo blanco), este es transparente
-   con borde y letras blancas, para que el texto siempre sea legible
-   sobre el azul del banner. */
 .btn-ghost-on-dark {
   background-color: rgba(255, 255, 255, 0.08);
   color: #ffffff;
@@ -517,11 +473,6 @@ body.perfil-body {
   border-color: #f87171;
 }
 
-/* ============================================================
-   6. TARJETA DE PUBLICACION PROPIA
-   Pertenece a: cada producto que el usuario tiene publicado,
-   listado en su propio perfil.
-   ============================================================ */
 .publicacion-card {
   background: #ffffff;
   border-radius: 16px;
@@ -561,10 +512,6 @@ body.perfil-body {
   color: #1A365D;
 }
 
-/* ============================================================
-   7. ACTIVIDAD RECIENTE
-   Pertenece a: la tarjeta "Actividad reciente" en la barra lateral.
-   ============================================================ */
 .activity-list {
   display: flex;
   flex-direction: column;
@@ -633,7 +580,7 @@ body.perfil-body {
   color: #16a34a;
 }
 
-/* ---------- Mis pedidos ---------- */
+/* Mis pedidos */
 .order-card {
   background: #ffffff;
   border-radius: 16px;

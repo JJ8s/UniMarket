@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import GuardiaRuta from './components/GuardiaRuta';
-import Catalogo from './pages/Catalogo';
+import Inicio from './pages/Inicio';
+import QuienesSomos from './pages/QuienesSomos';
 import Login from './pages/Login';
 import Registro from './pages/Registro';
 import Publicar from './pages/Publicar';
@@ -36,13 +37,15 @@ export default function App() {
 
   return (
     <Routes>
+      <Route path="/" element={<Inicio />} />
+      <Route path="/quienes-somos" element={<QuienesSomos />} />
+
       <Route element={<GuardiaRuta requiereSesion={false} />}>
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
       </Route>
 
       <Route element={<GuardiaRuta requiereSesion />}>
-        <Route path="/" element={<Catalogo />} />
         <Route path="/publicar" element={<Publicar />} />
         <Route path="/panel-vendedor" element={<PanelVendedor />} />
         <Route path="/bolsa" element={<Bolsa />} />
@@ -51,7 +54,7 @@ export default function App() {
         <Route path="/perfil" element={<Perfil />} />
       </Route>
 
-      {/* Panel de administracion: solo usuarios con rol admin */}
+      {/* Panel de administracion */}
       <Route element={<GuardiaRuta requiereSesion rol="admin" />}>
         {rutasAdmin()}
       </Route>

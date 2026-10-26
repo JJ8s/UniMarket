@@ -1,22 +1,9 @@
-// ============================================================
-// Supabase FALSO en memoria, solo para las pruebas (Vitest y Karma).
-// Imita lo justo de la API real (from/select/insert/update/delete/eq/lte/
-// order/single/maybeSingle/rpc y auth) y de las reglas de la base:
-//   - el trigger que crea el perfil al registrarse (rol cliente)
-//   - ids autoincrementales, valores por defecto, folio BOL-######
-//   - claves unicas (categorias) y restriccion al borrar categorias en uso
-//   - no se puede quitar/eliminar al ultimo admin
-// NO imita las politicas RLS: esas se probaron contra un PostgreSQL real
-// (ver supabase/esquema.sql). Asi las pruebas unitarias no necesitan red.
-// ============================================================
-
 const ID_ADMIN = 'u-admin';
 const ID_JUAN = 'u-juan';
 
 const DIA = 24 * 60 * 60 * 1000;
 const hace = (dias) => Date.now() - dias * DIA;
 
-/** Ordenes de ejemplo en formato de la app (4 Pagada, 1 Pendiente, 1 Anulada). */
 export const ORDENES_EJEMPLO = [
   { folio: 'BOL-100001', creadaEn: hace(34), estado: 'Pagada', cliente: { nombre: 'Juan Pérez', correo: 'juan.perez@unimarket.edu' }, metodoPago: 'Crédito', ultimosDigitos: '4242', autorizacion: 'EJ0001',
     lineas: [{ idArticulo: 3, nombre: 'Chaqueta Denim Vintage', categoria: 'ropa', vendedor: 'Ana V.', precio: 20, cantidad: 1 }], total: 20 },
@@ -50,14 +37,9 @@ const ARTICULOS = [
   ['Bebida Energética Monster Original 473ml', 3, 'snacks', 'Kiosco Central', 25],
 ];
 
-/**
- * Crea un cliente falso con datos de ejemplo.
- * Cuentas: admin@unimarket.edu / admin123 (admin) y juan.perez@unimarket.edu / 123456 (cliente).
- * Empieza SIN sesion; usa `iniciarComo(correo)` para simular una cuenta con sesion.
- */
 export function crearSupabaseFalso() {
   let reloj = Date.now();
-  const marca = () => new Date((reloj += 1000)).toISOString(); // siempre creciente
+  const marca = () => new Date((reloj += 1000)).toISOString();
   let sigueId = 1;
   let sigueFolio = 100001;
 
@@ -74,7 +56,7 @@ export function crearSupabaseFalso() {
     { id: ID_ADMIN, email: 'admin@unimarket.edu', password: 'admin123' },
     { id: ID_JUAN, email: 'juan.perez@unimarket.edu', password: '123456' },
   ];
-  let sesion = null; // { user: { id } }
+  let sesion = null;
   const oyentes = [];
 
   const completarArticulo = (f) => ({
@@ -97,7 +79,6 @@ export function crearSupabaseFalso() {
   const cantidadAdmins = () => db.perfiles.filter((p) => p.rol === 'admin').length;
   const error = (message, code) => ({ message, code });
 
-  // ---- constructor de consultas (imita el de supabase-js) ----
   class Consulta {
     constructor(tabla) { this.tabla = tabla; this.op = null; this.filtros = []; this.orden = null; this.devuelve = false; this.modo = 'lista'; this.opts = {}; }
     select(_columnas, opts = {}) { if (this.op) this.devuelve = true; else { this.op = 'select'; this.opts = opts; } return this; }
@@ -183,12 +164,38 @@ export function crearSupabaseFalso() {
   const cliente = {
     from: (tabla) => new Consulta(tabla),
 
-    rpc: async (nombre, { p_id }) => {
+    rpc: async (nombre, args) => {
+      if (nombre === 'crear_orden') {
+        const perfil = db.perfiles.find((p) => p.id === sesion?.user.id);
+        if (!perfil) return { data: null, error: error('Debes iniciar sesión para comprar.', 'P0001') };
+        if (!args.p_lineas.length) return { data: null, error: error('La bolsa está vacía.', 'P0001') };
+        const copia = structuredClone(db.articulos);
+        let total = 0;
+        const lineas = [];
+        for (const l of args.p_lineas) {
+          const art = copia.find((a) => a.id === Number(l.idArticulo));
+          if (!art) return { data: null, error: error('Un producto de tu bolsa ya no existe.', 'P0001') };
+          if (!(l.cantidad >= 1)) return { data: null, error: error('Cantidad no válida.', 'P0001') };
+          if (art.stock < l.cantidad) return { data: null, error: error(`Stock insuficiente de "${art.nombre}": quedan ${art.stock}.`, 'P0001') };
+          art.stock -= l.cantidad;
+          total += Number(art.precio) * l.cantidad;
+          lineas.push({ idArticulo: art.id, nombre: art.nombre, categoria: art.categoria, vendedor: art.vendedor, precio: Number(art.precio), cantidad: l.cantidad });
+        }
+        db.articulos = copia;
+        const orden = {
+          folio: 'BOL-' + sigueFolio++, user_id: perfil.id, cliente_nombre: perfil.nombre, cliente_correo: perfil.correo, estado: 'Pagada',
+          metodo_pago: args.p_metodo_pago, ultimos_digitos: args.p_ultimos_digitos, autorizacion: args.p_autorizacion,
+          lineas, total, creada_en: marca(),
+        };
+        db.ordenes.push(orden);
+        return { data: structuredClone(orden), error: null };
+      }
+      const { p_id } = args;
       if (nombre !== 'eliminar_usuario') return { data: null, error: error('funcion desconocida', '42883') };
       const perfil = db.perfiles.find((p) => p.id === p_id);
       if (perfil?.rol === 'admin' && cantidadAdmins() <= 1) return { data: null, error: error('No puedes eliminar al unico administrador.', 'P0001') };
       db.perfiles = db.perfiles.filter((p) => p.id !== p_id);
-      db.articulos.forEach((a) => { if (a.vendedor_id === p_id) a.vendedor_id = null; }); // on delete set null
+      db.articulos.forEach((a) => { if (a.vendedor_id === p_id) a.vendedor_id = null; });
       const i = cuentas.findIndex((c) => c.id === p_id);
       if (i >= 0) cuentas.splice(i, 1);
       return { data: null, error: null };
@@ -201,9 +208,7 @@ export function crearSupabaseFalso() {
         const id = 'u-' + (cuentas.length + 1) + '-' + Math.round(Math.random() * 1e6);
         cuentas.push({ id, email: correo, password });
         const meta = options?.data || {};
-        // trigger al_registrarse: el rol SIEMPRE parte como cliente
         db.perfiles.push({ id, nombre: meta.nombre || '', nombre_usuario: meta.nombre_usuario || '', correo, universidad: meta.universidad || '', rol: 'cliente', foto: null, creado_en: marca() });
-        // como el cliente real: si no habia sesion, la cuenta nueva queda con sesion
         if (!sesion) { sesion = { user: { id } }; notificar('SIGNED_IN'); }
         return { data: { user: { id, identities: [{}] }, session: sesion }, error: null };
       },
@@ -223,7 +228,7 @@ export function crearSupabaseFalso() {
     },
   };
 
-  /** Atajo de pruebas: deja una cuenta existente con sesion iniciada. */
+  /** Atajo de pruebas */
   const iniciarComo = (correo) => {
     const c = cuentas.find((x) => x.email === correo.toLowerCase());
     sesion = c ? { user: { id: c.id } } : null;

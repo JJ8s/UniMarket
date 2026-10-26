@@ -1,3 +1,4 @@
+-- TABLAS
 
 create table if not exists public.perfiles (
   id             uuid primary key references auth.users (id) on delete cascade,
@@ -6,13 +7,13 @@ create table if not exists public.perfiles (
   correo         text not null unique,
   universidad    text not null default '',
   rol            text not null default 'cliente' check (rol in ('admin', 'cliente')),
-  foto           text,                       -- foto de perfil (data URL comprimida)
+  foto           text,
   creado_en      timestamptz not null default now()
 );
 
 create table if not exists public.categorias (
-  valor       text primary key,              -- identificador estable, ej. 'snacks'
-  etiqueta    text not null unique,          -- nombre visible
+  valor       text primary key,
+  etiqueta    text not null unique,
   descripcion text not null default ''
 );
 
@@ -29,10 +30,10 @@ create table if not exists public.articulos (
   distancia           numeric(6, 2) not null default 0,
   condicion           text not null default 'Nuevo (Sellado)',
   stock               integer not null default 0 check (stock >= 0),
-  stock_guardado      integer,               -- stock previo a marcar "Agotado"
+  stock_guardado      integer,
   sku                 text not null default '',
   entrega             text not null default 'A convenir',
-  universidades_venta text[] not null default '{}',  -- vacio = todas
+  universidades_venta text[] not null default '{}',
   fotos               text[] not null default '{}',
   creado_en           timestamptz not null default now()
 );
@@ -55,6 +56,8 @@ create table if not exists public.ordenes (
   creada_en       timestamptz not null default now()
 );
 create index if not exists ordenes_correo_idx on public.ordenes (lower(cliente_correo));
+
+-- FUNCIONES Y TRIGGERS
 
 create or replace function public.es_admin()
 returns boolean
@@ -132,15 +135,17 @@ begin
   if not public.es_admin() then
     raise exception 'Solo un administrador puede eliminar cuentas.';
   end if;
-  delete from auth.users where id = p_id;  -- el perfil cae en cascada
+  delete from auth.users where id = p_id;
 end;
 $$;
 
+-- SEGURIDAD A NIVEL DE FILA
 alter table public.perfiles   enable row level security;
 alter table public.categorias enable row level security;
 alter table public.articulos  enable row level security;
 alter table public.ordenes    enable row level security;
 
+-- Politicas de perfiles
 drop policy if exists perfiles_ver on public.perfiles;
 create policy perfiles_ver on public.perfiles for select to authenticated
   using (id = auth.uid() or public.es_admin());
@@ -150,6 +155,7 @@ create policy perfiles_editar on public.perfiles for update to authenticated
   using (id = auth.uid() or public.es_admin())
   with check (id = auth.uid() or public.es_admin());
 
+-- Politicas de categorias
 drop policy if exists categorias_ver on public.categorias;
 create policy categorias_ver on public.categorias for select using (true);
 
@@ -179,16 +185,71 @@ create policy ordenes_ver on public.ordenes for select to authenticated
 
 drop policy if exists ordenes_crear on public.ordenes;
 create policy ordenes_crear on public.ordenes for insert to authenticated
-  with check (user_id = auth.uid() or public.es_admin());
+  with check (public.es_admin());
 
 drop policy if exists ordenes_admin_editar on public.ordenes;
 create policy ordenes_admin_editar on public.ordenes for update to authenticated
   using (public.es_admin()) with check (public.es_admin());
 
+-- Funcion de compra
+create or replace function public.crear_orden(
+  p_lineas jsonb, p_metodo_pago text, p_ultimos_digitos text, p_autorizacion text
+)
+returns public.ordenes
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_perfil public.perfiles;
+  v_linea  jsonb;
+  v_art    public.articulos;
+  v_cant   integer;
+  v_total  numeric := 0;
+  v_lineas jsonb := '[]';
+  v_orden  public.ordenes;
+begin
+  select * into v_perfil from public.perfiles where id = auth.uid();
+  if not found then
+    raise exception 'Debes iniciar sesión para comprar.';
+  end if;
+  if jsonb_typeof(p_lineas) <> 'array' or jsonb_array_length(p_lineas) = 0 then
+    raise exception 'La bolsa está vacía.';
+  end if;
+
+  for v_linea in select * from jsonb_array_elements(p_lineas) loop
+    v_cant := (v_linea ->> 'cantidad')::integer;
+    if v_cant is null or v_cant < 1 then
+      raise exception 'Cantidad no válida.';
+    end if;
+    select * into v_art from public.articulos where id = (v_linea ->> 'idArticulo')::bigint for update;
+    if not found then
+      raise exception 'Un producto de tu bolsa ya no existe.';
+    end if;
+    if v_art.stock < v_cant then
+      raise exception 'Stock insuficiente de "%": quedan %.', v_art.nombre, v_art.stock;
+    end if;
+    update public.articulos set stock = stock - v_cant where id = v_art.id;
+    v_total := v_total + v_art.precio * v_cant;
+    v_lineas := v_lineas || jsonb_build_object(
+      'idArticulo', v_art.id, 'nombre', v_art.nombre, 'categoria', v_art.categoria,
+      'vendedor', v_art.vendedor, 'precio', v_art.precio, 'cantidad', v_cant
+    );
+  end loop;
+
+  insert into public.ordenes (user_id, cliente_nombre, cliente_correo, metodo_pago, ultimos_digitos, autorizacion, lineas, total)
+  values (v_perfil.id, v_perfil.nombre, v_perfil.correo, p_metodo_pago, p_ultimos_digitos, p_autorizacion, v_lineas, v_total)
+  returning * into v_orden;
+  return v_orden;
+end;
+$$;
+
+-- Permisos de las funciones
 revoke all on function public.eliminar_usuario(uuid) from public;
 grant execute on function public.eliminar_usuario(uuid) to authenticated;
 grant execute on function public.es_admin() to anon, authenticated;
+revoke all on function public.crear_orden(jsonb, text, text, text) from public;
+grant execute on function public.crear_orden(jsonb, text, text, text) to authenticated;
 
+-- DATOS DE EJEMPLO
 insert into public.categorias (valor, etiqueta, descripcion) values
   ('snacks',     'Snacks & Comida',              'Comida casera, dulces y bebidas.'),
   ('ropa',       'Ropa & Accesorios',            'Ropa de segunda mano y accesorios.'),

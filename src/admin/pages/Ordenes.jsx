@@ -9,7 +9,6 @@ import BuscadorFiltros from '../components/BuscadorFiltros';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import InsigniaEstadoOrden from '../components/InsigniaEstadoOrden';
 
-/** Listado de ordenes/boletas con busqueda, filtro por estado y exportacion a CSV. */
 export default function Ordenes() {
   const { datos: ordenes, cargando } = useConsulta(cargarOrdenes, [], []);
   const [busqueda, setBusqueda] = useState('');
@@ -50,7 +49,7 @@ export default function Ordenes() {
       </EncabezadoPagina>
 
       <BuscadorFiltros busqueda={busqueda} onBusqueda={setBusqueda} placeholder="Buscar por boleta, cliente o correo">
-        <div className="col-12 col-md-4 col-lg-3">
+        <div className="flex-grow-1" style={{ minWidth: "150px" }}>
           <select className="form-select" value={estado} onChange={(e) => setEstado(e.target.value)} aria-label="Filtrar por estado">
             <option value="todos">Todos los estados</option>
             {ESTADOS_ORDEN.map((e) => <option key={e} value={e}>{e}</option>)}

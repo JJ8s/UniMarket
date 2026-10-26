@@ -8,13 +8,13 @@ import useConsulta from '../../hooks/useConsulta';
 import { formatearPrecio } from '../../utils/utilidades';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 
-// "2026-10" -> "oct 2026"
+// Formato de mes
 const nombreMes = (clave) => {
   const [anio, mes] = clave.split('-').map(Number);
   return new Date(anio, mes - 1, 1).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
 };
 
-/** Barra horizontal simple (Bootstrap progress) para comparar montos. */
+/** Barra horizontal simple */
 function Barra({ valor, maximo }) {
   const porcentaje = maximo > 0 ? Math.round((valor / maximo) * 100) : 0;
   return (
@@ -24,7 +24,7 @@ function Barra({ valor, maximo }) {
   );
 }
 
-/** Reportes de ventas, productos y usuarios, con exportacion a CSV. */
+/** Reportes de ventas */
 export default function Reportes() {
   const { etiquetaCategoria } = useCategorias();
   const { datos, cargando } = useConsulta(async () => {
@@ -61,15 +61,15 @@ export default function Reportes() {
     <>
       <EncabezadoPagina titulo="Reportes" subtitulo="Las ventas cuentan solo las órdenes en estado Pagada" />
 
-      <div className="row g-3 mb-4">
-        <div className="col-6 col-lg-3"><div className="card"><div className="card-body"><div className="small text-secondary">Ventas totales</div><div className="fs-4 fw-bold">{formatearPrecio(totalVentas(ordenes))}</div></div></div></div>
-        <div className="col-6 col-lg-3"><div className="card"><div className="card-body"><div className="small text-secondary">Órdenes pagadas</div><div className="fs-4 fw-bold">{resumen.pagadas}<span className="fs-6 text-secondary"> de {resumen.total}</span></div></div></div></div>
-        <div className="col-6 col-lg-3"><div className="card"><div className="card-body"><div className="small text-secondary">Productos críticos</div><div className="fs-4 fw-bold">{criticos.length}<span className="fs-6 text-secondary"> de {articulos.length}</span></div></div></div></div>
-        <div className="col-6 col-lg-3"><div className="card"><div className="card-body"><div className="small text-secondary">Usuarios</div><div className="fs-4 fw-bold">{usuarios.length}<span className="fs-6 text-secondary"> ({usuarios.filter((u) => u.rol === ROL_ADMIN).length} admin)</span></div></div></div></div>
+      <div className="d-flex flex-wrap gap-3 mb-4">
+        <div className="flex-grow-1" style={{ minWidth: "140px" }}><div className="card"><div className="card-body"><div className="small text-secondary">Ventas totales</div><div className="fs-4 fw-bold">{formatearPrecio(totalVentas(ordenes))}</div></div></div></div>
+        <div className="flex-grow-1" style={{ minWidth: "140px" }}><div className="card"><div className="card-body"><div className="small text-secondary">Órdenes pagadas</div><div className="fs-4 fw-bold">{resumen.pagadas}<span className="fs-6 text-secondary"> de {resumen.total}</span></div></div></div></div>
+        <div className="flex-grow-1" style={{ minWidth: "140px" }}><div className="card"><div className="card-body"><div className="small text-secondary">Productos críticos</div><div className="fs-4 fw-bold">{criticos.length}<span className="fs-6 text-secondary"> de {articulos.length}</span></div></div></div></div>
+        <div className="flex-grow-1" style={{ minWidth: "140px" }}><div className="card"><div className="card-body"><div className="small text-secondary">Usuarios</div><div className="fs-4 fw-bold">{usuarios.length}<span className="fs-6 text-secondary"> ({usuarios.filter((u) => u.rol === ROL_ADMIN).length} admin)</span></div></div></div></div>
       </div>
 
-      <div className="row g-3">
-        <div className="col-12 col-xl-6">
+      <div className="d-flex flex-wrap gap-3">
+        <div className="flex-grow-1" style={{ minWidth: "380px" }}>
           <div className="card h-100">
             <div className="card-header d-flex justify-content-between align-items-center">
               <strong>Ventas por categoría</strong>
@@ -90,7 +90,7 @@ export default function Reportes() {
           </div>
         </div>
 
-        <div className="col-12 col-xl-6">
+        <div className="flex-grow-1" style={{ minWidth: "380px" }}>
           <div className="card h-100">
             <div className="card-header"><strong>Ventas por mes</strong></div>
             <div className="card-body">
@@ -108,7 +108,7 @@ export default function Reportes() {
           </div>
         </div>
 
-        <div className="col-12 col-xl-6">
+        <div className="flex-grow-1" style={{ minWidth: "380px" }}>
           <div className="card h-100">
             <div className="card-header d-flex justify-content-between align-items-center">
               <strong>Productos más vendidos</strong>
@@ -128,7 +128,7 @@ export default function Reportes() {
           </div>
         </div>
 
-        <div className="col-12 col-xl-6">
+        <div className="flex-grow-1" style={{ minWidth: "380px" }}>
           <div className="card h-100">
             <div className="card-header"><strong>Stock crítico</strong></div>
             <div className="table-responsive">

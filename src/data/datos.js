@@ -1,28 +1,10 @@
-// ============================================================
-// Capa de datos. Habla con Supabase (PostgreSQL + Auth) y es el unico
-// archivo que lo hace; el unico localStorage que queda es el del carrito
-// (la bolsa es de cada dispositivo, no necesita estar en la base).
-//
-// Reglas del proyecto que se mantienen:
-//  - Las funciones que pueden fallar NO lanzan errores: devuelven
-//    { ok:boolean, mensaje?:string, ...datos }.
-//  - Las funciones de lectura devuelven los datos (o null / []).
-//  - Los objetos que salen de aqui usan camelCase (articulo.universidadesVenta,
-//    orden.cliente.correo...) aunque en la base las columnas sean snake_case.
-//
-// IMPORTANTE: todo lo que toca la base es asincrono (async/await).
-// La seguridad real (quien puede leer o escribir que) esta en las
-// politicas RLS de supabase/esquema.sql, no en este archivo.
-// ============================================================
 import { crearClienteSinSesion, obtenerCliente } from './supabase';
 
-// -------- CONSTANTES --------
 const CLAVE_ALMACENAMIENTO_CARRITO = 'unimarket_carrito';
 
 export const ROL_ADMIN = 'admin';
 export const ROL_CLIENTE = 'cliente';
 
-// Un articulo con stock menor o igual a este numero se considera "critico".
 export const UMBRAL_STOCK_CRITICO = 5;
 
 export const ESTADOS_ORDEN = ['Pagada', 'Pendiente', 'Anulada'];
@@ -46,9 +28,9 @@ const CORREO_VALIDO = /^\S+@\S+\.\S+$/;
 const LARGO_MINIMO_CONTRASENA = 6;
 export const normalizarCorreo = (correo) => (correo || '').trim().toLowerCase();
 
-// -------- UTILIDADES INTERNAS --------
+// UTILIDADES INTERNAS
 
-/** Traduce un error de Supabase/Postgres a un mensaje para mostrar. */
+/** Traduce un error */
 function mensajeDeError(error, porDefecto = 'Ocurrió un error. Intenta de nuevo.') {
   if (!error) return porDefecto;
   const texto = error.message || '';
@@ -61,13 +43,13 @@ function mensajeDeError(error, porDefecto = 'Ocurrió un error. Intenta de nuevo
 
 const falla = (error, porDefecto) => ({ ok: false, mensaje: mensajeDeError(error, porDefecto) });
 
-/** Id del usuario con sesion (o null). */
+/** Id del usuario */
 async function idSesion() {
   const { data } = await obtenerCliente().auth.getSession();
   return data?.session?.user?.id ?? null;
 }
 
-// -------- MAPEO base de datos (snake_case) <-> app (camelCase) --------
+// MAPEO BD <-> APP
 
 const aUsuario = (f) =>
   f && {
@@ -116,7 +98,6 @@ const aOrden = (f) =>
     total: Number(f.total),
   };
 
-// Campos de articulo app -> columna. Solo se envian los que vengan definidos.
 const COLUMNAS_ARTICULO = {
   nombre: 'nombre',
   descripcion: 'descripcion',
@@ -144,10 +125,6 @@ function aFilaArticulo(articulo) {
   return fila;
 }
 
-// ============================================================
-// CARRITO (unico uso de localStorage)
-// El carrito es un array simple con los IDs de los articulos agregados.
-// ============================================================
 export function cargarCarrito() {
   const almacenado = localStorage.getItem(CLAVE_ALMACENAMIENTO_CARRITO);
   if (!almacenado) return [];
@@ -162,11 +139,8 @@ export function guardarCarrito(carrito) {
   localStorage.setItem(CLAVE_ALMACENAMIENTO_CARRITO, JSON.stringify(carrito));
 }
 
-// ============================================================
-// AUTENTICACION (Supabase Auth) Y PERFILES
-// ============================================================
+// AUTENTICACION Y PERFILES
 
-/** Valida los campos comunes de crear/editar usuario. Devuelve un mensaje o null. */
 export function validarDatosUsuario(datos, contrasenaObligatoria) {
   if (!(datos.nombre || '').trim()) return 'El nombre no puede quedar vacío.';
   if (!CORREO_VALIDO.test((datos.correo || '').trim())) return 'Ingresa un correo válido.';
@@ -177,17 +151,12 @@ export function validarDatosUsuario(datos, contrasenaObligatoria) {
   return null;
 }
 
-/** Perfil de un usuario por su id (o null). */
+/** Perfil de un usuario por */
 async function perfilPorId(id) {
   const { data } = await obtenerCliente().from('perfiles').select('*').eq('id', id).maybeSingle();
   return aUsuario(data);
 }
 
-/**
- * Registro publico: crea la cuenta en Supabase Auth (el trigger de la base
- * crea el perfil con rol 'cliente'). Si el proyecto exige confirmar el
- * correo, devuelve requiereConfirmacion:true y todavia no hay sesion.
- */
 export async function registrarUsuario(datos) {
   const error = validarDatosUsuario(datos, true);
   if (error) return { ok: false, mensaje: error };
@@ -207,8 +176,6 @@ export async function registrarUsuario(datos) {
     if (/already registered/i.test(errorAuth.message)) return { ok: false, mensaje: 'Ya existe una cuenta con ese correo.' };
     return falla(errorAuth);
   }
-  // Con confirmacion de correo activada, un correo repetido no da error: devuelve
-  // un usuario sin identidades.
   if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
     return { ok: false, mensaje: 'Ya existe una cuenta con ese correo.' };
   }
@@ -216,7 +183,7 @@ export async function registrarUsuario(datos) {
   return { ok: true, usuario: await perfilPorId(data.user.id) };
 }
 
-/** Login. Devuelve { ok, usuario } o { ok:false, mensaje }. */
+/** Login */
 export async function iniciarSesion(correo, contrasena) {
   const { data, error } = await obtenerCliente().auth.signInWithPassword({
     email: normalizarCorreo(correo),
@@ -236,23 +203,17 @@ export async function cerrarSesion() {
   await obtenerCliente().auth.signOut();
 }
 
-/** Usuario (perfil) con sesion activa, o null. */
+/** Usuario con sesion */
 export async function obtenerSesion() {
   const id = await idSesion();
   return id ? perfilPorId(id) : null;
 }
 
-/**
- * Avisa cada vez que la sesion cambia (login, logout, token renovado).
- * @param {(haySesion:boolean)=>void} alCambiar
- * @returns {() => void} funcion para dejar de escuchar
- */
 export function suscribirSesion(alCambiar) {
   const { data } = obtenerCliente().auth.onAuthStateChange((_evento, sesion) => alCambiar(Boolean(sesion)));
   return () => data.subscription.unsubscribe();
 }
 
-/** Actualiza los datos propios (nombre, usuario, universidad). El correo no se cambia aqui. */
 export async function actualizarUsuario(id, { nombre, nombreUsuario, universidad }) {
   if (!(nombre || '').trim()) return { ok: false, mensaje: 'El nombre no puede quedar vacío.' };
   const cliente = obtenerCliente();
@@ -263,11 +224,11 @@ export async function actualizarUsuario(id, { nombre, nombreUsuario, universidad
     .select()
     .single();
   if (error) return falla(error, 'No se pudo actualizar la cuenta.');
-  await cliente.from('articulos').update({ vendedor: data.nombre }).eq('vendedor_id', id); // el nombre del vendedor sigue al perfil
+  await cliente.from('articulos').update({ vendedor: data.nombre }).eq('vendedor_id', id);
   return { ok: true, usuario: aUsuario(data) };
 }
 
-/** La foto va dentro del perfil (data URL ya comprimida en el navegador). */
+/** La foto va */
 export async function guardarFotoPerfil(id, dataUrl) {
   const { error } = await obtenerCliente().from('perfiles').update({ foto: dataUrl }).eq('id', id);
   return error ? falla(error, 'No se pudo guardar la foto.') : { ok: true };
@@ -278,9 +239,8 @@ export async function borrarFotoPerfil(id) {
   return error ? falla(error, 'No se pudo quitar la foto.') : { ok: true };
 }
 
-// -------- USUARIOS (panel de administracion) --------
+// USUARIOS
 
-/** Todos los perfiles (la politica RLS solo lo permite a administradores). */
 export async function cargarUsuarios() {
   const { data, error } = await obtenerCliente().from('perfiles').select('*').order('creado_en', { ascending: true });
   return error ? [] : data.map(aUsuario);
@@ -291,11 +251,6 @@ export async function obtenerUsuario(correo) {
   return aUsuario(data);
 }
 
-/**
- * Un admin crea la cuenta de otra persona. Se usa un cliente aparte sin
- * sesion para no cerrar la sesion del admin. Si el proyecto exige confirmar
- * el correo, la persona debe confirmarlo antes de entrar.
- */
 export async function crearUsuario(datos) {
   const error = validarDatosUsuario(datos, true);
   if (error) return { ok: false, mensaje: error };
@@ -330,11 +285,6 @@ async function cantidadAdmins() {
   return count ?? 0;
 }
 
-/**
- * Edita una cuenta desde el panel: nombre, usuario, universidad y rol.
- * El correo y la contrasena los maneja Supabase Auth, no se editan aqui.
- * No deja degradar al ultimo administrador (ademas lo exige un trigger en la base).
- */
 export async function actualizarUsuarioAdmin(correo, datos) {
   const anterior = await obtenerUsuario(correo);
   if (!anterior) return { ok: false, mensaje: 'No se encontró la cuenta a actualizar.' };
@@ -365,10 +315,6 @@ export async function actualizarUsuarioAdmin(correo, datos) {
   return { ok: true, usuario: aUsuario(data) };
 }
 
-/**
- * Elimina la cuenta completa (Auth + perfil) con la funcion eliminar_usuario
- * de la base. Sus articulos quedan sin dueno y sus ordenes se conservan.
- */
 export async function eliminarUsuario(correo) {
   const usuario = await obtenerUsuario(correo);
   if (!usuario) return { ok: false, mensaje: 'No se encontró la cuenta.' };
@@ -379,12 +325,6 @@ export async function eliminarUsuario(correo) {
   return error ? falla(error, 'No se pudo eliminar la cuenta.') : { ok: true };
 }
 
-// ============================================================
-// CATEGORIAS
-//   valor       : identificador estable que guardan los articulos (ej. 'snacks')
-//   etiqueta    : nombre visible (ej. 'Snacks & Comida')
-//   descripcion : texto corto para el panel (opcional)
-// ============================================================
 export async function cargarCategorias() {
   const { data, error } = await obtenerCliente().from('categorias').select('*').order('etiqueta', { ascending: true });
   return error ? [] : data;
@@ -395,7 +335,6 @@ export async function obtenerCategoria(valor) {
   return data || null;
 }
 
-/** "Tecnología & Electrónica" -> "tecnologia-electronica" (sin acentos ni simbolos). */
 export function generarValorCategoria(etiqueta) {
   return etiqueta
     .toLowerCase()
@@ -424,7 +363,6 @@ export async function crearCategoria({ etiqueta, descripcion }) {
   return error ? falla(error, 'No se pudo crear la categoría.') : { ok: true, categoria: data };
 }
 
-/** El `valor` no cambia al editar: asi los articulos existentes siguen enlazados. */
 export async function actualizarCategoria(valor, { etiqueta, descripcion }) {
   const existentes = await cargarCategorias();
   const actual = existentes.find((c) => c.valor === valor);
@@ -445,7 +383,6 @@ export async function actualizarCategoria(valor, { etiqueta, descripcion }) {
   return error ? falla(error, 'No se pudo actualizar la categoría.') : { ok: true, categoria: data };
 }
 
-/** No deja borrar una categoria que todavia tiene articulos (la base tambien lo impide). */
 export async function eliminarCategoria(valor) {
   const cliente = obtenerCliente();
   if (!(await obtenerCategoria(valor))) return { ok: false, mensaje: 'No se encontró la categoría.' };
@@ -457,12 +394,6 @@ export async function eliminarCategoria(valor) {
   return error ? falla(error, 'No se pudo eliminar la categoría.') : { ok: true };
 }
 
-// ============================================================
-// ARTICULOS
-//   id, nombre, descripcion, precio, calificacion (0-5), categoria, universidad,
-//   vendedor, vendedorId, distancia, condicion, stock, stockGuardado, sku, entrega,
-//   universidadesVenta (vacio = todas), fotos (data URLs), creadoEn (ms)
-// ============================================================
 export async function cargarArticulos() {
   const { data, error } = await obtenerCliente().from('articulos').select('*').order('creado_en', { ascending: false });
   return error ? [] : data.map(aArticulo);
@@ -473,7 +404,6 @@ export async function obtenerArticulo(id) {
   return aArticulo(data);
 }
 
-/** Articulos publicados por una cuenta (para "Panel vendedor"), del mas nuevo al mas viejo. */
 export async function articulosDeVendedor(idVendedor) {
   if (!idVendedor) return [];
   const { data, error } = await obtenerCliente()
@@ -484,7 +414,7 @@ export async function articulosDeVendedor(idVendedor) {
   return error ? [] : data.map(aArticulo);
 }
 
-/** Valida nombre, precio, stock y categoria. Devuelve un mensaje o null. */
+/** Valida nombre */
 export function validarDatosArticulo(datos) {
   if (!(datos.nombre || '').trim()) return 'El nombre del producto no puede quedar vacío.';
   const precio = Number(datos.precio);
@@ -499,10 +429,6 @@ export function validarDatosArticulo(datos) {
   return null;
 }
 
-/**
- * Crea un articulo (lo usan Publicar y el panel). Queda a nombre de la cuenta
- * con sesion (vendedorId); completa con valores por defecto lo que falte.
- */
 export async function crearArticulo(datos) {
   const error = validarDatosArticulo(datos);
   if (error) return { ok: false, mensaje: error };
@@ -527,7 +453,6 @@ export async function crearArticulo(datos) {
   return errorBd ? falla(errorBd, 'No se pudo guardar el producto.') : { ok: true, articulo: aArticulo(data) };
 }
 
-/** Edita un articulo existente. Solo cambia los campos que vengan en `cambios`. */
 export async function actualizarArticulo(id, cambios) {
   const actual = await obtenerArticulo(id);
   if (!actual) return { ok: false, mensaje: 'No se encontró el producto.' };
@@ -552,24 +477,16 @@ export async function eliminarArticulo(id) {
   return error ? falla(error, 'No se pudo eliminar el producto.') : { ok: true };
 }
 
-/** Articulos con stock bajo (<= umbral), del mas urgente al menos. */
+/** Articulos con stock bajo */
 export async function obtenerArticulosCriticos(umbral = UMBRAL_STOCK_CRITICO) {
   const { data, error } = await obtenerCliente().from('articulos').select('*').lte('stock', umbral).order('stock', { ascending: true });
   return error ? [] : data.map(aArticulo);
 }
 
-// ============================================================
-// ORDENES / BOLETAS
-// Cada compra confirmada en la pasarela (Pago.jsx) guarda una orden.
-//   folio  : 'BOL-100001' (lo genera la base con una secuencia)
-//   lineas : [{ idArticulo, nombre, categoria, vendedor, precio, cantidad }]
-//            (copia al momento de comprar: si el articulo cambia, la boleta no)
-// ============================================================
 export function calcularTotalLineas(lineas) {
   return lineas.reduce((suma, l) => suma + l.precio * l.cantidad, 0);
 }
 
-/** Todas las ordenes (admin) o solo las propias (cliente), segun la politica RLS. */
 export async function cargarOrdenes() {
   const { data, error } = await obtenerCliente().from('ordenes').select('*').order('creada_en', { ascending: false });
   return error ? [] : data.map(aOrden);
@@ -580,7 +497,6 @@ export async function obtenerOrden(folio) {
   return aOrden(data);
 }
 
-/** Ordenes de un cliente (historial de compras), de la mas nueva a la mas vieja. */
 export async function ordenesDeUsuario(correo) {
   const { data, error } = await obtenerCliente()
     .from('ordenes')
@@ -590,20 +506,14 @@ export async function ordenesDeUsuario(correo) {
   return error ? [] : data.map(aOrden);
 }
 
-/** Guarda una orden nueva (la llama Pago.jsx al confirmar el pago). */
-export async function crearOrden({ cliente, lineas, metodoPago, ultimosDigitos, autorizacion, estado = 'Pagada' }) {
-  const fila = {
-    user_id: await idSesion(),
-    cliente_nombre: cliente.nombre,
-    cliente_correo: normalizarCorreo(cliente.correo),
-    estado,
-    metodo_pago: metodoPago,
-    ultimos_digitos: ultimosDigitos,
-    autorizacion,
-    lineas,
-    total: calcularTotalLineas(lineas),
-  };
-  const { data, error } = await obtenerCliente().from('ordenes').insert(fila).select().single();
+/** Compra: el servidor valida el */
+export async function crearOrden({ lineas, metodoPago, ultimosDigitos, autorizacion }) {
+  const { data, error } = await obtenerCliente().rpc('crear_orden', {
+    p_lineas: lineas.map(({ idArticulo, cantidad }) => ({ idArticulo, cantidad })),
+    p_metodo_pago: metodoPago,
+    p_ultimos_digitos: ultimosDigitos,
+    p_autorizacion: autorizacion,
+  });
   return error ? falla(error, 'No se pudo registrar la compra.') : { ok: true, orden: aOrden(data) };
 }
 

@@ -17,10 +17,7 @@ export default function Bolsa() {
   const { datos: articulos, cargando } = useConsulta(cargarArticulos, []);
   const { lineas, hayFantasmas } = useMemo(() => agruparCarrito(carrito, articulos), [carrito, articulos]);
 
-  // Si un articulo del carrito ya no existe (el vendedor lo borro), se
-  // limpia de la bolsa en vez de mostrar una linea rota.
   useEffect(() => {
-    // Solo despues de cargar: con la lista vacia todo parecería un articulo borrado.
     if (!cargando && hayFantasmas) reemplazarCarrito(lineasAIds(lineas));
   }, [cargando, hayFantasmas, lineas, reemplazarCarrito]);
 

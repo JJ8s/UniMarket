@@ -1,6 +1,5 @@
-// Descarga de archivos generados en el navegador (sin servidor).
+// Descarga de archivos
 
-/** Descarga `texto` como archivo CSV. El BOM inicial hace que Excel respete las tildes. */
 export function descargarCsv(nombreArchivo, texto) {
   const blob = new Blob(['﻿' + texto], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);

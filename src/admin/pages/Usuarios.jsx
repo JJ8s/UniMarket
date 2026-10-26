@@ -8,7 +8,7 @@ import BuscadorFiltros from '../components/BuscadorFiltros';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import MensajeError from '../components/MensajeError';
 
-/** Listado de usuarios con busqueda y acciones ver / editar / eliminar. */
+/** Listado de usuarios */
 export default function Usuarios() {
   const { usuario: sesion } = useAuth();
   const { datos: usuarios, cargando, recargar } = useConsulta(cargarUsuarios, [], []);

@@ -4,7 +4,7 @@ import { crearCategoria } from '../../data/datos';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import FormularioCategoria from '../components/FormularioCategoria';
 
-/** "Nueva categoria". */
+/** "Nueva categoria" */
 export default function CategoriaNueva() {
   const navigate = useNavigate();
   const { recargar: recargarCategorias } = useCategorias();
@@ -12,7 +12,7 @@ export default function CategoriaNueva() {
   const guardar = async (datos) => {
     const resultado = await crearCategoria(datos);
     if (resultado.ok) {
-      await recargarCategorias(); // la tienda y los formularios ven la categoria nueva
+      await recargarCategorias();
       navigate('/admin/categorias');
     }
     return resultado;

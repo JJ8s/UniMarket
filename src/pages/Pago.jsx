@@ -15,7 +15,7 @@ const PASOS_STEPPER = [
 
 const ETIQUETA_METODO = { credito: 'Crédito', debito: 'Débito' };
 
-// Formatos en vivo de los campos de la tarjeta
+// Formatos en vivo
 const soloDigitos = (texto, maximo) => texto.replace(/\D/g, '').slice(0, maximo);
 const formatearNumeroTarjeta = (texto) => soloDigitos(texto, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
 const formatearVencimiento = (texto) => {
@@ -28,10 +28,7 @@ export default function Pago() {
   const { usuario } = useAuth();
   const { carrito, vaciarCarrito } = useCarrito();
 
-  // Foto de lo que se esta comprando al entrar a la pantalla. Se guarda en
-  // el estado para que, al vaciar la bolsa tras pagar, la boleta siga
-  // mostrando lo comprado (y no nos redirija a la bolsa vacia).
-  const [lineasCompra, setLineasCompra] = useState(null); // null = todavia cargando
+  const [lineasCompra, setLineasCompra] = useState(null);
   useEffect(() => {
     let activo = true;
     cargarArticulos().then((articulos) => {
@@ -41,26 +38,23 @@ export default function Pago() {
       activo = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // solo al entrar: despues de pagar el carrito se vacia y la boleta no debe cambiar
+  }, []);
   const totalCompra = (lineasCompra || []).reduce((suma, l) => suma + l.articulo.precio * l.cantidad, 0);
 
-  const [paso, setPaso] = useState(1); // 1 metodo, 2 datos, 3 procesando, 4 boleta
+  const [paso, setPaso] = useState(1);
   const [metodo, setMetodo] = useState(null);
   const [tarjeta, setTarjeta] = useState({ numero: '', nombre: '', vencimiento: '', cvv: '' });
   const [error, setError] = useState('');
   const [boleta, setBoleta] = useState(null);
   const temporizador = useRef(null);
 
-  // Si el usuario se va mientras se "procesa", se cancela el delay.
   useEffect(() => () => clearTimeout(temporizador.current), []);
 
-  // Si no hay nada que pagar, no tiene sentido estar aqui.
   if (lineasCompra === null) return <p className="p-8 text-center">Cargando...</p>;
   if (lineasCompra.length === 0) return <Navigate to="/bolsa" replace />;
 
   const cambiarTarjeta = (campo, valor) => setTarjeta((anterior) => ({ ...anterior, [campo]: valor }));
 
-  // Los pasos 3 y 4 (procesando/boleta) se muestran como el paso 3 del stepper
   const pasoStepper = paso >= 3 ? 3 : paso;
 
   const generarBoleta = (numeroLimpio) => ({
@@ -89,15 +83,10 @@ export default function Pago() {
     setError('');
     setPaso(3);
 
-    // Delay simulado de la pasarela de pago (4.5 segundos).
     temporizador.current = setTimeout(async () => {
       const datosBoleta = generarBoleta(numeroLimpio);
 
-      // Se guarda la orden para que aparezca en el panel de administracion
-      // (ordenes, reportes e historial de compras del cliente). El folio lo
-      // asigna la base de datos y reemplaza al que generaba la boleta.
       const resultado = await crearOrden({
-        cliente: { nombre: usuario.nombre, correo: usuario.correo },
         lineas: lineasCompra.map(({ articulo, cantidad }) => ({
           idArticulo: articulo.id,
           nombre: articulo.nombre,
@@ -112,7 +101,6 @@ export default function Pago() {
       });
 
       if (!resultado.ok) {
-        // No se guardo la compra: se vuelve al formulario sin vaciar la bolsa.
         setError(resultado.mensaje || 'No se pudo registrar la compra. Intenta de nuevo.');
         setPaso(2);
         return;
@@ -120,11 +108,10 @@ export default function Pago() {
 
       setBoleta({ ...datosBoleta, folio: resultado.orden.folio });
       setPaso(4);
-      vaciarCarrito(); // la "compra" quedo confirmada
+      vaciarCarrito();
     }, 4500);
   };
 
-  // Vista previa de la tarjeta: digitos escritos + puntos hasta completar 16
   const numeroPreview = soloDigitos(tarjeta.numero, 16).padEnd(16, '•').match(/.{1,4}/g).join(' ');
 
   return (
@@ -148,7 +135,7 @@ export default function Pago() {
           })}
         </div>
 
-        {/* ===== PASO 1: metodo ===== */}
+        {/* PASO 1 */}
         {paso === 1 && (
           <section>
             <p className="pago-titulo-paso">¿Cómo quieres pagar?</p>
@@ -174,7 +161,7 @@ export default function Pago() {
           </section>
         )}
 
-        {/* ===== PASO 2: datos de la tarjeta ===== */}
+        {/* PASO 2 */}
         {paso === 2 && (
           <section>
             <div className="tarjeta-preview">
@@ -231,7 +218,7 @@ export default function Pago() {
           </section>
         )}
 
-        {/* ===== PASO 3: procesando ===== */}
+        {/* PASO 3 */}
         {paso === 3 && (
           <section>
             <div className="pago-procesando">
@@ -241,7 +228,7 @@ export default function Pago() {
           </section>
         )}
 
-        {/* ===== PASO 4: boleta ===== */}
+        {/* PASO 4 */}
         {paso === 4 && boleta && (
           <section>
             <div className="boleta">

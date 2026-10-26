@@ -1,5 +1,3 @@
-// Corre TODAS las pruebas de Jasmine (las 10 de componentes + las de datos,
-// reportes y hooks): npm run test:karma:todo
 const base = require('./karma.conf.cjs');
 
 module.exports = function (config) {

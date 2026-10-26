@@ -1,7 +1,3 @@
-// Pruebas de la capa de datos: carrito, registro/login (Supabase Auth) y perfil.
-// Se usa un Supabase FALSO en memoria (src/tests/supabaseFalso.js): sin red y
-// sin tocar la base real. Este archivo usa solo sintaxis comun a Vitest y
-// Jasmine; existe una copia identica como datos.test.js (la que corre Vitest).
 import {
   ROL_CLIENTE,
   actualizarUsuario,
@@ -19,9 +15,6 @@ import {
 import { usarCliente } from '../data/supabase';
 import { crearSupabaseFalso } from '../tests/supabaseFalso';
 
-// OJO: en Karma todos los .spec.js comparten pagina y modulos, asi que esto NO
-// va en un beforeEach global (pisaria el Supabase falso de las demas pruebas):
-// se registra dentro de cada describe.
 let falso;
 const preparar = () => {
   localStorage.clear();

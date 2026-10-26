@@ -3,14 +3,6 @@ import Logo from './Logo';
 import MenuPerfil from './MenuPerfil';
 import { useCarrito } from '../context/CarritoContext';
 
-/**
- * Header compartido de index / publicar / panel-vendedor: logo, buscador
- * (opcional), menu de perfil y carrito con su contador.
- *
- * @param {boolean}  conBusqueda   muestra el buscador
- * @param {string}   busqueda      texto actual (si el padre lo controla)
- * @param {Function} onBusqueda    recibe el texto cada vez que cambia
- */
 export default function Header({ conBusqueda = false, busqueda, onBusqueda }) {
   const { carrito } = useCarrito();
   const controlado = busqueda !== undefined;
@@ -22,7 +14,6 @@ export default function Header({ conBusqueda = false, busqueda, onBusqueda }) {
       </h1>
 
       {conBusqueda && (
-        // El filtro se aplica en vivo; el submit solo evita recargar la pagina.
         <form className="search-form flex-1 max-w-xl" onSubmit={(evento) => evento.preventDefault()}>
           <input
             type="search"

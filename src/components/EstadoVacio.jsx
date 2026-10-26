@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 
-/** Mensaje cuando no hay nada que mostrar, con un boton naranja de accion. */
 export default function EstadoVacio({ mensaje, enlaceA, enlaceTexto, icono }) {
   return (
     <div className="empty-state">

@@ -4,7 +4,7 @@ import useConsulta from '../../hooks/useConsulta';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import FormularioProducto from '../components/FormularioProducto';
 
-/** "Editar producto". */
+/** "Editar producto" */
 export default function ProductoEditar() {
   const { id } = useParams();
   const navigate = useNavigate();
