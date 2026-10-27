@@ -1,4 +1,3 @@
-/** Tarjeta de color con una cifra grande (Compras, Productos, Usuarios del dashboard). */
 export default function TarjetaMetrica({ titulo, valor, detalle, icono, color }) {
   return (
     <div className={`card admin-metrica text-bg-${color} h-100`}>

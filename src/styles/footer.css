@@ -1,8 +1,3 @@
-/* ============================================================
-   FOOTER (claro, pegado al final de la pagina)
-   ============================================================ */
-
-/* Envoltura de pagina: empuja el footer hasta abajo aunque haya poco contenido */
 .pagina-con-footer {
   min-height: 100vh;
   display: flex;
@@ -17,7 +12,7 @@
   color: #475569;
 }
 
-/* ---- 1. Beneficios: 3 columnas centradas con divisores ---- */
+/* Beneficios: 3 columnas centradas */
 .footer-beneficios {
   max-width: 72rem;
   margin: 0 auto;
@@ -49,7 +44,7 @@
   line-height: 1.55;
 }
 
-/* ---- 2. Enlaces rapidos ---- */
+/* Enlaces rapidos */
 .footer-enlaces {
   max-width: 72rem;
   margin: 0 auto;
@@ -87,7 +82,7 @@
 }
 .footer-chip:focus-visible { outline: 2px solid #1A365D; outline-offset: 2px; }
 
-/* ---- 3. Tu espacio (vacio por defecto: no ocupa lugar) ---- */
+/* Tu espacio */
 .footer-espacio {
   max-width: 72rem;
   margin: 0 auto;
@@ -120,7 +115,7 @@
 }
 .footer-columna a:hover { color: #F97316; }
 
-/* ---- 4. Barra inferior (azul de marca) ---- */
+/* Barra inferior */
 .footer-inferior { background: #1A365D; }
 .footer-inferior-contenido {
   max-width: 72rem;
@@ -140,7 +135,7 @@
 .footer-logo-link {
   display: inline-flex;
   padding: 5px 12px;
-  background: #fff;       /* el logo tiene fondo blanco: va en una "pastilla" */
+  background: #fff;
   border-radius: 8px;
 }
 .footer-logo-link img {
@@ -148,7 +143,7 @@
   width: auto;
 }
 
-/* ---- Celular: beneficios en una sola columna ---- */
+/* Celular: beneficios */
 @media (max-width: 720px) {
   .footer-beneficios { grid-template-columns: 1fr; gap: 2rem; padding-top: 2rem; }
   .footer-beneficio { padding: 0; }

@@ -1,23 +1,25 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cargarArticulos, cargarCategorias, eliminarCategoria } from '../../data/datos';
-import useRecarga from '../../hooks/useRecarga';
+import { useCategorias } from '../../context/CategoriasContext';
+import useConsulta from '../../hooks/useConsulta';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import MensajeError from '../components/MensajeError';
 
-/** Listado de categorias con la cantidad de productos de cada una. */
+/** Listado de categorias */
 export default function Categorias() {
-  const [categorias, recargar] = useRecarga(cargarCategorias);
+  const { recargar: recargarCategoriasTienda } = useCategorias();
+  const { datos: categorias, cargando, recargar } = useConsulta(cargarCategorias, [], []);
+  const { datos: articulos } = useConsulta(cargarArticulos, [], []);
   const [error, setError] = useState('');
-  const articulos = cargarArticulos();
 
   const contarProductos = (valor) => articulos.filter((a) => a.categoria === valor).length;
 
-  const borrar = (categoria) => {
+  const borrar = async (categoria) => {
     if (!window.confirm(`¿Eliminar la categoría "${categoria.etiqueta}"?`)) return;
-    const resultado = eliminarCategoria(categoria.valor);
+    const resultado = await eliminarCategoria(categoria.valor);
     setError(resultado.ok ? '' : resultado.mensaje);
-    recargar();
+    await Promise.all([recargar(), recargarCategoriasTienda()]);
   };
 
   return (
@@ -49,7 +51,10 @@ export default function Categorias() {
                   </td>
                 </tr>
               ))}
-              {categorias.length === 0 && (
+              {cargando && (
+                <tr><td colSpan={5} className="text-center text-secondary py-4">Cargando...</td></tr>
+              )}
+              {!cargando && categorias.length === 0 && (
                 <tr><td colSpan={5} className="text-center text-secondary py-4">No hay categorías.</td></tr>
               )}
             </tbody>

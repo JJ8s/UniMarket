@@ -9,7 +9,7 @@ import { formatearFecha } from '../utils/utilidades';
 export default function Pedidos() {
   useBodyClass('perfil-body');
   const { usuario } = useAuth();
-  const { misArticulos, borrarArticulo } = useMisArticulos(usuario.nombre);
+  const { misArticulos, borrarArticulo, cargando } = useMisArticulos(usuario.id);
 
   return (
     <>
@@ -50,7 +50,9 @@ export default function Pedidos() {
           ))}
         </div>
 
-        {misArticulos.length === 0 && (
+        {cargando && <p className="text-center text-gray-500">Cargando...</p>}
+
+        {!cargando && misArticulos.length === 0 && (
           <EstadoVacio mensaje="Todavía no has publicado ningún artículo." enlaceA="/publicar" enlaceTexto="Publicar mi primer artículo" icono="fa-plus" />
         )}
       </main>

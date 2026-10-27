@@ -20,23 +20,25 @@ src/
 │   ├── useBodyClass.js     # clase CSS por pagina (equivalente a <body class="...">)
 │   └── useMisArticulos.js  # articulos publicados por el vendedor actual
 ├── data/
-│   └── datos.js            # unica capa que toca localStorage
+│   ├── datos.js            # unica capa que habla con Supabase (async); carrito en localStorage
+│   └── supabase.js         # cliente de Supabase (lee VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY)
 ├── utils/
 │   └── utilidades.js       # helpers compartidos (formato, imagenes, carrito, etc.)
 ├── components/              # piezas reutilizables (10 componentes, ver README.md)
 └── pages/                   # una pagina por ruta (9 paginas, ver README.md)
 ```
 
-No hay backend: todo el estado persistente (usuarios, artículos, carrito, sesión,
-fotos) vive en `localStorage` del navegador, tal como en la versión HTML original.
-Esto significa que los datos **no se comparten entre navegadores ni dispositivos**,
-y que cualquier panel de administración real necesitaría un servidor — ver la
-sección 6 para más detalle sobre esta limitación.
+El backend es **Supabase** (PostgreSQL + Auth + políticas RLS). El esquema completo
+está en `supabase/esquema.sql` y la guía de puesta en marcha en `SUPABASE.md`.
+Usuarios, artículos, categorías y órdenes se comparten entre dispositivos; solo el
+carrito sigue en `localStorage` (es de cada dispositivo). Todas las funciones de
+`datos.js` son `async`.
 
 ### Flujo de datos
 
-1. `src/data/datos.js` es la única puerta de entrada a `localStorage`. Ningún
-   componente o página llama a `localStorage` directamente.
+1. `src/data/datos.js` es la única puerta de entrada a Supabase (y al carrito en
+   `localStorage`). Ningún componente o página llama a la base directamente.
+   Convierte entre `snake_case` (base) y `camelCase` (app).
 2. `AuthContext` y `CarritoContext` envuelven la app en `main.jsx` y exponen el
    estado de sesión y carrito a cualquier componente vía `useAuth()` / `useCarrito()`.
 3. Las páginas leen artículos con `cargarArticulos()` (normalmente dentro de un
@@ -84,35 +86,19 @@ redirige. Con sesión activa no se puede volver a `/login` ni `/registro`
 
 ---
 
-## 3. Modelo de datos (localStorage)
+## 3. Modelo de datos (Supabase)
 
-| Llave | Contenido |
+| Tabla | Contenido |
 |---|---|
-| `unimarket_articulos` | array de artículos publicados (ver estructura abajo) |
-| `unimarket_carrito` | array plano de ids de artículo, uno por unidad en la bolsa |
-| `unimarket_sesion` | el usuario actualmente conectado (o ausente si no hay sesión) |
-| `unimarket_usuarios` | array de cuentas registradas |
-| `unimarket_foto_<correo>` | foto de perfil del usuario, en base64 (una llave por usuario) |
-| `unimarket_categorias` | categorías editables (`valor`, `etiqueta`, `descripcion`); antes estaban fijas en el código |
-| `unimarket_ordenes` | órdenes/boletas (`folio` BOL-######, estado Pagada/Pendiente/Anulada, cliente, líneas, total); se crean al pagar |
+| `perfiles` | una fila por cuenta de Supabase Auth: nombre, usuario, correo, universidad, `rol` (`admin`/`cliente`), foto. Se crea sola con un trigger al registrarse (siempre como `cliente`) |
+| `categorias` | `valor` (identificador), `etiqueta`, `descripcion`. No se puede borrar una con artículos |
+| `articulos` | productos publicados; `vendedor_id` apunta al perfil dueño |
+| `ordenes` | boletas: folio `BOL-######` (secuencia), estado Pagada/Pendiente/Anulada, datos del cliente y `lineas` (copia de lo comprado, en JSON) |
 
-Cada usuario tiene además `rol` (`admin` o `cliente`). Si los datos guardados no
-traen administrador, `cargarUsuarios()` agrega el de por defecto.
-
-### Panel de administración
-
-- Código en `src/admin/` (layout, rutas, `components/` de una sola responsabilidad, `pages/`).
-- Reglas de integridad en `datos.js`: no se puede borrar ni quitar el rol al
-  último admin, no se puede borrar una categoría con productos, el correo no
-  puede repetirse.
-- Los reportes son funciones puras en `src/utils/reportes.js` (solo cuentan
-  órdenes Pagadas).
-- Bootstrap 5 se inyecta como `<link>` solo en `/admin` (`?url` de Vite).
-- Seguridad: el control de rol es solo del lado del cliente y las contraseñas
-  están en texto plano en localStorage; es suficiente para la evaluación, no
-  para producción (requeriría backend).
-- Los iconos usan Font Awesome por CDN: sin internet no se ven.
-
+Seguridad (RLS, ver `supabase/esquema.sql`): categorías y artículos se leen sin sesión;
+publica y edita el dueño del artículo o un admin; cada cliente solo ve y crea sus órdenes;
+solo un admin cambia roles, estados de orden, categorías y elimina cuentas; nunca puede
+quedar el sistema sin administradores. El carrito sigue en `localStorage` (`unimarket_carrito`).
 
 ### Artículo
 
@@ -231,13 +217,11 @@ dejarlas explícitas acá para quien planifique los próximos pasos:
   4.5 segundos, y lo indica en pantalla ("Pago simulado").
 - **Sin límite de stock en el carrito.** `Bolsa.jsx` permite subir la
   cantidad de un artículo con el botón "+" sin verificar contra `stock`.
-- **Contraseñas en texto plano.** Igual que en la versión HTML: válido solo
-  para una demo, nunca para producción.
-- **`localStorage` es por navegador.** Como se discutió antes de que llegara
-  esta versión, un panel de administrador real (ver histórico de ventas de
-  todos los usuarios, chats, etc.) necesita que los datos vivan en un
-  servidor compartido, no en el navegador de cada persona. React no cambia
-  esta restricción por sí solo; solo ordena el código del front-end.
+- **Contraseñas.** Las maneja Supabase Auth (cifradas); la app no las guarda.
+- **El carrito es por dispositivo** (`localStorage`); el resto de los datos ya está en Supabase.
+- **Fotos como data URL** dentro de la fila (comprimidas en el navegador). Para muchas fotos
+  convendría Supabase Storage.
+- **La compra no descuenta stock** ni valida el pago: la pasarela sigue siendo una simulación.
 
 ---
 

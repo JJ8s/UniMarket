@@ -1,13 +1,4 @@
-/*
-   ============================================================
-     1. Titulo del panel
-     2. Tarjetas de estadisticas (arriba de todo)
-     3. Layout de dos columnas (pedidos + inventario)
-     4. Tabla de pedidos activos (columna izquierda)
-     5. Inventario rapido (columna derecha)
-   ============================================================ */
-
-/* Titulo superior de la pagina ("Panel de Vendedor") */
+/* Titulo superior */
 .panel-titulo {
   display: flex;
   align-items: center;
@@ -19,11 +10,6 @@
   font-size: 1.4rem;
 }
 
-/* ============================================================
-   2. TARJETAS DE ESTADISTICAS
-   Pertenece a: la fila de 3 recuadros arriba del panel (ventas,
-   productos activos, calificacion promedio).
-   ============================================================ */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -82,11 +68,6 @@
   margin-top: -0.5rem;
 }
 
-/* ============================================================
-   3. LAYOUT DE DOS COLUMNAS
-   Pertenece a: el contenedor que separa "Pedidos activos" (columna
-   ancha, izquierda) de "Inventario rapido" (columna angosta, derecha).
-   ============================================================ */
 .panel-layout {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
@@ -94,7 +75,7 @@
   align-items: start;
 }
 
-/* Titulo de cada columna ("Pedidos activos", "Inventario rapido") */
+/* Titulo de cada columna */
 .panel-seccion-titulo {
   font-size: 1.15rem;
   font-weight: 700;
@@ -102,11 +83,6 @@
   margin-bottom: 0.9rem;
 }
 
-/* ============================================================
-   4. TABLA DE PEDIDOS ACTIVOS
-   Pertenece a: la tabla de la columna izquierda, con producto,
-   entrega y estado de cada pedido.
-   ============================================================ */
 .tabla-wrapper {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -202,11 +178,6 @@
   font-size: 0.9rem;
 }
 
-/* ============================================================
-   5. INVENTARIO RAPIDO
-   Pertenece a: la lista de la columna derecha, con cada producto,
-   el switch de disponibilidad y el boton de borrar.
-   ============================================================ */
 .inventario-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -271,7 +242,6 @@
 .inventario-estado-texto.disponible { color: #16a34a; }
 .inventario-estado-texto.agotado { color: #94a3b8; }
 
-/* Interruptor tipo switch: SOLO cambia disponibilidad (stock), no borra nada. */
 .switch-disponibilidad {
   position: relative;
   display: inline-block;
@@ -316,9 +286,6 @@
   transform: translateX(18px);
 }
 
-/* Boton de borrar: separado a proposito del switch de arriba, para que
-   nunca se puedan confundir. Borrar elimina el producto por completo;
-   el switch solo lo marca sin stock. */
 .btn-borrar-inventario {
   background: none;
   border: none;

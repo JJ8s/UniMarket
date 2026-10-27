@@ -3,14 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import SelectorModal from '../components/SelectorModal';
 import { useAuth } from '../context/AuthContext';
-import {
-  UNIVERSIDADES_DISPONIBLES,
-  cargarArticulos,
-  guardarArticulos,
-  obtenerSiguienteId,
-} from '../data/datos';
+import { useCategorias } from '../context/CategoriasContext';
+import { UNIVERSIDADES_DISPONIBLES, crearArticulo } from '../data/datos';
 import useBodyClass from '../hooks/useBodyClass';
-import { OPCIONES_ESTADO, comprimirImagen, obtenerOpcionesCategoria } from '../utils/utilidades';
+import { OPCIONES_ESTADO, comprimirImagen } from '../utils/utilidades';
 
 const MAX_FOTOS = 4;
 const MAX_ENTREGA = 300;
@@ -29,16 +25,16 @@ export default function Publicar() {
   useBodyClass('bg-surface');
   const { usuario } = useAuth();
   const navigate = useNavigate();
-  const [opcionesCategoria] = useState(() => obtenerOpcionesCategoria()); // las edita el administrador
+  const { opciones: opcionesCategoria } = useCategorias();
+  const [guardando, setGuardando] = useState(false);
 
   const [campos, setCampos] = useState(FORMULARIO_INICIAL);
-  const [fotos, setFotos] = useState([]); // data URLs ya comprimidas
-  const [universidadesVenta, setUniversidadesVenta] = useState([]); // [] = todas
+  const [fotos, setFotos] = useState([]);
+  const [universidadesVenta, setUniversidadesVenta] = useState([]);
 
   const cambiarCampo = (nombre, valor) => setCampos((anterior) => ({ ...anterior, [nombre]: valor }));
   const manejarInput = (evento) => cambiarCampo(evento.target.name, evento.target.value);
 
-  // ---- Fotos: lee, comprime (480px, JPEG 70%) y muestra miniaturas ----
   const manejarFotos = async (evento) => {
     const archivos = Array.from(evento.target.files).slice(0, MAX_FOTOS);
     const comprimidas = await Promise.all(archivos.map((archivo) => comprimirImagen(archivo, 480, 0.7)));
@@ -53,7 +49,6 @@ export default function Publicar() {
     );
   };
 
-  // ---- Validacion: devuelve un mensaje de error o null ----
   const validar = () => {
     if (!campos.categoria) return 'Selecciona una categoria.';
     if (!campos.estado) return 'Selecciona el estado del producto.';
@@ -75,9 +70,7 @@ export default function Publicar() {
     return `Articulo de ${opcion ? opcion.etiqueta : categoria} sin titulo`;
   };
 
-  const generarSkuAutomatico = () => `SKU-${Date.now().toString(36).toUpperCase()}`;
-
-  const manejarEnvio = (evento) => {
+  const manejarEnvio = async (evento) => {
     evento.preventDefault();
 
     const errorValidacion = validar();
@@ -86,34 +79,26 @@ export default function Publicar() {
       return;
     }
 
-    const articulosActuales = cargarArticulos();
-    const nuevoArticulo = {
-      id: obtenerSiguienteId(articulosActuales),
+    setGuardando(true);
+    const resultado = await crearArticulo({
       nombre: campos.titulo.trim() || generarTituloAutomatico(campos.categoria),
       descripcion: campos.descripcion.trim(),
       precio: parseFloat(campos.precio),
-      calificacion: 0,
       categoria: campos.categoria,
       universidad: usuario.universidad || 'Sin universidad',
       vendedor: usuario.nombre || 'Vendedor',
-      distancia: 0,
       condicion: campos.estado,
       stock: parseInt(campos.stock, 10),
-      sku: generarSkuAutomatico(),
       entrega: campos.entrega.trim(),
       universidadesVenta,
       fotos,
-      creadoEn: Date.now(),
-    };
+    });
+    setGuardando(false);
 
-    try {
-      guardarArticulos([...articulosActuales, nuevoArticulo]);
-    } catch {
-      // Puede fallar si localStorage se queda sin espacio
-      alert('No se pudo guardar la publicacion. Intenta con fotos mas livianas o menos fotos.');
+    if (!resultado.ok) {
+      alert(resultado.mensaje || 'No se pudo guardar la publicacion. Intenta con fotos mas livianas o menos fotos.');
       return;
     }
-
     navigate('/');
   };
 
@@ -132,7 +117,7 @@ export default function Publicar() {
         <h2 className="text-3xl font-bold text-primary mt-4 mb-6">Crear Publicación</h2>
 
         <form onSubmit={manejarEnvio}>
-          {/* ===== FOTOS ===== */}
+          {/* FOTOS */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-camara.png" alt="camara" className="form-section-icon" />
@@ -159,7 +144,7 @@ export default function Publicar() {
             />
           </section>
 
-          {/* ===== INFORMACION ===== */}
+          {/* INFORMACION */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-info.png" alt="informacion" className="form-section-icon" />
@@ -196,7 +181,7 @@ export default function Publicar() {
             />
           </section>
 
-          {/* ===== PRECIO E INVENTARIO ===== */}
+          {/* PRECIO E INVENTARIO */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-dolar.png" alt="precio" className="form-section-icon" />
@@ -216,7 +201,7 @@ export default function Publicar() {
             <p className="form-hint">El código SKU para tu inventario lo genera Unimarket automáticamente al publicar.</p>
           </section>
 
-          {/* ===== PUNTO DE ENTREGA ===== */}
+          {/* PUNTO DE ENTREGA */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-entrega.png" alt="entrega" className="form-section-icon" />
@@ -232,7 +217,7 @@ export default function Publicar() {
             <p className="form-hint form-hint-derecha">{campos.entrega.length}/{MAX_ENTREGA}</p>
           </section>
 
-          {/* ===== UNIVERSIDADES ===== */}
+          {/* UNIVERSIDADES */}
           <section className="form-section">
             <h3 className="form-section-title">
               <img src="/img/icono-universidad.png" alt="universidad" className="form-section-icon" />
@@ -258,11 +243,11 @@ export default function Publicar() {
             </div>
           </section>
 
-          <button type="submit" className="submit-btn">
+          <button type="submit" className="submit-btn" disabled={guardando}>
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
             </svg>
-            Publicar Producto
+            {guardando ? 'Publicando...' : 'Publicar Producto'}
           </button>
         </form>
       </main>

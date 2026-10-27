@@ -1,6 +1,4 @@
-// Pruebas de los calculos de reportes. Sintaxis comun a Vitest y Jasmine:
-// existe una copia identica como reportes.test.js (la que corre Vitest).
-import { ORDENES_POR_DEFECTO } from '../data/datos';
+import { ORDENES_EJEMPLO } from '../tests/supabaseFalso';
 import {
   convertirACsv,
   ordenesPagadas,
@@ -9,10 +7,9 @@ import {
   totalVentas,
   ventasPorCategoria,
   ventasPorMes,
-} from './reportes';
+} from '../utils/reportes';
 
-// Las 6 ordenes de ejemplo: 4 Pagada, 1 Pendiente, 1 Anulada. Pagadas = 20 + 16 + 20 + 23 = 79.
-const ordenes = ORDENES_POR_DEFECTO;
+const ordenes = ORDENES_EJEMPLO;
 
 describe('reportes - ventas', () => {
   it('ordenesPagadas deja solo las pagadas', () => {
@@ -35,7 +32,7 @@ describe('reportes - ventas', () => {
     const filas = ventasPorCategoria(ordenes);
     expect(filas.map((f) => f.categoria)).toEqual(['ropa', 'snacks', 'tecnologia']);
     expect(filas[0].monto).toBeCloseTo(40, 5);
-    expect(filas[1].unidades).toBe(9); // 6 brownies + 3 monster
+    expect(filas[1].unidades).toBe(9);
     expect(filas[1].monto).toBeCloseTo(24, 5);
   });
 

@@ -1,13 +1,16 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { actualizarArticulo, obtenerArticulo } from '../../data/datos';
+import useConsulta from '../../hooks/useConsulta';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import FormularioProducto from '../components/FormularioProducto';
 
-/** "Editar producto". */
+/** "Editar producto" */
 export default function ProductoEditar() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const articulo = obtenerArticulo(id);
+  const { datos: articulo, cargando } = useConsulta(() => obtenerArticulo(id), null, [id]);
+
+  if (cargando) return <p className="text-secondary">Cargando...</p>;
 
   if (!articulo) {
     return (
@@ -18,8 +21,8 @@ export default function ProductoEditar() {
     );
   }
 
-  const guardar = (datos) => {
-    const resultado = actualizarArticulo(articulo.id, datos);
+  const guardar = async (datos) => {
+    const resultado = await actualizarArticulo(articulo.id, datos);
     if (resultado.ok) navigate(`/admin/productos/${articulo.id}`);
     return resultado;
   };

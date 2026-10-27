@@ -1,15 +1,20 @@
 import { useNavigate } from 'react-router-dom';
+import { useCategorias } from '../../context/CategoriasContext';
 import { crearCategoria } from '../../data/datos';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import FormularioCategoria from '../components/FormularioCategoria';
 
-/** "Nueva categoria". */
+/** "Nueva categoria" */
 export default function CategoriaNueva() {
   const navigate = useNavigate();
+  const { recargar: recargarCategorias } = useCategorias();
 
-  const guardar = (datos) => {
-    const resultado = crearCategoria(datos);
-    if (resultado.ok) navigate('/admin/categorias');
+  const guardar = async (datos) => {
+    const resultado = await crearCategoria(datos);
+    if (resultado.ok) {
+      await recargarCategorias();
+      navigate('/admin/categorias');
+    }
     return resultado;
   };
 

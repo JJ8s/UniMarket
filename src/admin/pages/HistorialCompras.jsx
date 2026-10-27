@@ -1,15 +1,18 @@
 import { Link, useParams } from 'react-router-dom';
 import { obtenerUsuario, ordenesDeUsuario } from '../../data/datos';
+import useConsulta from '../../hooks/useConsulta';
 import { totalVentas } from '../../utils/reportes';
 import { formatearFechaHora, formatearPrecio } from '../../utils/utilidades';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import InsigniaEstadoOrden from '../components/InsigniaEstadoOrden';
 
-/** "Historial de compras" de un usuario: todas sus ordenes, de la mas nueva a la mas vieja. */
 export default function HistorialCompras() {
   const { correo } = useParams();
-  const usuario = obtenerUsuario(correo);
-  const ordenes = ordenesDeUsuario(correo);
+  const { datos: ficha, cargando } = useConsulta(async () => {
+    const [usuario, ordenes] = await Promise.all([obtenerUsuario(correo), ordenesDeUsuario(correo)]);
+    return { usuario, ordenes };
+  }, { usuario: null, ordenes: [] }, [correo]);
+  const { usuario, ordenes } = ficha;
 
   return (
     <>
@@ -32,7 +35,10 @@ export default function HistorialCompras() {
                   <td><InsigniaEstadoOrden estado={orden.estado} /></td>
                 </tr>
               ))}
-              {ordenes.length === 0 && (
+              {cargando && (
+                <tr><td colSpan={5} className="text-center text-secondary py-4">Cargando...</td></tr>
+              )}
+              {!cargando && ordenes.length === 0 && (
                 <tr><td colSpan={5} className="text-center text-secondary py-4">Este usuario todavía no tiene compras.</td></tr>
               )}
             </tbody>

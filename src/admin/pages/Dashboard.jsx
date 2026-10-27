@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ROL_ADMIN, cargarArticulos, cargarOrdenes, cargarUsuarios, obtenerArticulosCriticos } from '../../data/datos';
+import useConsulta from '../../hooks/useConsulta';
 import { formatearFechaHora, formatearPrecio } from '../../utils/utilidades';
 import { resumenOrdenes, totalVentas } from '../../utils/reportes';
 import EncabezadoPagina from '../components/EncabezadoPagina';
@@ -7,7 +8,7 @@ import InsigniaEstadoOrden from '../components/InsigniaEstadoOrden';
 import TarjetaMetrica from '../components/TarjetaMetrica';
 import TarjetaModulo from '../components/TarjetaModulo';
 
-// Accesos directos a cada seccion (Figura 9 del anexo)
+// Accesos directos a cada seccion
 const MODULOS = [
   { a: '/admin/ordenes', icono: 'fa-receipt', titulo: 'Órdenes', texto: 'Seguimiento de las compras y sus boletas.' },
   { a: '/admin/productos', icono: 'fa-box', titulo: 'Productos', texto: 'Inventario y detalle de los productos.' },
@@ -15,18 +16,23 @@ const MODULOS = [
   { a: '/admin/categorias', icono: 'fa-tags', titulo: 'Categorías', texto: 'Organiza los productos por categoría.' },
   { a: '/admin/usuarios', icono: 'fa-users', titulo: 'Usuarios', texto: 'Cuentas y roles del sistema.' },
   { a: '/admin/reportes', icono: 'fa-chart-column', titulo: 'Reportes', texto: 'Ventas, productos y exportación a CSV.' },
-  { a: '/admin/perfil', icono: 'fa-user', titulo: 'Perfil', texto: 'Tus datos y tu contraseña.' },
+  { a: '/admin/perfil', icono: 'fa-user', titulo: 'Perfil', texto: 'Tus datos de administrador.' },
   { a: '/', icono: 'fa-store', titulo: 'Tienda', texto: 'Ver la tienda como la ven los clientes.' },
 ];
 
-/** Home del panel: metricas, accesos directos y ultimas ordenes. */
+/** Home del panel */
 export default function Dashboard() {
-  const ordenes = cargarOrdenes();
-  const articulos = cargarArticulos();
-  const usuarios = cargarUsuarios();
+  const { datos, cargando } = useConsulta(async () => {
+    const [ordenes, articulos, usuarios, criticos] = await Promise.all([
+      cargarOrdenes(), cargarArticulos(), cargarUsuarios(), obtenerArticulosCriticos(),
+    ]);
+    return { ordenes, articulos, usuarios, criticos: criticos.length };
+  }, { ordenes: [], articulos: [], usuarios: [], criticos: 0 }, []);
+
+  if (cargando) return <p className="text-secondary">Cargando...</p>;
+  const { ordenes, articulos, usuarios, criticos } = datos;
 
   const resumen = resumenOrdenes(ordenes);
-  const criticos = obtenerArticulosCriticos().length;
   const admins = usuarios.filter((u) => u.rol === ROL_ADMIN).length;
   const ultimas = [...ordenes].sort((a, b) => b.creadaEn - a.creadaEn).slice(0, 5);
 
@@ -34,24 +40,24 @@ export default function Dashboard() {
     <>
       <EncabezadoPagina titulo="Dashboard" subtitulo="Resumen de la actividad de UniMarket" />
 
-      <div className="row g-3 mb-4">
-        <div className="col-12 col-md-4">
+      <div className="d-flex flex-wrap gap-3 mb-4">
+        <div className="flex-grow-1" style={{ minWidth: "200px" }}>
           <TarjetaMetrica titulo="Compras" valor={resumen.pagadas} color="primary" icono="fa-cart-shopping"
             detalle={`${formatearPrecio(totalVentas(ordenes))} vendidos · ${resumen.pendientes} pendiente(s)`} />
         </div>
-        <div className="col-12 col-md-4">
+        <div className="flex-grow-1" style={{ minWidth: "200px" }}>
           <TarjetaMetrica titulo="Productos" valor={articulos.length} color="success" icono="fa-box"
             detalle={`${criticos} con stock crítico`} />
         </div>
-        <div className="col-12 col-md-4">
+        <div className="flex-grow-1" style={{ minWidth: "200px" }}>
           <TarjetaMetrica titulo="Usuarios" valor={usuarios.length} color="warning" icono="fa-users"
             detalle={`${admins} administrador(es)`} />
         </div>
       </div>
 
-      <div className="row g-3 mb-4">
+      <div className="d-flex flex-wrap gap-3 mb-4">
         {MODULOS.map((modulo) => (
-          <div className="col-6 col-md-4 col-xl-3" key={modulo.a}>
+          <div className="flex-grow-1" style={{ minWidth: "140px" }} key={modulo.a}>
             <TarjetaModulo {...modulo} />
           </div>
         ))}

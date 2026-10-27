@@ -2,31 +2,22 @@ import { useRef, useState } from 'react';
 import Logo from '../components/Logo';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {
-  UNIVERSIDADES_DISPONIBLES,
-  actualizarUsuario,
-  borrarFotoPerfil,
-  cargarArticulos,
-  guardarArticulos,
-  guardarFotoPerfil,
-  obtenerFotoPerfil,
-} from '../data/datos';
+import { UNIVERSIDADES_DISPONIBLES, actualizarUsuario, borrarFotoPerfil, guardarFotoPerfil } from '../data/datos';
 import useBodyClass from '../hooks/useBodyClass';
 import { comprimirImagen } from '../utils/utilidades';
 
-const TAMANIO_MAX_FOTO = 240; // px del lado mas largo
+const TAMANIO_MAX_FOTO = 240;
 
 export default function Perfil() {
   useBodyClass('perfil-body');
-  const { usuario, login } = useAuth();
+  const { usuario, refrescarUsuario } = useAuth();
 
   const nombreCompleto = (usuario.nombre || 'Usuario').trim();
   const partesNombre = nombreCompleto.split(' ').filter(Boolean);
   const nombre = partesNombre[0] || nombreCompleto;
   const apellido = partesNombre.slice(1).join(' ') || '-';
 
-  // ---- Foto de perfil (opcional; se comprime antes de guardarla) ----
-  const [foto, setFoto] = useState(() => obtenerFotoPerfil(usuario.correo));
+  const foto = usuario.foto;
   const inputFotoRef = useRef(null);
 
   const manejarSeleccionDeFoto = async (evento) => {
@@ -37,19 +28,19 @@ export default function Perfil() {
       return;
     }
     const dataUrl = await comprimirImagen(archivo, TAMANIO_MAX_FOTO, 0.75);
-    guardarFotoPerfil(usuario.correo, dataUrl);
-    setFoto(dataUrl);
-    evento.target.value = ''; // permite volver a elegir el mismo archivo
+    const resultado = await guardarFotoPerfil(usuario.id, dataUrl);
+    if (!resultado.ok) alert(resultado.mensaje);
+    await refrescarUsuario();
+    evento.target.value = '';
   };
 
-  const quitarFoto = () => {
-    borrarFotoPerfil(usuario.correo);
-    setFoto(null);
+  const quitarFoto = async () => {
+    await borrarFotoPerfil(usuario.id);
+    await refrescarUsuario();
   };
 
-  // ---- Edicion: nombre, apellido, universidad y correo (el usuario no) ----
   const [editando, setEditando] = useState(false);
-  const [formulario, setFormulario] = useState({ nombre: '', apellido: '', universidad: '', correo: '' });
+  const [formulario, setFormulario] = useState({ nombre: '', apellido: '', universidad: '' });
   const [error, setError] = useState('');
 
   const entrarModoEdicion = () => {
@@ -57,7 +48,6 @@ export default function Perfil() {
       nombre,
       apellido: apellido === '-' ? '' : apellido,
       universidad: usuario.universidad || '',
-      correo: usuario.correo || '',
     });
     setError('');
     setEditando(true);
@@ -65,24 +55,19 @@ export default function Perfil() {
 
   const cambiarCampo = (campo, valor) => setFormulario((anterior) => ({ ...anterior, [campo]: valor }));
 
-  const guardarEdicion = () => {
+  const guardarEdicion = async () => {
     const nombreNuevo = formulario.nombre.trim();
     const apellidoNuevo = formulario.apellido.trim();
-    const correoNuevo = formulario.correo.trim();
     const nombreCompletoNuevo = [nombreNuevo, apellidoNuevo].filter(Boolean).join(' ');
 
     if (!nombreNuevo) {
       setError('El nombre no puede quedar vacío.');
       return;
     }
-    if (!/^\S+@\S+\.\S+$/.test(correoNuevo)) {
-      setError('Ingresa un correo válido.');
-      return;
-    }
 
-    const resultado = actualizarUsuario(usuario.correo, {
+    const resultado = await actualizarUsuario(usuario.id, {
       nombre: nombreCompletoNuevo,
-      correo: correoNuevo,
+      nombreUsuario: usuario.nombreUsuario,
       universidad: formulario.universidad,
     });
     if (!resultado.ok) {
@@ -90,29 +75,7 @@ export default function Perfil() {
       return;
     }
 
-    // Si cambio el nombre, los articulos ya publicados quedan con el
-    // "vendedor" antiguo: se actualizan para seguir reconociendolos como propios.
-    if (nombreCompletoNuevo !== nombreCompleto) {
-      const articulos = cargarArticulos();
-      if (articulos.some((a) => a.vendedor === nombreCompleto)) {
-        guardarArticulos(
-          articulos.map((a) => (a.vendedor === nombreCompleto ? { ...a, vendedor: nombreCompletoNuevo } : a))
-        );
-      }
-    }
-
-    // Si cambio el correo, la foto estaba guardada bajo el correo anterior.
-    if (correoNuevo.toLowerCase() !== usuario.correo.trim().toLowerCase()) {
-      const fotoActual = obtenerFotoPerfil(usuario.correo);
-      if (fotoActual) {
-        guardarFotoPerfil(correoNuevo, fotoActual);
-        borrarFotoPerfil(usuario.correo);
-      }
-    }
-
-    // Refresca la sesion: toda la app (header, tarjetas...) se actualiza sola,
-    // ya no hace falta recargar la pagina.
-    login(resultado.usuario);
+    await refrescarUsuario();
     setError('');
     setEditando(false);
   };
@@ -232,6 +195,9 @@ export default function Perfil() {
                   {editando ? (
                     <select className="campo-editable-input" value={formulario.universidad}
                             onChange={(e) => cambiarCampo('universidad', e.target.value)}>
+                      {formulario.universidad && !UNIVERSIDADES_DISPONIBLES.includes(formulario.universidad) && (
+                        <option value={formulario.universidad}>{formulario.universidad}</option>
+                      )}
                       {UNIVERSIDADES_DISPONIBLES.map((uni) => (
                         <option key={uni} value={uni}>{uni}</option>
                       ))}
@@ -246,12 +212,8 @@ export default function Perfil() {
                 <div className="field-icon"><i className="fa-regular fa-envelope"></i></div>
                 <div className="field-content">
                   <span className="field-label">Correo de la cuenta</span>
-                  {editando ? (
-                    <input type="email" className="campo-editable-input" placeholder="correo@universidad.edu"
-                           value={formulario.correo} onChange={(e) => cambiarCampo('correo', e.target.value)} />
-                  ) : (
-                    <span className="field-value">{usuario.correo || 'Sin correo registrado'}</span>
-                  )}
+                  <span className="field-value">{usuario.correo || 'Sin correo registrado'}</span>
+                  {editando && <span className="field-subvalue">El correo no se puede editar</span>}
                 </div>
               </div>
             </div>

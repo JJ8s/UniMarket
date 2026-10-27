@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { esAdmin } from '../data/datos';
+import { ROL_ADMIN } from '../data/datos';
 
-/**
- * Boton de perfil + menu desplegable del header. Se abre/cierra con el
- * boton, se cierra al hacer click afuera o con Escape.
- * (Reemplaza la clase MenuPerfil de interfaz.js.)
- */
 export default function MenuPerfil() {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
@@ -34,9 +29,9 @@ export default function MenuPerfil() {
     };
   }, [abierto]);
 
-  const salir = (evento) => {
+  const salir = async (evento) => {
     evento.preventDefault();
-    logout();
+    await logout();
     navigate('/login');
   };
 
@@ -63,7 +58,8 @@ export default function MenuPerfil() {
           <Link to="/perfil" className="profile-menu-item">Ver mi perfil</Link>
           <Link to="/pedidos" className="profile-menu-item">Mis pedidos</Link>
           <Link to="/panel-vendedor" className="profile-menu-item">Panel vendedor</Link>
-          {esAdmin(usuario?.correo) && (
+          <Link to="/quienes-somos" className="profile-menu-item">Quiénes somos</Link>
+          {usuario?.rol === ROL_ADMIN && (
             <Link to="/admin" className="profile-menu-item">Administración</Link>
           )}
           <hr className="profile-divider" />

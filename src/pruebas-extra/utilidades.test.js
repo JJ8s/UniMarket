@@ -5,11 +5,9 @@ import {
   lineasAIds,
   normalizarTexto,
   obtenerColorImagen,
-} from './utilidades';
+} from '../utils/utilidades';
 
-// ------------------------------------------------------------
-// formatearPrecio: numero -> texto con simbolo $ y 2 decimales
-// ------------------------------------------------------------
+// FormatearPrecio: numero
 describe('formatearPrecio', () => {
   it('agrega el simbolo $ y dos decimales', () => {
     expect(formatearPrecio(2.5)).toBe('$2.50');
@@ -24,9 +22,7 @@ describe('formatearPrecio', () => {
   });
 });
 
-// ------------------------------------------------------------
-// normalizarTexto: minusculas y sin acentos, para comparar busquedas
-// ------------------------------------------------------------
+// NormalizarTexto: minusculas
 describe('normalizarTexto', () => {
   it('pasa el texto a minusculas', () => {
     expect(normalizarTexto('CALCULADORA')).toBe('calculadora');
@@ -42,10 +38,6 @@ describe('normalizarTexto', () => {
   });
 });
 
-// ------------------------------------------------------------
-// obtenerColorImagen: siempre debe devolver un color de la paleta,
-// sin importar que tan grande sea el id
-// ------------------------------------------------------------
 describe('obtenerColorImagen', () => {
   it('devuelve el mismo color para el mismo id (es determinista)', () => {
     expect(obtenerColorImagen(7)).toBe(obtenerColorImagen(7));
@@ -58,10 +50,6 @@ describe('obtenerColorImagen', () => {
   });
 });
 
-// ------------------------------------------------------------
-// agruparCarrito / lineasAIds: ida y vuelta entre el array plano de
-// ids del carrito y las lineas agrupadas {articulo, cantidad}
-// ------------------------------------------------------------
 describe('agruparCarrito', () => {
   const articulosDisponibles = [
     { id: 1, nombre: 'Brownie', precio: 2.5 },
@@ -80,7 +68,7 @@ describe('agruparCarrito', () => {
   it('marca hayFantasmas cuando un id del carrito ya no existe como articulo', () => {
     const { lineas, hayFantasmas } = agruparCarrito([1, 999], articulosDisponibles);
 
-    expect(lineas).toHaveLength(1); // el id 999 (fantasma) se descarta
+    expect(lineas).toHaveLength(1);
     expect(hayFantasmas).toBe(true);
   });
 

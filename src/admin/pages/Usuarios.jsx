@@ -2,16 +2,16 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ROL_ADMIN, cargarUsuarios, eliminarUsuario } from '../../data/datos';
 import { useAuth } from '../../context/AuthContext';
-import useRecarga from '../../hooks/useRecarga';
+import useConsulta from '../../hooks/useConsulta';
 import { normalizarTexto } from '../../utils/utilidades';
 import BuscadorFiltros from '../components/BuscadorFiltros';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import MensajeError from '../components/MensajeError';
 
-/** Listado de usuarios con busqueda y acciones ver / editar / eliminar. */
+/** Listado de usuarios */
 export default function Usuarios() {
   const { usuario: sesion } = useAuth();
-  const [usuarios, recargar] = useRecarga(cargarUsuarios);
+  const { datos: usuarios, cargando, recargar } = useConsulta(cargarUsuarios, [], []);
   const [busqueda, setBusqueda] = useState('');
   const [error, setError] = useState('');
 
@@ -20,13 +20,13 @@ export default function Usuarios() {
     return usuarios.filter((u) => !termino || normalizarTexto(`${u.nombre} ${u.nombreUsuario} ${u.correo}`).includes(termino));
   }, [usuarios, busqueda]);
 
-  const esYo = (u) => u.correo.toLowerCase() === (sesion.correo || '').toLowerCase();
+  const esYo = (u) => u.id === sesion.id;
 
-  const borrar = (u) => {
+  const borrar = async (u) => {
     if (!window.confirm(`¿Eliminar la cuenta de ${u.nombre}? Sus publicaciones y órdenes se conservan.`)) return;
-    const resultado = eliminarUsuario(u.correo);
+    const resultado = await eliminarUsuario(u.correo);
     setError(resultado.ok ? '' : resultado.mensaje);
-    recargar();
+    await recargar();
   };
 
   return (
@@ -70,7 +70,10 @@ export default function Usuarios() {
                   </td>
                 </tr>
               ))}
-              {filtrados.length === 0 && (
+              {cargando && (
+                <tr><td colSpan={5} className="text-center text-secondary py-4">Cargando...</td></tr>
+              )}
+              {!cargando && filtrados.length === 0 && (
                 <tr><td colSpan={5} className="text-center text-secondary py-4">No hay usuarios que coincidan.</td></tr>
               )}
             </tbody>

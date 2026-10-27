@@ -1,17 +1,10 @@
-/* ============================================================
-   Estilos propios del panel /admin. Todo va con prefijo "admin-"
-   para no tocar nada de la tienda. El grueso del aspecto (tablas,
-   formularios, botones, grilla) viene de Bootstrap, que solo se
-   carga dentro de AdminLayout.
-   ============================================================ */
-
-/* Fondo gris claro de todo el panel (la clase se pone en <body>) */
+/* Fondo gris claro */
 body.admin-body {
   background: #f1f4f9;
   min-height: 100vh;
 }
 
-/* ---------- Barra superior oscura (fija) ---------- */
+/* Barra superior oscura */
 .admin-topbar {
   position: fixed;
   top: 0;
@@ -32,7 +25,7 @@ body.admin-body {
   text-decoration: none;
 }
 
-/* ---------- Menu lateral ---------- */
+/* Menu lateral */
 .admin-sidebar {
   position: fixed;
   top: 56px;
@@ -44,7 +37,6 @@ body.admin-body {
   padding: 1rem;
   overflow-y: auto;
   z-index: 1020;
-  /* En pantallas chicas el menu esta escondido a la izquierda */
   transform: translateX(-100%);
   transition: transform 0.2s ease;
 }
@@ -53,7 +45,7 @@ body.admin-body {
   transform: translateX(0);
 }
 
-/* Fondo oscuro detras del menu abierto (solo pantallas chicas) */
+/* Fondo oscuro detras */
 .admin-fondo-menu {
   position: fixed;
   inset: 56px 0 0 0;
@@ -80,18 +72,18 @@ body.admin-body {
   background: #eef2f8;
 }
 
-/* NavLink agrega la clase "active" a la seccion actual */
+/* Enlace activo */
 .admin-enlace.active {
   background: #0d6efd;
   color: #fff;
 }
 
-/* ---------- Contenido ---------- */
+/* Contenido */
 .admin-contenido {
   padding: 72px 1rem 2rem;
 }
 
-/* ---------- Tarjetas de metricas (dashboard) ---------- */
+/* Tarjetas de metricas */
 .admin-metrica {
   color: #fff;
   border: 0;
@@ -103,7 +95,7 @@ body.admin-body {
   opacity: 0.85;
 }
 
-/* ---------- Tarjetas de modulos (dashboard) ---------- */
+/* Tarjetas de modulos */
 .admin-modulo {
   display: block;
   height: 100%;
@@ -128,7 +120,7 @@ body.admin-body {
   color: #0d6efd;
 }
 
-/* ---------- Miniatura de producto en las tablas ---------- */
+/* Miniatura de producto */
 .admin-miniatura {
   width: 40px;
   height: 40px;
@@ -138,12 +130,12 @@ body.admin-body {
   flex-shrink: 0;
 }
 
-/* ---------- Barras simples de reportes ---------- */
+/* Barras simples */
 .admin-barra {
   height: 0.6rem;
 }
 
-/* ---------- Escritorio: el menu queda fijo a la vista ---------- */
+/* Escritorio: el menu queda fijo */
 @media (min-width: 992px) {
   .admin-sidebar {
     transform: none;
@@ -155,7 +147,7 @@ body.admin-body {
   }
 }
 
-/* ---------- Impresion (boleta): se oculta el marco del panel ---------- */
+/* Impresion */
 @media print {
   body.admin-body {
     background: #fff;

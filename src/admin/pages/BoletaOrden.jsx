@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ESTADOS_ORDEN, actualizarEstadoOrden, obtenerOrden } from '../../data/datos';
+import useConsulta from '../../hooks/useConsulta';
 import { formatearFechaHora, formatearPrecio } from '../../utils/utilidades';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import InsigniaEstadoOrden from '../components/InsigniaEstadoOrden';
 import MensajeError from '../components/MensajeError';
 
-/** "Mostrar boleta": detalle de una orden, con cambio de estado e impresion. */
 export default function BoletaOrden() {
   const { folio } = useParams();
-  const [orden, setOrden] = useState(() => obtenerOrden(folio));
+  const { datos: ordenCargada, cargando } = useConsulta(() => obtenerOrden(folio), null, [folio]);
+  const [ordenActualizada, setOrden] = useState(null);
+  const orden = ordenActualizada ?? ordenCargada;
   const [error, setError] = useState('');
   const [guardado, setGuardado] = useState(false);
+
+  if (cargando) return <p className="text-secondary">Cargando...</p>;
 
   if (!orden) {
     return (
@@ -23,8 +27,8 @@ export default function BoletaOrden() {
     );
   }
 
-  const cambiarEstado = (evento) => {
-    const resultado = actualizarEstadoOrden(orden.folio, evento.target.value);
+  const cambiarEstado = async (evento) => {
+    const resultado = await actualizarEstadoOrden(orden.folio, evento.target.value);
     if (!resultado.ok) {
       setError(resultado.mensaje);
       return;
@@ -47,18 +51,18 @@ export default function BoletaOrden() {
 
       <div className="card" style={{ maxWidth: 760 }}>
         <div className="card-body">
-          <div className="row g-3 mb-3">
-            <div className="col-12 col-md-6">
+          <div className="d-flex flex-wrap gap-3 mb-3">
+            <div className="flex-grow-1" style={{ minWidth: "240px" }}>
               <div className="small text-secondary">Cliente</div>
               <div className="fw-semibold">{orden.cliente.nombre}</div>
               <div className="small">{orden.cliente.correo}</div>
             </div>
-            <div className="col-12 col-md-6">
+            <div className="flex-grow-1" style={{ minWidth: "240px" }}>
               <div className="small text-secondary">Pago</div>
               <div className="fw-semibold">{orden.metodoPago} terminada en {orden.ultimosDigitos}</div>
               <div className="small">Autorización {orden.autorizacion}</div>
             </div>
-            <div className="col-12 d-flex align-items-center gap-2">
+            <div className="flex-grow-1 d-flex align-items-center gap-2" style={{ minWidth: "100%" }}>
               <span className="small text-secondary">Estado</span>
               <InsigniaEstadoOrden estado={orden.estado} />
               <select className="form-select form-select-sm w-auto d-print-none" value={orden.estado} onChange={cambiarEstado} aria-label="Cambiar estado">

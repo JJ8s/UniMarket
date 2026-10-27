@@ -1,27 +1,54 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { cerrarSesion, iniciarSesion, obtenerSesion } from '../data/datos';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { cerrarSesion, iniciarSesion, obtenerSesion, suscribirSesion } from '../data/datos';
 
 const AuthContext = createContext(null);
 
-/**
- * Sesion activa compartida por toda la app. Reemplaza los chequeos
- * `haySesionActiva()` + `window.location.href = 'login.html'` que cada
- * pagina hacia por su cuenta.
- */
 export function AuthProvider({ children }) {
-  const [usuario, setUsuario] = useState(() => obtenerSesion());
+  const [usuario, setUsuario] = useState(null);
+  const [cargando, setCargando] = useState(true);
 
-  const login = useCallback((datosUsuario) => {
-    iniciarSesion(datosUsuario);
-    setUsuario(obtenerSesion());
+  /** Vuelve a leer el perfil */
+  const refrescarUsuario = useCallback(async () => {
+    try {
+      setUsuario(await obtenerSesion());
+    } catch {
+      setUsuario(null);
+    }
   }, []);
 
-  const logout = useCallback(() => {
-    cerrarSesion();
+  useEffect(() => {
+    let activo = true;
+    refrescarUsuario().finally(() => activo && setCargando(false));
+
+    let dejarDeEscuchar = () => {};
+    try {
+      dejarDeEscuchar = suscribirSesion((haySesion) => {
+        if (!haySesion) setUsuario(null);
+      });
+    } catch {
+    }
+    return () => {
+      activo = false;
+      dejarDeEscuchar();
+    };
+  }, [refrescarUsuario]);
+
+  /** Inicia sesion */
+  const login = useCallback(async (correo, contrasena) => {
+    const resultado = await iniciarSesion(correo, contrasena);
+    if (resultado.ok) setUsuario(resultado.usuario);
+    return resultado;
+  }, []);
+
+  const logout = useCallback(async () => {
+    await cerrarSesion();
     setUsuario(null);
   }, []);
 
-  const valor = useMemo(() => ({ usuario, login, logout }), [usuario, login, logout]);
+  const valor = useMemo(
+    () => ({ usuario, cargando, login, logout, refrescarUsuario }),
+    [usuario, cargando, login, logout, refrescarUsuario]
+  );
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>;
 }
 

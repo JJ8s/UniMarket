@@ -1,28 +1,14 @@
-import { cargarCategorias } from '../data/datos';
-
-// ============================================================
-// Utilidades compartidas. Antes cada pagina .html repetia su propia
-// copia de obtenerColorImagen(), escaparHtml(), obtenerLineasDeBolsa(),
-// etc. Ahora viven aqui una sola vez.
-// (escaparHtml ya no hace falta: React escapa el texto por defecto.)
-// ============================================================
-
-// Las categorias ya no estan escritas aqui: viven en datos.js y se editan
-// desde el panel de administracion. Estas funciones las leen cada vez que
-// se llaman, asi un cambio del admin se ve de inmediato en la tienda.
-
-/** Lista { valor, etiqueta } para selectores y botones de filtro. */
-export function obtenerOpcionesCategoria() {
-  return cargarCategorias().map(({ valor, etiqueta }) => ({ valor, etiqueta }));
+/** Lista para selectores */
+export function obtenerOpcionesCategoria(categorias) {
+  return categorias.map(({ valor, etiqueta }) => ({ valor, etiqueta }));
 }
 
-/** Nombre visible de una categoria (si ya no existe, devuelve el valor tal cual). */
-export function etiquetaCategoria(valor) {
-  const categoria = cargarCategorias().find((c) => c.valor === valor);
+export function etiquetaCategoria(valor, categorias) {
+  const categoria = categorias.find((c) => c.valor === valor);
   return categoria ? categoria.etiqueta : valor;
 }
 
-// Opciones del selector de estado del producto en publicar.
+// Opciones del selector
 export const OPCIONES_ESTADO = [
   'Nuevo (Sellado)',
   'Como Nuevo (Casi sin uso)',
@@ -30,17 +16,13 @@ export const OPCIONES_ESTADO = [
   'Usado - Aceptable',
 ].map((texto) => ({ valor: texto, etiqueta: texto }));
 
-// Paleta placeholder para articulos sin fotos.
+// Colores de relleno
 const COLORES_IMAGEN = ['#FDF3D0', '#E7E9EC', '#DCEBFB', '#D9F5E3', '#FCE1E4'];
 
 export function obtenerColorImagen(idArticulo) {
   return COLORES_IMAGEN[idArticulo % COLORES_IMAGEN.length];
 }
 
-/**
- * Estilo (objeto para el prop `style` de React) del bloque de imagen de un
- * articulo: primera foto si tiene, o el color placeholder.
- */
 export function obtenerEstiloImagen(articulo) {
   if (articulo.fotos && articulo.fotos.length > 0) {
     return {
@@ -52,7 +34,7 @@ export function obtenerEstiloImagen(articulo) {
   return { background: obtenerColorImagen(articulo.id) };
 }
 
-/** Minusculas y sin acentos, para comparar busquedas. */
+/** Minusculas y sin acentos */
 export function normalizarTexto(texto) {
   return (texto || '')
     .toString()
@@ -61,7 +43,7 @@ export function normalizarTexto(texto) {
     .replace(/[\u0300-\u036f]/g, '');
 }
 
-/** Fecha y hora, ej. "16 oct 2026, 14:30". */
+/** Fecha y hora */
 export function formatearFechaHora(marcaDeTiempo) {
   if (!marcaDeTiempo) return '';
   return new Date(marcaDeTiempo).toLocaleString('es-ES', {
@@ -86,11 +68,6 @@ export function formatearFecha(marcaDeTiempo) {
   });
 }
 
-/**
- * El carrito se guarda como un array plano de ids (uno por unidad).
- * Aqui se agrupa en lineas { articulo, cantidad }. Los ids cuyo articulo
- * ya no existe se descartan y se avisa con `hayFantasmas`.
- */
 export function agruparCarrito(idsEnCarrito, articulosDisponibles) {
   const conteoPorId = idsEnCarrito.reduce((mapa, id) => {
     mapa[id] = (mapa[id] || 0) + 1;
@@ -113,16 +90,10 @@ export function agruparCarrito(idsEnCarrito, articulosDisponibles) {
   return { lineas, hayFantasmas };
 }
 
-/** Convierte lineas { articulo, cantidad } de vuelta al array plano de ids. */
 export function lineasAIds(lineas) {
   return lineas.flatMap((linea) => Array(linea.cantidad).fill(linea.articulo.id));
 }
 
-/**
- * Lee una imagen, la reduce (lado mas largo = tamanoMaximo) y la
- * comprime a JPEG para que ocupe poco en localStorage.
- * @returns {Promise<string>} data URL
- */
 export function comprimirImagen(archivo, tamanoMaximo, calidad) {
   return new Promise((resolve, reject) => {
     const lector = new FileReader();

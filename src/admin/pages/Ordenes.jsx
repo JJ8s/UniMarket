@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ESTADOS_ORDEN, cargarOrdenes } from '../../data/datos';
+import useConsulta from '../../hooks/useConsulta';
 import { descargarCsv } from '../../utils/archivos';
 import { convertirACsv } from '../../utils/reportes';
 import { formatearFechaHora, formatearPrecio, normalizarTexto } from '../../utils/utilidades';
@@ -8,9 +9,8 @@ import BuscadorFiltros from '../components/BuscadorFiltros';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import InsigniaEstadoOrden from '../components/InsigniaEstadoOrden';
 
-/** Listado de ordenes/boletas con busqueda, filtro por estado y exportacion a CSV. */
 export default function Ordenes() {
-  const [ordenes] = useState(() => cargarOrdenes());
+  const { datos: ordenes, cargando } = useConsulta(cargarOrdenes, [], []);
   const [busqueda, setBusqueda] = useState('');
   const [estado, setEstado] = useState('todos');
 
@@ -49,7 +49,7 @@ export default function Ordenes() {
       </EncabezadoPagina>
 
       <BuscadorFiltros busqueda={busqueda} onBusqueda={setBusqueda} placeholder="Buscar por boleta, cliente o correo">
-        <div className="col-12 col-md-4 col-lg-3">
+        <div className="flex-grow-1" style={{ minWidth: "150px" }}>
           <select className="form-select" value={estado} onChange={(e) => setEstado(e.target.value)} aria-label="Filtrar por estado">
             <option value="todos">Todos los estados</option>
             {ESTADOS_ORDEN.map((e) => <option key={e} value={e}>{e}</option>)}
@@ -77,7 +77,10 @@ export default function Ordenes() {
                   </td>
                 </tr>
               ))}
-              {filtradas.length === 0 && (
+              {cargando && (
+                <tr><td colSpan={7} className="text-center text-secondary py-4">Cargando...</td></tr>
+              )}
+              {!cargando && filtradas.length === 0 && (
                 <tr><td colSpan={7} className="text-center text-secondary py-4">No hay órdenes que coincidan.</td></tr>
               )}
             </tbody>

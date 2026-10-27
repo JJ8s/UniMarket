@@ -1,52 +1,44 @@
-import { useCallback, useState } from 'react';
-import { cargarArticulos, guardarArticulos } from '../data/datos';
+import { useCallback, useEffect, useState } from 'react';
+import { actualizarArticulo, articulosDeVendedor, eliminarArticulo } from '../data/datos';
 
-/**
- * Articulos publicados por el usuario con sesion activa (los que tienen
- * `vendedor === nombre`). Lo usan pedidos.html y panel-vendedor.html, que
- * antes duplicaban esta logica.
- */
-export default function useMisArticulos(nombreVendedor) {
-  const [articulos, setArticulos] = useState(() => cargarArticulos());
+export default function useMisArticulos(idVendedor) {
+  const [misArticulos, setMisArticulos] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
-  const misArticulos = articulos
-    .filter((articulo) => articulo.vendedor === nombreVendedor)
-    .sort((a, b) => b.creadoEn - a.creadoEn);
+  const recargar = useCallback(async () => {
+    setMisArticulos(await articulosDeVendedor(idVendedor));
+    setCargando(false);
+  }, [idVendedor]);
 
-  const persistir = useCallback((nuevos) => {
-    guardarArticulos(nuevos);
-    setArticulos(nuevos);
-  }, []);
+  useEffect(() => {
+    recargar();
+  }, [recargar]);
 
-  /** Borra un articulo por completo (pide confirmacion). */
+  /** Borra un articulo por completo */
   const borrarArticulo = useCallback(
-    (idArticulo, mensaje) => {
+    async (idArticulo, mensaje) => {
       if (!window.confirm(mensaje)) return;
-      persistir(articulos.filter((a) => a.id !== idArticulo));
+      const resultado = await eliminarArticulo(idArticulo);
+      if (!resultado.ok) alert(resultado.mensaje);
+      await recargar();
     },
-    [articulos, persistir]
+    [recargar]
   );
 
-  /**
-   * Disponible <-> Agotado sin borrar:
-   *  - a Agotado: guarda el stock en stockGuardado y deja stock en 0.
-   *  - a Disponible: restaura stockGuardado (o 1 si no habia).
-   */
   const alternarDisponibilidad = useCallback(
-    (idArticulo) => {
-      persistir(
-        articulos.map((articulo) => {
-          if (articulo.id !== idArticulo) return articulo;
-          if ((articulo.stock ?? 0) > 0) {
-            return { ...articulo, stockGuardado: articulo.stock, stock: 0 };
-          }
-          const restaurado = articulo.stockGuardado > 0 ? articulo.stockGuardado : 1;
-          return { ...articulo, stock: restaurado };
-        })
-      );
+    async (idArticulo) => {
+      const articulo = misArticulos.find((a) => a.id === idArticulo);
+      if (!articulo) return;
+      const cambios =
+        (articulo.stock ?? 0) > 0
+          ? { stockGuardado: articulo.stock, stock: 0 }
+          : { stock: articulo.stockGuardado > 0 ? articulo.stockGuardado : 1 };
+      const resultado = await actualizarArticulo(idArticulo, cambios);
+      if (!resultado.ok) alert(resultado.mensaje);
+      await recargar();
     },
-    [articulos, persistir]
+    [misArticulos, recargar]
   );
 
-  return { misArticulos, borrarArticulo, alternarDisponibilidad };
+  return { misArticulos, borrarArticulo, alternarDisponibilidad, cargando };
 }

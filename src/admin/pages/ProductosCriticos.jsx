@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UMBRAL_STOCK_CRITICO, obtenerArticulosCriticos } from '../../data/datos';
-import { etiquetaCategoria } from '../../utils/utilidades';
+import { useCategorias } from '../../context/CategoriasContext';
+import useConsulta from '../../hooks/useConsulta';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import InsigniaStock from '../components/InsigniaStock';
 import Miniatura from '../components/Miniatura';
 
-/** "Listado de productos criticos": los que tienen poco stock, del mas urgente al menos. */
 export default function ProductosCriticos() {
   const [umbral, setUmbral] = useState(UMBRAL_STOCK_CRITICO);
-  const criticos = obtenerArticulosCriticos(umbral);
+  const { etiquetaCategoria } = useCategorias();
+  const { datos: criticos, cargando } = useConsulta(() => obtenerArticulosCriticos(umbral), [], [umbral]);
 
   return (
     <>
@@ -17,13 +18,13 @@ export default function ProductosCriticos() {
         <Link to="/admin/productos" className="btn btn-outline-secondary">Volver a productos</Link>
       </EncabezadoPagina>
 
-      <div className="row g-2 align-items-center mb-3">
-        <div className="col-auto"><label htmlFor="umbral" className="col-form-label">Mostrar productos con stock de</label></div>
-        <div className="col-auto">
+      <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
+        <div><label htmlFor="umbral" className="col-form-label">Mostrar productos con stock de</label></div>
+        <div>
           <input id="umbral" type="number" min="0" className="form-control" style={{ width: 90 }}
                  value={umbral} onChange={(e) => setUmbral(Math.max(0, Number(e.target.value) || 0))} />
         </div>
-        <div className="col-auto"><span className="col-form-label">unidades o menos</span></div>
+        <div><span className="col-form-label">unidades o menos</span></div>
       </div>
 
       <div className="card">
@@ -47,7 +48,10 @@ export default function ProductosCriticos() {
                   </td>
                 </tr>
               ))}
-              {criticos.length === 0 && (
+              {cargando && (
+                <tr><td colSpan={5} className="text-center text-secondary py-4">Cargando...</td></tr>
+              )}
+              {!cargando && criticos.length === 0 && (
                 <tr><td colSpan={5} className="text-center text-secondary py-4">No hay productos con ese nivel de stock.</td></tr>
               )}
             </tbody>

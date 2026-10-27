@@ -1,13 +1,18 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useCategorias } from '../../context/CategoriasContext';
 import { actualizarCategoria, obtenerCategoria } from '../../data/datos';
+import useConsulta from '../../hooks/useConsulta';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import FormularioCategoria from '../components/FormularioCategoria';
 
-/** "Editar categoria". */
+/** "Editar categoria" */
 export default function CategoriaEditar() {
   const { valor } = useParams();
   const navigate = useNavigate();
-  const categoria = obtenerCategoria(valor);
+  const { recargar: recargarCategorias } = useCategorias();
+  const { datos: categoria, cargando } = useConsulta(() => obtenerCategoria(valor), null, [valor]);
+
+  if (cargando) return <p className="text-secondary">Cargando...</p>;
 
   if (!categoria) {
     return (
@@ -18,9 +23,12 @@ export default function CategoriaEditar() {
     );
   }
 
-  const guardar = (datos) => {
-    const resultado = actualizarCategoria(categoria.valor, datos);
-    if (resultado.ok) navigate('/admin/categorias');
+  const guardar = async (datos) => {
+    const resultado = await actualizarCategoria(categoria.valor, datos);
+    if (resultado.ok) {
+      await recargarCategorias();
+      navigate('/admin/categorias');
+    }
     return resultado;
   };
 

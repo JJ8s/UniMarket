@@ -1,20 +1,4 @@
-/* ============================================================
-     1. Modal generico (el cascaron: fondo oscuro + caja blanca +
-        boton de cerrar). Cada pagina le agrega su propio contenido
-        adentro con clases especificas (ver catalogo.css y publicar.css).
-     2. Menu desplegable de perfil (usado en el header de ambas paginas).
-   ============================================================ */
-
-
-/* ============================================================
-   1. MODAL GENERICO (cascaron reutilizable)
-   Lo usan: el modal de detalle de producto en index.html, y el
-   modal de Categoria/Estado en publicar.html. Cada uno pone su
-   propio contenido adentro; este archivo solo define el fondo,
-   la caja blanca y el boton de cerrar.
-   ============================================================ */
-
-/* Fondo oscuro semitransparente que cubre toda la pantalla */
+/* Fondo oscuro semitransparente */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -26,12 +10,12 @@
   z-index: 100;
 }
 
-/* Estado oculto del modal (el JS de cada pagina agrega/quita esta clase) */
+/* Estado oculto */
 .modal-overlay.hidden {
   display: none;
 }
 
-/* Caja blanca del modal, centrada sobre el fondo oscuro */
+/* Caja blanca */
 .modal-content {
   background: white;
   border-radius: 20px;
@@ -43,9 +27,6 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 }
 
-/* Boton circular "X" para cerrar el modal (lo usa el modal de detalle
-   de producto; el modal de Categoria/Estado se cierra tocando afuera
-   o con Escape, sin este boton) */
 .modal-close {
   position: absolute;
   top: 0.7rem;
@@ -66,15 +47,7 @@
   background: #f0f4fe;
 }
 
-
-/* ============================================================
-   2. MENU DESPLEGABLE DE PERFIL
-   Pertenece a: el header de index.html Y de publicar.html (mismo
-   header en ambas paginas). Lo controla la clase MenuPerfil,
-   definida en interfaz.js.
-   ============================================================ */
-
-/* Panel blanco que cae debajo del icono de perfil */
+/* Panel blanco */
 .profile-dropdown {
   position: absolute;
   top: calc(100% + 0.6rem);
@@ -88,12 +61,12 @@
   z-index: 60;
 }
 
-/* Estado oculto del menu (MenuPerfil.cerrar() agrega esta clase) */
+/* Estado oculto */
 .profile-dropdown.hidden {
   display: none;
 }
 
-/* Bloque superior del menu: nombre, usuario y correo */
+/* Bloque superior */
 .profile-info {
   padding: 0 1.1rem 0.7rem;
 }
@@ -118,14 +91,14 @@
   word-break: break-all;
 }
 
-/* Lineas divisorias dentro del menu de perfil */
+/* Lineas divisorias */
 .profile-divider {
   border: none;
   border-top: 1px solid #edf2f9;
   margin: 0.4rem 0;
 }
 
-/* Cada opcion del menu ("Ver mi perfil", "Mis pedidos", etc) */
+/* Opcion del menu */
 .profile-menu-item {
   display: block;
   padding: 0.55rem 1.1rem;
@@ -139,7 +112,6 @@
   background: #f0f4fe;
 }
 
-/* Opcion "Salir de la sesion", en rojo para distinguirla del resto */
 .profile-menu-item-danger {
   color: #dc2626;
 }

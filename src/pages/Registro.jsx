@@ -7,7 +7,7 @@ import useBodyClass from '../hooks/useBodyClass';
 
 export default function Registro() {
   useBodyClass('auth-body');
-  const { login } = useAuth();
+  const { refrescarUsuario } = useAuth();
   const navigate = useNavigate();
 
   const [campos, setCampos] = useState({
@@ -19,14 +19,15 @@ export default function Registro() {
     contrasena2: '',
   });
   const [error, setError] = useState('');
+  const [aviso, setAviso] = useState('');
+  const [enviando, setEnviando] = useState(false);
 
-  // Un solo handler para todos los inputs (usa el atributo name).
   const cambiarCampo = (evento) => {
     const { name, value } = evento.target;
     setCampos((anterior) => ({ ...anterior, [name]: value }));
   };
 
-  const manejarEnvio = (evento) => {
+  const manejarEnvio = async (evento) => {
     evento.preventDefault();
 
     if (campos.contrasena !== campos.contrasena2) {
@@ -34,7 +35,8 @@ export default function Registro() {
       return;
     }
 
-    const resultado = registrarUsuario({
+    setEnviando(true);
+    const resultado = await registrarUsuario({
       nombre: campos.nombre.trim(),
       nombreUsuario: campos.nombreUsuario.trim(),
       correo: campos.correo.trim(),
@@ -42,14 +44,19 @@ export default function Registro() {
       contrasena: campos.contrasena,
     });
 
+    setEnviando(false);
+
     if (!resultado.ok) {
       setError(resultado.mensaje);
       return;
     }
 
     setError('');
-    // Registro exitoso: inicia sesion automaticamente y entra al catalogo.
-    login(resultado.usuario);
+    if (resultado.requiereConfirmacion) {
+      setAviso('Cuenta creada. Revisa tu correo y confirma tu cuenta para poder iniciar sesión.');
+      return;
+    }
+    await refrescarUsuario();
     navigate('/');
   };
 
@@ -105,9 +112,11 @@ export default function Registro() {
                    value={campos.contrasena2} onChange={cambiarCampo} />
           </div>
           {error && <p className="form-error">{error}</p>}
-          <button type="submit" className="btn-submit">Crear cuenta</button>
+          {aviso && <p className="auth-hint">{aviso}</p>}
+          <button type="submit" className="btn-submit" disabled={enviando}>{enviando ? 'Creando...' : 'Crear cuenta'}</button>
           <div className="form-footer">
             <p>¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link></p>
+            <p><Link to="/quienes-somos">Conoce UniMarket</Link></p>
           </div>
         </form>
       </div>

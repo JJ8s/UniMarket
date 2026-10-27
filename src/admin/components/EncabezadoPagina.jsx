@@ -1,4 +1,3 @@
-/** Titulo de cada pagina del panel, con subtitulo y botones de accion a la derecha. */
 export default function EncabezadoPagina({ titulo, subtitulo, children }) {
   return (
     <div className="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">

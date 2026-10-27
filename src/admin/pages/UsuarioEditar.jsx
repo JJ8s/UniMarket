@@ -1,15 +1,18 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { actualizarUsuarioAdmin, obtenerUsuario } from '../../data/datos';
+import useConsulta from '../../hooks/useConsulta';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import FormularioUsuario from '../components/FormularioUsuario';
 
-/** "Editar usuario". */
+/** "Editar usuario" */
 export default function UsuarioEditar() {
-  const { correo } = useParams(); // React Router ya lo entrega decodificado
+  const { correo } = useParams();
   const navigate = useNavigate();
-  const { usuario: sesion, login } = useAuth();
-  const usuario = obtenerUsuario(correo);
+  const { usuario: sesion, refrescarUsuario } = useAuth();
+  const { datos: usuario, cargando } = useConsulta(() => obtenerUsuario(correo), null, [correo]);
+
+  if (cargando) return <p className="text-secondary">Cargando...</p>;
 
   if (!usuario) {
     return (
@@ -20,12 +23,11 @@ export default function UsuarioEditar() {
     );
   }
 
-  const guardar = (datos) => {
-    const resultado = actualizarUsuarioAdmin(usuario.correo, datos);
+  const guardar = async (datos) => {
+    const resultado = await actualizarUsuarioAdmin(usuario.correo, datos);
     if (!resultado.ok) return resultado;
 
-    // Si el admin se edito a si mismo, se refresca su sesion (nombre, correo, rol).
-    if (usuario.correo.toLowerCase() === (sesion.correo || '').toLowerCase()) login(resultado.usuario);
+    if (usuario.id === sesion.id) await refrescarUsuario();
     navigate(`/admin/usuarios/${encodeURIComponent(resultado.usuario.correo)}`);
     return resultado;
   };

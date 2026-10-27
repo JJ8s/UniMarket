@@ -1,20 +1,20 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { cargarArticulos, cargarCategorias, eliminarArticulo } from '../../data/datos';
-import useRecarga from '../../hooks/useRecarga';
+import { useCategorias } from '../../context/CategoriasContext';
+import { cargarArticulos, eliminarArticulo } from '../../data/datos';
+import useConsulta from '../../hooks/useConsulta';
 import { descargarCsv } from '../../utils/archivos';
 import { convertirACsv } from '../../utils/reportes';
-import { etiquetaCategoria, formatearPrecio, normalizarTexto } from '../../utils/utilidades';
+import { formatearPrecio, normalizarTexto } from '../../utils/utilidades';
 import BuscadorFiltros from '../components/BuscadorFiltros';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import InsigniaStock from '../components/InsigniaStock';
 import MensajeError from '../components/MensajeError';
 import Miniatura from '../components/Miniatura';
 
-/** Listado de productos con busqueda, filtro por categoria y acciones ver / editar / eliminar. */
 export default function Productos() {
-  const [articulos, recargar] = useRecarga(cargarArticulos);
-  const [categorias] = useState(() => cargarCategorias());
+  const { datos: articulos, cargando, recargar } = useConsulta(cargarArticulos, [], []);
+  const { categorias, etiquetaCategoria } = useCategorias();
   const [busqueda, setBusqueda] = useState('');
   const [categoria, setCategoria] = useState('todas');
   const [error, setError] = useState('');
@@ -27,11 +27,11 @@ export default function Productos() {
       .sort((a, b) => b.creadoEn - a.creadoEn);
   }, [articulos, busqueda, categoria]);
 
-  const borrar = (articulo) => {
+  const borrar = async (articulo) => {
     if (!window.confirm(`¿Eliminar "${articulo.nombre}"? Esta acción no se puede deshacer.`)) return;
-    const resultado = eliminarArticulo(articulo.id);
+    const resultado = await eliminarArticulo(articulo.id);
     setError(resultado.ok ? '' : resultado.mensaje);
-    recargar();
+    await recargar();
   };
 
   const exportar = () => {
@@ -64,7 +64,7 @@ export default function Productos() {
       <MensajeError mensaje={error} />
 
       <BuscadorFiltros busqueda={busqueda} onBusqueda={setBusqueda} placeholder="Buscar por nombre, vendedor o SKU">
-        <div className="col-12 col-md-4 col-lg-3">
+        <div className="flex-grow-1" style={{ minWidth: "150px" }}>
           <select className="form-select" value={categoria} onChange={(e) => setCategoria(e.target.value)} aria-label="Filtrar por categoría">
             <option value="todas">Todas las categorías</option>
             {categorias.map((c) => <option key={c.valor} value={c.valor}>{c.etiqueta}</option>)}
@@ -107,7 +107,10 @@ export default function Productos() {
                   </td>
                 </tr>
               ))}
-              {filtrados.length === 0 && (
+              {cargando && (
+                <tr><td colSpan={6} className="text-center text-secondary py-4">Cargando...</td></tr>
+              )}
+              {!cargando && filtrados.length === 0 && (
                 <tr><td colSpan={6} className="text-center text-secondary py-4">No hay productos que coincidan.</td></tr>
               )}
             </tbody>

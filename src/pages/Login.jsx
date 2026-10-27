@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Logo from '../components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
-import { esAdmin, validarCredenciales } from '../data/datos';
+import { ROL_ADMIN } from '../data/datos';
 import { useAuth } from '../context/AuthContext';
 import useBodyClass from '../hooks/useBodyClass';
 
@@ -13,18 +13,20 @@ export default function Login() {
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
+  const [enviando, setEnviando] = useState(false);
 
-  const manejarEnvio = (evento) => {
+  const manejarEnvio = async (evento) => {
     evento.preventDefault();
-    const usuario = validarCredenciales(correo, contrasena);
+    setEnviando(true);
+    const resultado = await login(correo, contrasena);
+    setEnviando(false);
 
-    if (!usuario) {
-      setError('Correo o contraseña incorrectos.');
+    if (!resultado.ok) {
+      setError(resultado.mensaje);
       return;
     }
     setError('');
-    login(usuario);
-    navigate(esAdmin(usuario.correo) ? '/admin' : '/'); // el admin entra directo a su panel
+    navigate(resultado.usuario.rol === ROL_ADMIN ? '/admin' : '/');
   };
 
   return (
@@ -35,8 +37,6 @@ export default function Login() {
 
       <div className="login-container">
         <h2>Inicia sesión</h2>
-        <p className="auth-hint">Cuenta de prueba: juan.perez@unimarket.edu / 123456</p>
-        <p className="auth-hint">Administrador: admin@unimarket.edu / admin123</p>
 
         <form onSubmit={manejarEnvio}>
           <div className="form-group">
@@ -64,10 +64,11 @@ export default function Login() {
             />
           </div>
           {error && <p className="form-error">{error}</p>}
-          <button type="submit" className="btn-submit">Ingresar</button>
+          <button type="submit" className="btn-submit" disabled={enviando}>{enviando ? 'Ingresando...' : 'Ingresar'}</button>
           <div className="form-footer">
             <p><a href="#">¿Olvidaste tu contraseña?</a></p>
             <p>¿No tienes cuenta? <Link to="/registro">Regístrate</Link></p>
+            <p><Link to="/quienes-somos">Conoce UniMarket</Link></p>
           </div>
         </form>
       </div>

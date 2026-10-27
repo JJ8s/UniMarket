@@ -19,12 +19,6 @@ import UsuarioEditar from './pages/UsuarioEditar';
 import UsuarioNuevo from './pages/UsuarioNuevo';
 import Usuarios from './pages/Usuarios';
 
-/**
- * Arbol de rutas del panel, equivalente al diagrama de la Figura 10 del anexo.
- * No es un componente: es una funcion que devuelve elementos <Route>, y se
- * llama dentro de <Routes> en App.jsx (React Router exige que los hijos de
- * <Routes> sean <Route>, por eso no se envuelve en otro componente).
- */
 export default function rutasAdmin() {
   return (
     <Route path="/admin" element={<AdminLayout />}>
@@ -34,7 +28,6 @@ export default function rutasAdmin() {
       <Route path="ordenes" element={<Ordenes />} />
       <Route path="ordenes/:folio" element={<BoletaOrden />} />
 
-      {/* Productos (las rutas fijas "nuevo" y "criticos" van antes de ":id") */}
       <Route path="productos" element={<Productos />} />
       <Route path="productos/nuevo" element={<ProductoNuevo />} />
       <Route path="productos/criticos" element={<ProductosCriticos />} />

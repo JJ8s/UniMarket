@@ -1,23 +1,28 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { UMBRAL_STOCK_CRITICO, eliminarArticulo, obtenerArticulo } from '../../data/datos';
-import { etiquetaCategoria, formatearFechaHora, formatearPrecio } from '../../utils/utilidades';
+import { useCategorias } from '../../context/CategoriasContext';
+import useConsulta from '../../hooks/useConsulta';
+import { formatearFechaHora, formatearPrecio } from '../../utils/utilidades';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import InsigniaStock from '../components/InsigniaStock';
 import Miniatura from '../components/Miniatura';
 
-// Filas de datos que se muestran en la ficha del producto
+// Filas de la ficha
 const dato = (etiqueta, valor) => (
-  <div className="col-12 col-md-6" key={etiqueta}>
+  <div className="flex-grow-1" style={{ minWidth: "240px" }} key={etiqueta}>
     <div className="small text-secondary">{etiqueta}</div>
     <div>{valor || '-'}</div>
   </div>
 );
 
-/** "Mostrar producto": ficha completa de un producto. */
+/** "Mostrar producto" */
 export default function ProductoDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const articulo = obtenerArticulo(id);
+  const { etiquetaCategoria } = useCategorias();
+  const { datos: articulo, cargando } = useConsulta(() => obtenerArticulo(id), null, [id]);
+
+  if (cargando) return <p className="text-secondary">Cargando...</p>;
 
   if (!articulo) {
     return (
@@ -28,9 +33,13 @@ export default function ProductoDetalle() {
     );
   }
 
-  const borrar = () => {
+  const borrar = async () => {
     if (!window.confirm(`¿Eliminar "${articulo.nombre}"? Esta acción no se puede deshacer.`)) return;
-    eliminarArticulo(articulo.id);
+    const resultado = await eliminarArticulo(articulo.id);
+    if (!resultado.ok) {
+      window.alert(resultado.mensaje);
+      return;
+    }
     navigate('/admin/productos');
   };
 
@@ -61,7 +70,7 @@ export default function ProductoDetalle() {
               <InsigniaStock stock={articulo.stock} />
             </div>
           </div>
-          <div className="row g-3">
+          <div className="d-flex flex-wrap gap-3">
             {dato('Categoría', etiquetaCategoria(articulo.categoria))}
             {dato('Precio', formatearPrecio(articulo.precio))}
             {dato('Stock', `${articulo.stock ?? 0} unidades`)}

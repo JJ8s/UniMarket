@@ -1,7 +1,9 @@
-import { etiquetaCategoria, obtenerEstiloImagen } from '../utils/utilidades';
+import { useCategorias } from '../context/CategoriasContext';
+import { obtenerEstiloImagen } from '../utils/utilidades';
 
-/** Tarjeta de un producto en la grilla del catalogo. */
+/** Tarjeta de un producto */
 export default function TarjetaArticulo({ articulo, onClick }) {
+  const { etiquetaCategoria } = useCategorias();
   return (
     <div className="card" onClick={onClick}>
       <div className="card-image" style={obtenerEstiloImagen(articulo)}>

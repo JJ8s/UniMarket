@@ -5,9 +5,11 @@ cómo mostrarlas en una evaluación de sistema.
 
 ## 0. Por qué estas pruebas y no otras
 
-El proyecto no tiene backend (servidor): usuarios, artículos, carrito y
-sesión viven en `localStorage` del navegador (ver `DOCUMENTACION.md`,
-sección 1). Por eso las pruebas unitarias apuntan a lo que sí es "lógica de
+Los datos viven en Supabase (ver `DOCUMENTACION.md`, sección 1), pero las
+pruebas **no usan la red**: inyectan un Supabase simulado en memoria
+(`src/tests/supabaseFalso.js`) con `usarCliente()`. Ese simulador imita las
+tablas, el trigger de perfiles, los folios y las restricciones; las políticas
+RLS se verificaron aparte contra un PostgreSQL real. Por eso las pruebas unitarias apuntan a lo que sí es "lógica de
 negocio" real en este proyecto:
 
 - **`src/data/datos.js`** — registro, login, actualización de cuenta, lectura
@@ -91,20 +93,28 @@ mostrar en la evaluación (ver sección 6).
 
 ## 4. Dónde quedó cada archivo de pruebas
 
-Los archivos de prueba se ubicaron junto al código que prueban, con el
-sufijo `.test.js` (convención estándar, Vitest los detecta solo):
+**Las 10 pruebas de la evaluación** son de componentes React (anexo, pág. 11) y
+viven en `src/tests/`:
 
 ```
-src/data/datos.test.js              (15 pruebas)
-src/utils/utilidades.test.js        (12 pruebas)
-src/hooks/useMisArticulos.test.js   (6 pruebas)
-src/data/datosAdmin.test.js         (32 pruebas: roles, usuarios, categorías, productos, órdenes)
-src/utils/reportes.test.js          (10 pruebas: totales, por categoría, más vendidos, por mes, CSV)
+src/tests/componentes.spec.js    Jasmine + Karma   (npm run test:karma)
+src/tests/componentes.test.jsx   Vitest            (npm run test)
 ```
 
-Cada archivo tiene un espejo `.spec.js` para Jasmine/Karma (los de admin y
-reportes son idénticos en contenido porque usan solo sintaxis común). Total: 75
-pruebas en ambos runners.
+Los dos archivos tienen el mismo contenido. Son 2 pruebas por cada tipo:
+
+| Tipo | Pruebas |
+|---|---|
+| Renderizado correcto | 1) `SelectorModal` lista todas las opciones; 2) `TarjetaMetrica` muestra título, valor y detalle |
+| Renderizado condicional | 3) `MensajeError` solo aparece si hay error; 4) `InsigniaStock` muestra "Agotado" con stock 0 |
+| Props | 5) `EstadoVacio` usa mensaje, texto y destino del enlace; 6) `InsigniaEstadoOrden` cambia de color según `estado` |
+| Estado | 7) `FormularioCategoria` actualiza su estado al escribir; 8) `SelectorModal` abre y cierra su modal |
+| Eventos | 9) `BuscadorFiltros` llama a `onBusqueda`; 10) `FormularioCategoria` envía los datos y muestra el error devuelto |
+
+**Pruebas adicionales** (capa de datos, reportes y un hook; usan un Supabase
+simulado en memoria) están aparte en `src/pruebas-extra/` y no cuentan entre
+las 10: `npm run test:extra` (84 pruebas). `npm run test:todo` y
+`npm run test:karma:todo` corren las 94 juntas.
 
 Un ejemplo real (`formatearPrecio`, en `utilidades.test.js`):
 

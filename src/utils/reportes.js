@@ -1,24 +1,15 @@
-// ============================================================
-// Calculos de los reportes del panel de administracion.
-// Son funciones puras (reciben datos, devuelven datos): no tocan
-// localStorage ni React, asi se pueden probar facilmente.
-// Solo las ordenes 'Pagada' cuentan como ventas; las 'Pendiente' y
-// 'Anulada' no suman dinero.
-// ============================================================
-
 export const ESTADO_PAGADA = 'Pagada';
 
-/** Ordenes que cuentan como venta. */
+/** Ordenes que cuentan */
 export function ordenesPagadas(ordenes) {
   return ordenes.filter((o) => o.estado === ESTADO_PAGADA);
 }
 
-/** Suma del total de las ordenes pagadas. */
+/** Suma del total */
 export function totalVentas(ordenes) {
   return ordenesPagadas(ordenes).reduce((suma, o) => suma + o.total, 0);
 }
 
-/** Cantidad de ordenes por estado: { total, pagadas, pendientes, anuladas }. */
 export function resumenOrdenes(ordenes) {
   return {
     total: ordenes.length,
@@ -28,7 +19,6 @@ export function resumenOrdenes(ordenes) {
   };
 }
 
-/** Ventas agrupadas por categoria, de mayor a menor monto: [{ categoria, unidades, monto }]. */
 export function ventasPorCategoria(ordenes) {
   const mapa = {};
   ordenesPagadas(ordenes).forEach((orden) => {
@@ -42,7 +32,6 @@ export function ventasPorCategoria(ordenes) {
   return Object.values(mapa).sort((a, b) => b.monto - a.monto);
 }
 
-/** Productos mas vendidos por unidades: [{ idArticulo, nombre, unidades, monto }]. */
 export function productosMasVendidos(ordenes, limite = 5) {
   const mapa = {};
   ordenesPagadas(ordenes).forEach((orden) => {
@@ -58,7 +47,6 @@ export function productosMasVendidos(ordenes, limite = 5) {
     .slice(0, limite);
 }
 
-/** Ventas por mes, de mas antiguo a mas nuevo: [{ clave: '2026-10', monto, ordenes }]. */
 export function ventasPorMes(ordenes) {
   const mapa = {};
   ordenesPagadas(ordenes).forEach((orden) => {
@@ -72,10 +60,6 @@ export function ventasPorMes(ordenes) {
   return Object.values(mapa).sort((a, b) => a.clave.localeCompare(b.clave));
 }
 
-/**
- * Convierte filas a texto CSV. `columnas` es [{ clave, titulo }].
- * Las comillas dobles se escapan duplicandolas, como exige el formato.
- */
 export function convertirACsv(filas, columnas) {
   const celda = (valor) => `"${String(valor ?? '').replace(/"/g, '""')}"`;
   const encabezado = columnas.map((c) => celda(c.titulo)).join(',');

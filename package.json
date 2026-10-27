@@ -7,12 +7,16 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:karma": "karma start karma.conf.cjs"
+    "test": "vitest run src/tests",
+    "test:watch": "vitest src/tests",
+    "test:coverage": "vitest run src/tests --coverage",
+    "test:karma": "karma start karma.conf.cjs",
+    "test:todo": "vitest run",
+    "test:karma:todo": "karma start karma.todo.conf.cjs",
+    "test:extra": "vitest run src/pruebas-extra"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
     "bootstrap": "^5.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

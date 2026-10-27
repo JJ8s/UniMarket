@@ -5,8 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import useBodyClass from '../hooks/useBodyClass';
 import './admin.css';
 
-// Secciones del menu lateral (Figura 9 del anexo). `fin` hace que el enlace
-// "Dashboard" solo se marque activo en /admin y no en todas las subrutas.
 const SECCIONES = [
   { a: '/admin', texto: 'Dashboard', icono: 'fa-gauge', fin: true },
   { a: '/admin/ordenes', texto: 'Órdenes', icono: 'fa-receipt' },
@@ -16,19 +14,11 @@ const SECCIONES = [
   { a: '/admin/reportes', texto: 'Reportes', icono: 'fa-chart-column' },
 ];
 
-/**
- * Marco de todo el panel /admin: barra superior, menu lateral y, en el
- * centro, la pagina que corresponda a la ruta (<Outlet />).
- *
- * Bootstrap solo se carga mientras el administrador esta en /admin: se agrega
- * un <link> al entrar y se quita al salir. Asi no choca con los estilos de la
- * tienda (que usa Tailwind y CSS propio) ni los altera.
- */
 export default function AdminLayout() {
   useBodyClass('admin-body');
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
-  const [menuAbierto, setMenuAbierto] = useState(false); // solo se usa en pantallas chicas
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const [bootstrapListo, setBootstrapListo] = useState(false);
 
   useEffect(() => {
@@ -36,17 +26,16 @@ export default function AdminLayout() {
     enlace.rel = 'stylesheet';
     enlace.href = bootstrapCssUrl;
     enlace.onload = () => setBootstrapListo(true);
-    enlace.onerror = () => setBootstrapListo(true); // si falla, se muestra igual
+    enlace.onerror = () => setBootstrapListo(true);
     document.head.appendChild(enlace);
     return () => enlace.remove();
   }, []);
 
-  const cerrarSesion = () => {
-    logout();
+  const cerrarSesion = async () => {
+    await logout();
     navigate('/login');
   };
 
-  // Mientras Bootstrap carga no se pinta nada, para evitar un parpadeo sin estilos.
   if (!bootstrapListo) return null;
 
   return (

@@ -1,13 +1,21 @@
 import { Link, useParams } from 'react-router-dom';
-import { ROL_ADMIN, cargarArticulos, obtenerFotoPerfil, obtenerUsuario, ordenesDeUsuario } from '../../data/datos';
+import { ROL_ADMIN, articulosDeVendedor, obtenerUsuario, ordenesDeUsuario } from '../../data/datos';
+import useConsulta from '../../hooks/useConsulta';
 import { totalVentas } from '../../utils/reportes';
 import { formatearPrecio } from '../../utils/utilidades';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 
-/** "Mostrar usuario": ficha de una cuenta, con accesos a editar y al historial de compras. */
 export default function UsuarioDetalle() {
   const { correo } = useParams();
-  const usuario = obtenerUsuario(correo);
+  const { datos: ficha, cargando } = useConsulta(async () => {
+    const encontrado = await obtenerUsuario(correo);
+    if (!encontrado) return { usuario: null, ordenes: [], publicaciones: 0 };
+    const [ordenes, articulos] = await Promise.all([ordenesDeUsuario(encontrado.correo), articulosDeVendedor(encontrado.id)]);
+    return { usuario: encontrado, ordenes, publicaciones: articulos.length };
+  }, null, [correo]);
+
+  if (cargando || !ficha) return <p className="text-secondary">Cargando...</p>;
+  const { usuario, ordenes, publicaciones } = ficha;
 
   if (!usuario) {
     return (
@@ -18,9 +26,7 @@ export default function UsuarioDetalle() {
     );
   }
 
-  const ordenes = ordenesDeUsuario(usuario.correo);
-  const publicaciones = cargarArticulos().filter((a) => a.vendedor === usuario.nombre).length;
-  const foto = obtenerFotoPerfil(usuario.correo);
+  const foto = usuario.foto;
   const enlace = encodeURIComponent(usuario.correo);
 
   return (
@@ -31,8 +37,8 @@ export default function UsuarioDetalle() {
         <Link to="/admin/usuarios" className="btn btn-outline-secondary">Volver</Link>
       </EncabezadoPagina>
 
-      <div className="row g-3">
-        <div className="col-12 col-lg-7">
+      <div className="d-flex flex-wrap gap-3">
+        <div className="flex-grow-1" style={{ minWidth: "320px" }}>
           <div className="card h-100">
             <div className="card-body">
               <div className="d-flex align-items-center gap-3 mb-3">
@@ -43,19 +49,19 @@ export default function UsuarioDetalle() {
                   {usuario.rol === ROL_ADMIN ? 'Administrador' : 'Cliente'}
                 </span>
               </div>
-              <div className="row g-3">
-                <div className="col-12 col-md-6"><div className="small text-secondary">Correo</div><div>{usuario.correo}</div></div>
-                <div className="col-12 col-md-6"><div className="small text-secondary">Usuario</div><div>{usuario.nombreUsuario || '-'}</div></div>
-                <div className="col-12"><div className="small text-secondary">Universidad</div><div>{usuario.universidad || '-'}</div></div>
+              <div className="d-flex flex-wrap gap-3">
+                <div className="flex-grow-1" style={{ minWidth: "240px" }}><div className="small text-secondary">Correo</div><div>{usuario.correo}</div></div>
+                <div className="flex-grow-1" style={{ minWidth: "240px" }}><div className="small text-secondary">Usuario</div><div>{usuario.nombreUsuario || '-'}</div></div>
+                <div className="flex-grow-1" style={{ minWidth: "100%" }}><div className="small text-secondary">Universidad</div><div>{usuario.universidad || '-'}</div></div>
               </div>
             </div>
           </div>
         </div>
-        <div className="col-12 col-lg-5">
-          <div className="row g-3">
-            <div className="col-4 col-lg-12"><div className="card"><div className="card-body py-3"><div className="small text-secondary">Compras pagadas</div><div className="fs-4 fw-bold">{ordenes.filter((o) => o.estado === 'Pagada').length}</div></div></div></div>
-            <div className="col-4 col-lg-12"><div className="card"><div className="card-body py-3"><div className="small text-secondary">Total gastado</div><div className="fs-4 fw-bold">{formatearPrecio(totalVentas(ordenes))}</div></div></div></div>
-            <div className="col-4 col-lg-12"><div className="card"><div className="card-body py-3"><div className="small text-secondary">Publicaciones</div><div className="fs-4 fw-bold">{publicaciones}</div></div></div></div>
+        <div className="flex-grow-1" style={{ minWidth: "260px" }}>
+          <div className="d-flex flex-wrap gap-3">
+            <div className="flex-grow-1" style={{ minWidth: "100px" }}><div className="card"><div className="card-body py-3"><div className="small text-secondary">Compras pagadas</div><div className="fs-4 fw-bold">{ordenes.filter((o) => o.estado === 'Pagada').length}</div></div></div></div>
+            <div className="flex-grow-1" style={{ minWidth: "100px" }}><div className="card"><div className="card-body py-3"><div className="small text-secondary">Total gastado</div><div className="fs-4 fw-bold">{formatearPrecio(totalVentas(ordenes))}</div></div></div></div>
+            <div className="flex-grow-1" style={{ minWidth: "100px" }}><div className="card"><div className="card-body py-3"><div className="small text-secondary">Publicaciones</div><div className="fs-4 fw-bold">{publicaciones}</div></div></div></div>
           </div>
         </div>
       </div>

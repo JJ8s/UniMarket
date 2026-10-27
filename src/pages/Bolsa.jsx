@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '../context/CarritoContext';
 import { cargarArticulos } from '../data/datos';
 import useBodyClass from '../hooks/useBodyClass';
+import useConsulta from '../hooks/useConsulta';
 import { agruparCarrito, formatearPrecio, lineasAIds, obtenerEstiloImagen } from '../utils/utilidades';
 
 export default function Bolsa() {
@@ -13,14 +14,12 @@ export default function Bolsa() {
   const navigate = useNavigate();
   const { carrito, reemplazarCarrito } = useCarrito();
 
-  const articulos = useMemo(() => cargarArticulos(), []);
+  const { datos: articulos, cargando } = useConsulta(cargarArticulos, []);
   const { lineas, hayFantasmas } = useMemo(() => agruparCarrito(carrito, articulos), [carrito, articulos]);
 
-  // Si un articulo del carrito ya no existe (el vendedor lo borro), se
-  // limpia de la bolsa en vez de mostrar una linea rota.
   useEffect(() => {
-    if (hayFantasmas) reemplazarCarrito(lineasAIds(lineas));
-  }, [hayFantasmas, lineas, reemplazarCarrito]);
+    if (!cargando && hayFantasmas) reemplazarCarrito(lineasAIds(lineas));
+  }, [cargando, hayFantasmas, lineas, reemplazarCarrito]);
 
   const totalUnidades = lineas.reduce((suma, l) => suma + l.cantidad, 0);
   const total = lineas.reduce((suma, l) => suma + l.articulo.precio * l.cantidad, 0);
@@ -50,7 +49,9 @@ export default function Bolsa() {
       <main className="bolsa-wrapper">
         <BannerPagina titulo="Mi Bolsa" subtitulo={subtitulo} enlaceA="/" enlaceTexto="Seguir comprando" />
 
-        {lineas.length === 0 ? (
+        {cargando ? (
+          <p className="text-center p-8">Cargando...</p>
+        ) : lineas.length === 0 ? (
           <EstadoVacio mensaje="Tu bolsa está vacía." enlaceA="/" enlaceTexto="Ir al catálogo" icono="fa-store" />
         ) : (
           <div className="bolsa-layout">
