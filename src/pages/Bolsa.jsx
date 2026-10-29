@@ -26,7 +26,11 @@ export default function Bolsa() {
 
   const cambiarCantidad = (idArticulo, delta) => {
     const nuevas = lineas
-      .map((l) => (l.articulo.id === idArticulo ? { ...l, cantidad: l.cantidad + delta } : l))
+      .map((l) => {
+        if (l.articulo.id !== idArticulo) return l;
+        const tope = l.articulo.stock ?? Infinity;
+        return { ...l, cantidad: Math.min(l.cantidad + delta, tope) };
+      })
       .filter((l) => l.cantidad > 0);
     reemplazarCarrito(lineasAIds(nuevas));
   };
@@ -69,7 +73,12 @@ export default function Bolsa() {
                     <div className="stepper-cantidad">
                       <button type="button" aria-label="Quitar una unidad" onClick={() => cambiarCantidad(articulo.id, -1)}>−</button>
                       <span>{cantidad}</span>
-                      <button type="button" aria-label="Agregar una unidad" onClick={() => cambiarCantidad(articulo.id, 1)}>+</button>
+                      <button
+                        type="button"
+                        aria-label="Agregar una unidad"
+                        disabled={cantidad >= (articulo.stock ?? Infinity)}
+                        onClick={() => cambiarCantidad(articulo.id, 1)}
+                      >+</button>
                     </div>
                     <button type="button" className="bolsa-item-quitar" onClick={() => quitar(articulo.id)}>
                       <i className="fa-solid fa-trash"></i> Quitar

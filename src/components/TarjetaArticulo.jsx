@@ -4,11 +4,19 @@ import { obtenerEstiloImagen } from '../utils/utilidades';
 /** Tarjeta de un producto */
 export default function TarjetaArticulo({ articulo, onClick }) {
   const { etiquetaCategoria } = useCategorias();
+  const stock = articulo.stock ?? 0;
+  const vendido = stock <= 0;
   return (
-    <div className="card" onClick={onClick}>
+    <div className={`card ${vendido ? 'card-vendido' : ''}`} onClick={onClick}>
       <div className="card-image" style={obtenerEstiloImagen(articulo)}>
-        {articulo.condicion && <span className="badge-condition">{articulo.condicion}</span>}
+        {vendido && <span className="badge-vendido">Vendido</span>}
+        {articulo.condicion && (
+          <span className={`badge-condition ${vendido ? 'a-la-izquierda' : ''}`}>{articulo.condicion}</span>
+        )}
         <span className="badge-distance">{articulo.distancia.toFixed(1)} km</span>
+        {!vendido && (
+          <span className="badge-stock">{stock === 1 ? 'Queda 1' : `Quedan ${stock}`}</span>
+        )}
       </div>
       <div className="card-body">
         <h3 className="product-name">{articulo.nombre}</h3>

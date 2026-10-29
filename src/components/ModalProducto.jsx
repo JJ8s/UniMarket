@@ -3,7 +3,7 @@ import { useCategorias } from '../context/CategoriasContext';
 import { obtenerEstiloImagen } from '../utils/utilidades';
 
 /** Ventana con el detalle */
-export default function ModalProducto({ articulo, onCerrar, onAgregar }) {
+export default function ModalProducto({ articulo, onCerrar, onAgregar, enBolsa = 0 }) {
   const { etiquetaCategoria } = useCategorias();
   const [agregado, setAgregado] = useState(false);
 
@@ -21,8 +21,12 @@ export default function ModalProducto({ articulo, onCerrar, onAgregar }) {
     return () => clearTimeout(temporizador);
   }, [agregado, onCerrar]);
 
+  const stock = articulo.stock ?? 0;
+  const vendido = stock <= 0;
+  const sinMas = !vendido && enBolsa >= stock;
+
   const agregar = () => {
-    if (agregado) return;
+    if (agregado || vendido || sinMas) return;
     onAgregar();
     setAgregado(true);
   };
@@ -46,6 +50,12 @@ export default function ModalProducto({ articulo, onCerrar, onAgregar }) {
               <span className="info-value">${articulo.precio.toFixed(2)}</span>
             </div>
             <div className="info-item">
+              <span className="info-label">Disponibles</span>
+              <span className={`info-value ${vendido ? 'modal-vendido-aviso' : ''}`}>
+                {vendido ? 'Vendido' : stock}
+              </span>
+            </div>
+            <div className="info-item">
               <span className="info-label">Universidad</span>
               <span className="info-value">{articulo.universidad}</span>
             </div>
@@ -64,8 +74,19 @@ export default function ModalProducto({ articulo, onCerrar, onAgregar }) {
             <span className="info-value">{articulo.entrega || 'A convenir con el vendedor'}</span>
           </div>
 
-          <button type="button" className={`modal-cart-btn ${agregado ? 'added' : ''}`} onClick={agregar}>
-            {agregado ? 'Agregado a la bolsa' : 'Agregar a la bolsa'}
+          <button
+            type="button"
+            className={`modal-cart-btn ${agregado ? 'added' : ''}`}
+            onClick={agregar}
+            disabled={vendido || sinMas}
+          >
+            {vendido
+              ? 'Vendido'
+              : sinMas
+                ? 'Ya tienes todas las unidades en tu bolsa'
+                : agregado
+                  ? 'Agregado a la bolsa'
+                  : 'Agregar a la bolsa'}
           </button>
         </div>
       </div>

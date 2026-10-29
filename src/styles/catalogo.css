@@ -303,3 +303,65 @@
 .modal-cart-btn.added {
   background: #16a34a;
 }
+
+/* Stock: vendido y unidades disponibles */
+#product-grid .card .badge-vendido {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.75rem;
+  border-radius: 40px;
+  box-shadow: 0 1px 6px rgba(220, 38, 38, 0.35);
+}
+
+#product-grid .card .badge-condition.a-la-izquierda {
+  right: auto;
+  left: 0.6rem;
+}
+
+#product-grid .card .badge-stock {
+  position: absolute;
+  bottom: 0.6rem;
+  right: 0.6rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0b1b32;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.7rem;
+  border-radius: 40px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+#product-grid .card.card-vendido .card-image {
+  filter: grayscale(0.7) brightness(0.9);
+}
+
+#product-grid .card.card-vendido .card-image .badge-vendido,
+#product-grid .card.card-vendido .card-image .badge-condition,
+#product-grid .card.card-vendido .card-image .badge-distance {
+  filter: none;
+}
+
+#product-grid .card.card-vendido .card-body {
+  opacity: 0.65;
+}
+
+.modal-vendido-aviso {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.modal-cart-btn:disabled,
+.modal-cart-btn:disabled:hover {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+}
