@@ -56,6 +56,7 @@ export default function MenuPerfil() {
           </div>
           <hr className="profile-divider" />
           <Link to="/perfil" className="profile-menu-item">Ver mi perfil</Link>
+          <Link to="/compras" className="profile-menu-item">Mis compras</Link>
           <Link to="/pedidos" className="profile-menu-item">Mis pedidos</Link>
           <Link to="/panel-vendedor" className="profile-menu-item">Panel vendedor</Link>
           <Link to="/quienes-somos" className="profile-menu-item">Quiénes somos</Link>

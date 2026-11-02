@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useCategorias } from '../context/CategoriasContext';
 import { obtenerEstiloImagen } from '../utils/utilidades';
+import Estrellas from './Estrellas';
+import CalificarArticulo from './CalificarArticulo';
 
 /** Ventana con el detalle */
-export default function ModalProducto({ articulo, onCerrar, onAgregar }) {
+export default function ModalProducto({ articulo, onCerrar, onAgregar, onActualizado }) {
   const { etiquetaCategoria } = useCategorias();
   const [agregado, setAgregado] = useState(false);
 
@@ -53,16 +55,19 @@ export default function ModalProducto({ articulo, onCerrar, onAgregar }) {
               <span className="info-label">Distancia</span>
               <span className="info-value">{articulo.distancia.toFixed(1)} km</span>
             </div>
-            <div className="info-item">
-              <span className="info-label">Calificación</span>
-              <span className="info-value">★ {(articulo.calificacion ?? 0).toFixed(1)}</span>
-            </div>
+          </div>
+
+          <div className="modal-calificacion">
+            <span className="info-label">Calificación</span>
+            <Estrellas valor={articulo.calificacion} cantidad={articulo.calificacionesCantidad} />
           </div>
 
           <div className="modal-entrega">
             <span className="info-label">Punto de entrega</span>
             <span className="info-value">{articulo.entrega || 'A convenir con el vendedor'}</span>
           </div>
+
+          <CalificarArticulo articulo={articulo} onCalificado={onActualizado} />
 
           <button type="button" className={`modal-cart-btn ${agregado ? 'added' : ''}`} onClick={agregar}>
             {agregado ? 'Agregado a la bolsa' : 'Agregar a la bolsa'}

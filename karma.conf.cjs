@@ -4,9 +4,9 @@ module.exports = function (config) {
     frameworks: ['jasmine'],
     client: { jasmine: { random: false } },
 
-    files: [{ pattern: 'src/tests/componentes.spec.js', watched: false }],
+    files: [{ pattern: 'src/tests/componentes/*.spec.js', watched: false }],
     preprocessors: {
-      'src/tests/componentes.spec.js': ['esbuild'],
+      'src/tests/componentes/*.spec.js': ['esbuild'],
     },
 
     esbuild: {

@@ -22,7 +22,7 @@ const IconoUbicacion = ({ className }) => (
 export default function Catalogo() {
   const { agregarAlCarrito } = useCarrito();
 
-  const { datos: articulos, cargando } = useConsulta(cargarArticulos, []);
+  const { datos: articulos, cargando, establecer } = useConsulta(cargarArticulos, []);
   const { opciones, etiquetaCategoria } = useCategorias();
   const filtrosCategoria = useMemo(() => [{ valor: 'todos', etiqueta: 'Todos' }, ...opciones], [opciones]);
   const [categoria, setCategoria] = useState('todos');
@@ -224,6 +224,10 @@ export default function Catalogo() {
           articulo={articuloModal}
           onCerrar={() => setArticuloModal(null)}
           onAgregar={() => agregarAlCarrito(articuloModal.id)}
+          onActualizado={(nuevo) => {
+            setArticuloModal(nuevo);
+            establecer((lista) => lista.map((a) => (a.id === nuevo.id ? nuevo : a)));
+          }}
         />
       )}
     </>

@@ -8,6 +8,7 @@ import Publicar from './pages/Publicar';
 import PanelVendedor from './pages/PanelVendedor';
 import Bolsa from './pages/Bolsa';
 import Pago from './pages/Pago';
+import Compras from './pages/Compras';
 import Pedidos from './pages/Pedidos';
 import Perfil from './pages/Perfil';
 import rutasAdmin from './admin/rutasAdmin';
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="/bolsa" element={<Bolsa />} />
         <Route path="/pago" element={<Pago />} />
         <Route path="/pedidos" element={<Pedidos />} />
+        <Route path="/compras" element={<Compras />} />
         <Route path="/perfil" element={<Perfil />} />
       </Route>
 

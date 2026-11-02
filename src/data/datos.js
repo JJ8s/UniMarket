@@ -69,6 +69,7 @@ const aArticulo = (f) =>
     descripcion: f.descripcion,
     precio: Number(f.precio),
     calificacion: Number(f.calificacion),
+    calificacionesCantidad: Number(f.calificaciones_cantidad ?? 0),
     categoria: f.categoria,
     universidad: f.universidad,
     vendedor: f.vendedor,
@@ -102,7 +103,6 @@ const COLUMNAS_ARTICULO = {
   nombre: 'nombre',
   descripcion: 'descripcion',
   precio: 'precio',
-  calificacion: 'calificacion',
   categoria: 'categoria',
   universidad: 'universidad',
   vendedor: 'vendedor',
@@ -515,6 +515,22 @@ export async function crearOrden({ lineas, metodoPago, ultimosDigitos, autorizac
     p_autorizacion: autorizacion,
   });
   return error ? falla(error, 'No se pudo registrar la compra.') : { ok: true, orden: aOrden(data) };
+}
+
+/** Si el usuario puede calificar el artículo y su puntaje actual */
+export async function estadoCalificacion(idArticulo) {
+  const { data, error } = await obtenerCliente().rpc('estado_calificacion', { p_articulo_id: Number(idArticulo) });
+  if (error) return falla(error, 'No se pudo cargar tu calificación.');
+  return { ok: true, puntaje: data?.puntaje ?? null, motivo: data?.motivo ?? null };
+}
+
+/** Guarda (o cambia) la calificación de 1 a 5 estrellas */
+export async function calificarArticulo(idArticulo, puntaje) {
+  if (!Number.isInteger(puntaje) || puntaje < 1 || puntaje > 5) {
+    return { ok: false, mensaje: 'Elige entre 1 y 5 estrellas.' };
+  }
+  const { data, error } = await obtenerCliente().rpc('calificar_articulo', { p_articulo_id: Number(idArticulo), p_puntaje: puntaje });
+  return error ? falla(error, 'No se pudo guardar tu calificación.') : { ok: true, articulo: aArticulo(data) };
 }
 
 export async function actualizarEstadoOrden(folio, estado) {

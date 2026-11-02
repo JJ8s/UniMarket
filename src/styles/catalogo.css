@@ -303,3 +303,136 @@
 .modal-cart-btn.added {
   background: #16a34a;
 }
+
+/* Estrellas de promedio */
+.modal-calificacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: #f7fafc;
+  border-radius: 14px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 0.4rem;
+}
+
+.modal-calificacion .info-label {
+  font-size: 0.7rem;
+  color: #7a8b9f;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.estrellas-resumen {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.estrellas {
+  position: relative;
+  display: inline-block;
+  font-size: 1.25rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: #cbd5e1;
+}
+
+.estrellas-relleno {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #F97316;
+}
+
+.estrellas-numero {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0b1b32;
+}
+
+.estrellas-detalle {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+#product-grid .card .rating .rating-cantidad {
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Calificar el articulo */
+.calificar {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.8rem 1rem 0.9rem;
+  margin: 0.2rem 0 0.8rem;
+  text-align: center;
+}
+
+.calificar-titulo {
+  margin: 0 0 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1A365D;
+}
+
+.calificar-estrellas {
+  display: flex;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.calificar-estrella {
+  background: none;
+  border: none;
+  padding: 0 0.1rem;
+  font-size: 2.1rem;
+  line-height: 1.2;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: transform 0.12s, color 0.12s;
+}
+
+.calificar-estrella.activa { color: #F97316; }
+.calificar-estrella:hover:not(:disabled) { transform: scale(1.18); }
+.calificar-estrella:focus-visible {
+  outline: 2px solid #1A365D;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.calificar-estrella:disabled { cursor: not-allowed; }
+.calificar-bloqueado .calificar-estrella { opacity: 0.5; }
+
+.calificar-etiqueta {
+  min-height: 1.3rem;
+  margin: 0.1rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1A365D;
+}
+
+.calificar-bloqueado .calificar-etiqueta {
+  font-weight: 500;
+  color: #64748b;
+}
+
+.calificar-mensaje {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.calificar-mensaje-ok { color: #16a34a; animation: calificar-aparecer 0.25s ease; }
+.calificar-mensaje-error { color: #dc2626; }
+.calificar-mensaje-info { color: #64748b; }
+
+@keyframes calificar-aparecer {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calificar-estrella, .calificar-mensaje-ok { transition: none; animation: none; }
+}
