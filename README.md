@@ -421,7 +421,7 @@ npx vitest run src/tests --reporter=verbose
 
 ```bash
 npx karma start karma.conf.cjs --grep="MensajeError"
-npx karma start karma.conf.cjs --grep="5) EstadoVacio"
+npx karma start karma.conf.cjs --grep="5 EstadoVacio"
 npx karma start karma.conf.cjs --archivos="src/tests/componentes/karma/5-eventos/*.spec.js"
 npx karma start karma.conf.cjs --archivos="src/tests/componentes/karma/4-estado-state/07-*.spec.js"
 
