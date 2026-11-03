@@ -1,12 +1,14 @@
+// Opciones por consola: --grep="texto" (una prueba por nombre) y --archivos="glob" (un archivo o carpeta)
 module.exports = function (config) {
+  const archivos = config.archivos || 'src/tests/componentes/karma/**/*.spec.js';
   config.set({
     basePath: '',
     frameworks: ['jasmine'],
-    client: { jasmine: { random: false } },
+    client: { jasmine: { random: false }, args: config.grep ? ['--grep', config.grep] : [] },
 
-    files: [{ pattern: 'src/tests/componentes.spec.js', watched: false }],
+    files: [{ pattern: archivos, watched: false }],
     preprocessors: {
-      'src/tests/componentes.spec.js': ['esbuild'],
+      [archivos]: ['esbuild'],
     },
 
     esbuild: {

@@ -20,9 +20,9 @@ const IconoUbicacion = ({ className }) => (
 );
 
 export default function Catalogo() {
-  const { carrito, agregarAlCarrito } = useCarrito();
+  const { agregarAlCarrito } = useCarrito();
 
-  const { datos: articulos, cargando } = useConsulta(cargarArticulos, []);
+  const { datos: articulos, cargando, establecer } = useConsulta(cargarArticulos, []);
   const { opciones, etiquetaCategoria } = useCategorias();
   const filtrosCategoria = useMemo(() => [{ valor: 'todos', etiqueta: 'Todos' }, ...opciones], [opciones]);
   const [categoria, setCategoria] = useState('todos');
@@ -57,10 +57,7 @@ export default function Catalogo() {
 
     if (ubicacion) lista.sort((a, b) => a.distancia - b.distancia);
     else lista.sort((a, b) => b.creadoEn - a.creadoEn);
-    // Los vendidos (stock 0) van al final, conservando el orden anterior
-    const disponibles = lista.filter((a) => (a.stock ?? 0) > 0);
-    const vendidos = lista.filter((a) => (a.stock ?? 0) <= 0);
-    return [...disponibles, ...vendidos];
+    return lista;
   }, [articulos, categoria, universidad, busqueda, radio, ubicacion, etiquetaCategoria]);
 
   const irAProductos = () =>
@@ -225,9 +222,12 @@ export default function Catalogo() {
       {articuloModal && (
         <ModalProducto
           articulo={articuloModal}
-          enBolsa={carrito.filter((id) => id === articuloModal.id).length}
           onCerrar={() => setArticuloModal(null)}
           onAgregar={() => agregarAlCarrito(articuloModal.id)}
+          onActualizado={(nuevo) => {
+            setArticuloModal(nuevo);
+            establecer((lista) => lista.map((a) => (a.id === nuevo.id ? nuevo : a)));
+          }}
         />
       )}
     </>

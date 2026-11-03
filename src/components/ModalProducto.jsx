@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useCategorias } from '../context/CategoriasContext';
 import { obtenerEstiloImagen } from '../utils/utilidades';
+import Estrellas from './Estrellas';
+import CalificarArticulo from './CalificarArticulo';
 
 /** Ventana con el detalle */
-export default function ModalProducto({ articulo, onCerrar, onAgregar, enBolsa = 0 }) {
+export default function ModalProducto({ articulo, onCerrar, onAgregar, onActualizado }) {
   const { etiquetaCategoria } = useCategorias();
   const [agregado, setAgregado] = useState(false);
 
@@ -21,12 +23,8 @@ export default function ModalProducto({ articulo, onCerrar, onAgregar, enBolsa =
     return () => clearTimeout(temporizador);
   }, [agregado, onCerrar]);
 
-  const stock = articulo.stock ?? 0;
-  const vendido = stock <= 0;
-  const sinMas = !vendido && enBolsa >= stock;
-
   const agregar = () => {
-    if (agregado || vendido || sinMas) return;
+    if (agregado) return;
     onAgregar();
     setAgregado(true);
   };
@@ -50,12 +48,6 @@ export default function ModalProducto({ articulo, onCerrar, onAgregar, enBolsa =
               <span className="info-value">${articulo.precio.toFixed(2)}</span>
             </div>
             <div className="info-item">
-              <span className="info-label">Disponibles</span>
-              <span className={`info-value ${vendido ? 'modal-vendido-aviso' : ''}`}>
-                {vendido ? 'Vendido' : stock}
-              </span>
-            </div>
-            <div className="info-item">
               <span className="info-label">Universidad</span>
               <span className="info-value">{articulo.universidad}</span>
             </div>
@@ -63,10 +55,11 @@ export default function ModalProducto({ articulo, onCerrar, onAgregar, enBolsa =
               <span className="info-label">Distancia</span>
               <span className="info-value">{articulo.distancia.toFixed(1)} km</span>
             </div>
-            <div className="info-item">
-              <span className="info-label">Calificación</span>
-              <span className="info-value">★ {(articulo.calificacion ?? 0).toFixed(1)}</span>
-            </div>
+          </div>
+
+          <div className="modal-calificacion">
+            <span className="info-label">Calificación</span>
+            <Estrellas valor={articulo.calificacion} cantidad={articulo.calificacionesCantidad} />
           </div>
 
           <div className="modal-entrega">
@@ -74,19 +67,10 @@ export default function ModalProducto({ articulo, onCerrar, onAgregar, enBolsa =
             <span className="info-value">{articulo.entrega || 'A convenir con el vendedor'}</span>
           </div>
 
-          <button
-            type="button"
-            className={`modal-cart-btn ${agregado ? 'added' : ''}`}
-            onClick={agregar}
-            disabled={vendido || sinMas}
-          >
-            {vendido
-              ? 'Vendido'
-              : sinMas
-                ? 'Ya tienes todas las unidades en tu bolsa'
-                : agregado
-                  ? 'Agregado a la bolsa'
-                  : 'Agregar a la bolsa'}
+          <CalificarArticulo articulo={articulo} onCalificado={onActualizado} />
+
+          <button type="button" className={`modal-cart-btn ${agregado ? 'added' : ''}`} onClick={agregar}>
+            {agregado ? 'Agregado a la bolsa' : 'Agregar a la bolsa'}
           </button>
         </div>
       </div>

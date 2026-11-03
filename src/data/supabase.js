@@ -1,7 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
-const URL = import.meta.env?.VITE_SUPABASE_URL;
-const CLAVE = import.meta.env?.VITE_SUPABASE_ANON_KEY;
+const ENTORNO = import.meta.env || {};
+const URL = ENTORNO.VITE_SUPABASE_URL || ENTORNO.NEXT_PUBLIC_SUPABASE_URL;
+const CLAVE =
+  ENTORNO.VITE_SUPABASE_ANON_KEY || ENTORNO.VITE_SUPABASE_PUBLISHABLE_KEY || ENTORNO.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 function validarConfiguracion() {
   if (!URL || !CLAVE) return null;

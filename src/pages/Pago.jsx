@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 import { cargarArticulos, crearOrden } from '../data/datos';
 import useBodyClass from '../hooks/useBodyClass';
+import { descargarBoletaPdf } from '../utils/boletaPdf';
 import { agruparCarrito, formatearPrecio } from '../utils/utilidades';
 
 const PASOS_STEPPER = [
@@ -46,6 +47,7 @@ export default function Pago() {
   const [tarjeta, setTarjeta] = useState({ numero: '', nombre: '', vencimiento: '', cvv: '' });
   const [error, setError] = useState('');
   const [boleta, setBoleta] = useState(null);
+  const [ordenCreada, setOrdenCreada] = useState(null);
   const temporizador = useRef(null);
 
   useEffect(() => () => clearTimeout(temporizador.current), []);
@@ -107,6 +109,7 @@ export default function Pago() {
       }
 
       setBoleta({ ...datosBoleta, folio: resultado.orden.folio });
+      setOrdenCreada(resultado.orden);
       setPaso(4);
       vaciarCarrito();
     }, 4500);
@@ -263,8 +266,8 @@ export default function Pago() {
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-secundario" onClick={() => window.print()}>
-                  <i className="fa-solid fa-print"></i> Imprimir
+                <button type="button" className="btn-secundario" onClick={() => ordenCreada && descargarBoletaPdf(ordenCreada)}>
+                  <i className="fa-solid fa-file-pdf"></i> Descargar PDF
                 </button>
                 <Link to="/" className="btn-submit" style={{ flex: 2, textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   Volver al inicio

@@ -1,17 +1,19 @@
 /* Fondo gris claro */
 body.admin-body {
-  background: #f1f4f9;
+  background: #F7FAFC;
+  color: #1e293b;
   min-height: 100vh;
 }
 
-/* Barra superior oscura */
+/* Barra superior azul de la tienda */
 .admin-topbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   height: 56px;
-  background: #1b2433;
+  background: #1A365D;
+  border-bottom: 3px solid #F97316;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -33,7 +35,7 @@ body.admin-body {
   left: 0;
   width: 240px;
   background: #fff;
-  border-right: 1px solid #dde3ec;
+  border-right: 1px solid #e2e8f0;
   padding: 1rem;
   overflow-y: auto;
   z-index: 1020;
@@ -57,7 +59,7 @@ body.admin-body {
   display: block;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  color: #344054;
+  color: #1e293b;
   text-decoration: none;
   font-size: 0.9rem;
 }
@@ -69,13 +71,15 @@ body.admin-body {
 }
 
 .admin-enlace:hover {
-  background: #eef2f8;
+  background: #eaf0f8;
+  color: #1A365D;
 }
 
 /* Enlace activo */
 .admin-enlace.active {
-  background: #0d6efd;
+  background: #1A365D;
   color: #fff;
+  box-shadow: inset 4px 0 0 #F97316;
 }
 
 /* Contenido */
@@ -101,7 +105,7 @@ body.admin-body {
   height: 100%;
   padding: 1rem;
   background: #fff;
-  border: 1px solid #e3e8f0;
+  border: 1px solid #e2e8f0;
   border-radius: 0.75rem;
   text-align: center;
   color: inherit;
@@ -117,7 +121,7 @@ body.admin-body {
 
 .admin-modulo i {
   font-size: 1.5rem;
-  color: #0d6efd;
+  color: #F97316;
 }
 
 /* Miniatura de producto */
@@ -133,6 +137,74 @@ body.admin-body {
 /* Barras simples */
 .admin-barra {
   height: 0.6rem;
+}
+
+/* Colores de Bootstrap iguales a los de la tienda */
+body.admin-body .btn-primary {
+  --bs-btn-bg: #1A365D;
+  --bs-btn-border-color: #1A365D;
+  --bs-btn-hover-bg: #2c5282;
+  --bs-btn-hover-border-color: #2c5282;
+  --bs-btn-active-bg: #12294a;
+  --bs-btn-active-border-color: #12294a;
+  --bs-btn-disabled-bg: #1A365D;
+  --bs-btn-disabled-border-color: #1A365D;
+  --bs-btn-focus-shadow-rgb: 26, 54, 93;
+}
+
+body.admin-body .btn-outline-primary {
+  --bs-btn-color: #1A365D;
+  --bs-btn-border-color: #1A365D;
+  --bs-btn-hover-bg: #1A365D;
+  --bs-btn-hover-border-color: #1A365D;
+  --bs-btn-active-bg: #12294a;
+  --bs-btn-active-border-color: #12294a;
+  --bs-btn-focus-shadow-rgb: 26, 54, 93;
+}
+
+body.admin-body .btn-dark {
+  --bs-btn-bg: #F97316;
+  --bs-btn-border-color: #F97316;
+  --bs-btn-hover-bg: #ea580c;
+  --bs-btn-hover-border-color: #ea580c;
+  --bs-btn-active-bg: #c2410c;
+  --bs-btn-active-border-color: #c2410c;
+}
+
+body.admin-body .btn-danger {
+  --bs-btn-bg: #dc2626;
+  --bs-btn-border-color: #dc2626;
+  --bs-btn-hover-bg: #b91c1c;
+  --bs-btn-hover-border-color: #b91c1c;
+}
+
+body.admin-body .text-bg-primary { background-color: #1A365D !important; }
+body.admin-body .text-bg-success { background-color: #16a34a !important; }
+body.admin-body .text-bg-warning { background-color: #F97316 !important; color: #fff !important; }
+body.admin-body .text-bg-danger { background-color: #dc2626 !important; }
+body.admin-body .text-bg-info { background-color: #2c5282 !important; color: #fff !important; }
+
+body.admin-body .form-control:focus,
+body.admin-body .form-select:focus {
+  border-color: #2c5282;
+  box-shadow: 0 0 0 0.2rem rgba(26, 54, 93, 0.2);
+}
+
+body.admin-body .table > :not(caption) > * > * {
+  border-color: #e2e8f0;
+}
+
+body.admin-body .table thead th {
+  background: #F7FAFC;
+  color: #1A365D;
+}
+
+body.admin-body .card {
+  border-color: #e2e8f0;
+}
+
+body.admin-body a:not([class]) {
+  color: #1A365D;
 }
 
 /* Escritorio: el menu queda fijo */

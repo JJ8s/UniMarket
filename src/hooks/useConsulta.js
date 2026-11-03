@@ -33,5 +33,5 @@ export default function useConsulta(cargar, valorInicial = null, dependencias = 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencias);
 
-  return { datos, cargando, recargar };
+  return { datos, cargando, recargar, establecer: setDatos };
 }

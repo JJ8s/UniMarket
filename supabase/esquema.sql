@@ -242,12 +242,138 @@ begin
 end;
 $$;
 
+-- CALIFICACIONES
+alter table public.articulos add column if not exists calificaciones_cantidad integer not null default 0;
+
+create table if not exists public.calificaciones (
+  articulo_id bigint   not null references public.articulos (id) on delete cascade,
+  user_id     uuid     not null references public.perfiles (id) on delete cascade,
+  puntaje     smallint not null check (puntaje between 1 and 5),
+  creada_en   timestamptz not null default now(),
+  primary key (articulo_id, user_id)
+);
+
+alter table public.calificaciones enable row level security;
+
+drop policy if exists calificaciones_ver on public.calificaciones;
+create policy calificaciones_ver on public.calificaciones for select to authenticated
+  using (user_id = auth.uid() or public.es_admin());
+
+-- El promedio solo cambia desde calificar_articulo
+create or replace function public.proteger_calificacion()
+returns trigger
+language plpgsql
+as $$
+begin
+  if auth.uid() is null or current_setting('unimarket.calificando', true) = 'on' then
+    return new;
+  end if;
+  if tg_op = 'INSERT' then
+    new.calificacion := 0;
+    new.calificaciones_cantidad := 0;
+  else
+    new.calificacion := old.calificacion;
+    new.calificaciones_cantidad := old.calificaciones_cantidad;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists proteger_calificacion_trg on public.articulos;
+create trigger proteger_calificacion_trg
+  before insert or update on public.articulos
+  for each row execute function public.proteger_calificacion();
+
+-- Devuelve el motivo por el que no puede calificar, o null si puede
+create or replace function public.motivo_no_calificar(p_articulo_id bigint)
+returns text
+language plpgsql stable security definer set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_correo text;
+  v_articulo public.articulos;
+begin
+  select correo into v_correo from public.perfiles where id = v_uid;
+  if v_correo is null then
+    return 'Inicia sesión para calificar.';
+  end if;
+
+  select * into v_articulo from public.articulos where id = p_articulo_id;
+  if not found then
+    return 'El artículo ya no existe.';
+  end if;
+  if v_articulo.vendedor_id = v_uid then
+    return 'No puedes calificar tu propio artículo.';
+  end if;
+
+  if not exists (
+    select 1 from public.ordenes o
+    where o.estado = 'Pagada'
+      and (o.user_id = v_uid or lower(o.cliente_correo) = v_correo)
+      and o.lineas @> jsonb_build_array(jsonb_build_object('idArticulo', p_articulo_id))
+  ) then
+    return 'Solo puedes calificar artículos que compraste.';
+  end if;
+  return null;
+end;
+$$;
+
+-- Estado para la pantalla: motivo (o null) y la calificación propia
+create or replace function public.estado_calificacion(p_articulo_id bigint)
+returns jsonb
+language sql stable security definer set search_path = public
+as $$
+  select jsonb_build_object(
+    'motivo', public.motivo_no_calificar(p_articulo_id),
+    'puntaje', (select puntaje from public.calificaciones where articulo_id = p_articulo_id and user_id = auth.uid())
+  );
+$$;
+
+create or replace function public.calificar_articulo(p_articulo_id bigint, p_puntaje integer)
+returns public.articulos
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_motivo text;
+  v_articulo public.articulos;
+begin
+  if p_puntaje is null or p_puntaje < 1 or p_puntaje > 5 then
+    raise exception 'La calificación debe ser entre 1 y 5.';
+  end if;
+
+  v_motivo := public.motivo_no_calificar(p_articulo_id);
+  if v_motivo is not null then
+    raise exception '%', v_motivo;
+  end if;
+
+  insert into public.calificaciones (articulo_id, user_id, puntaje)
+  values (p_articulo_id, auth.uid(), p_puntaje)
+  on conflict (articulo_id, user_id) do update set puntaje = excluded.puntaje, creada_en = now();
+
+  perform set_config('unimarket.calificando', 'on', true);
+  update public.articulos a set
+    calificacion = (select round(avg(puntaje)::numeric, 1) from public.calificaciones where articulo_id = p_articulo_id),
+    calificaciones_cantidad = (select count(*) from public.calificaciones where articulo_id = p_articulo_id)
+  where a.id = p_articulo_id
+  returning * into v_articulo;
+  perform set_config('unimarket.calificando', 'off', true);
+
+  return v_articulo;
+end;
+$$;
+
 -- Permisos de las funciones
 revoke all on function public.eliminar_usuario(uuid) from public;
 grant execute on function public.eliminar_usuario(uuid) to authenticated;
 grant execute on function public.es_admin() to anon, authenticated;
 revoke all on function public.crear_orden(jsonb, text, text, text) from public;
 grant execute on function public.crear_orden(jsonb, text, text, text) to authenticated;
+revoke all on function public.motivo_no_calificar(bigint) from public;
+revoke all on function public.estado_calificacion(bigint) from public;
+revoke all on function public.calificar_articulo(bigint, integer) from public;
+grant execute on function public.estado_calificacion(bigint) to authenticated;
+grant execute on function public.calificar_articulo(bigint, integer) to authenticated;
 
 -- DATOS DE EJEMPLO
 insert into public.categorias (valor, etiqueta, descripcion) values

@@ -54,6 +54,8 @@ erDiagram
     PERFILES ||--o{ ARTICULOS : "vendedor_id"
     CATEGORIAS ||--o{ ARTICULOS : "categoria"
     PERFILES ||--o{ ORDENES : "user_id"
+    PERFILES ||--o{ CALIFICACIONES : "user_id"
+    ARTICULOS ||--o{ CALIFICACIONES : "articulo_id"
 
     PERFILES {
         uuid id PK "= auth.users.id"
@@ -75,7 +77,8 @@ erDiagram
         text nombre
         text descripcion
         numeric precio "mayor o igual a 0"
-        numeric calificacion "0 a 5"
+        numeric calificacion "promedio 0 a 5"
+        int calificaciones_cantidad
         text categoria FK
         text universidad
         text vendedor
@@ -89,6 +92,12 @@ erDiagram
         text_array universidades_venta
         text_array fotos
         timestamptz creado_en
+    }
+    CALIFICACIONES {
+        bigint articulo_id PK
+        uuid user_id PK
+        smallint puntaje "1 a 5"
+        timestamptz creada_en
     }
     ORDENES {
         text folio PK "BOL-100001..."
@@ -109,65 +118,75 @@ erDiagram
 
 **`perfiles`**: una fila por cuenta (la crea el trigger al registrarse).
 
-| Columna | Tipo | Restricciones | Descripción |
-|---|---|---|---|
-| `id` | `uuid` | PK, FK -> `auth.users(id)` `on delete cascade` | Mismo id que la cuenta de Auth |
-| `nombre` | `text` | not null, default `''` | Nombre completo |
-| `nombre_usuario` | `text` | not null, default `''` | Usuario visible |
-| `correo` | `text` | not null, **unique** | Siempre en minúsculas; no se puede cambiar desde la tabla |
-| `universidad` | `text` | not null, default `''` | Sede elegida |
-| `rol` | `text` | not null, default `'cliente'`, check `admin` o `cliente` | Define el acceso al panel |
-| `foto` | `text` | nullable | Foto de perfil (data URL comprimida) |
-| `creado_en` | `timestamptz` | not null, default `now()` | Fecha de registro |
+| Columna            | Tipo            | Restricciones                                                  | Descripción                                               |
+| ------------------ | --------------- | -------------------------------------------------------------- | ---------------------------------------------------------- |
+| `id`             | `uuid`        | PK, FK -> `auth.users(id)` `on delete cascade`             | Mismo id que la cuenta de Auth                             |
+| `nombre`         | `text`        | not null, default `''`                                       | Nombre completo                                            |
+| `nombre_usuario` | `text`        | not null, default `''`                                       | Usuario visible                                            |
+| `correo`         | `text`        | not null, **unique**                                     | Siempre en minúsculas; no se puede cambiar desde la tabla |
+| `universidad`    | `text`        | not null, default `''`                                       | Sede elegida                                               |
+| `rol`            | `text`        | not null, default `'cliente'`, check `admin` o `cliente` | Define el acceso al panel                                  |
+| `foto`           | `text`        | nullable                                                       | Foto de perfil (data URL comprimida)                       |
+| `creado_en`      | `timestamptz` | not null, default `now()`                                    | Fecha de registro                                          |
 
 **`categorias`**: alimentan el catálogo, el formulario de publicar y el panel admin.
 
-| Columna | Tipo | Restricciones | Descripción |
-|---|---|---|---|
-| `valor` | `text` | PK | Identificador estable (ej. `snacks`) |
-| `etiqueta` | `text` | not null, **unique** | Nombre visible |
-| `descripcion` | `text` | not null, default `''` | Texto de apoyo |
+| Columna         | Tipo     | Restricciones              | Descripción                           |
+| --------------- | -------- | -------------------------- | -------------------------------------- |
+| `valor`       | `text` | PK                         | Identificador estable (ej. `snacks`) |
+| `etiqueta`    | `text` | not null, **unique** | Nombre visible                         |
+| `descripcion` | `text` | not null, default `''`   | Texto de apoyo                         |
 
 **`articulos`**: productos publicados.
 
-| Columna | Tipo | Restricciones | Descripción |
-|---|---|---|---|
-| `id` | `bigint` | PK, `generated always as identity` | Identificador |
-| `nombre` | `text` | not null | Título del producto |
-| `descripcion` | `text` | not null, default `''` | Detalle |
-| `precio` | `numeric(12,2)` | not null, check `>= 0` | Precio unitario |
-| `calificacion` | `numeric(2,1)` | not null, default `0`, check entre 0 y 5 | Estrellas |
-| `categoria` | `text` | not null, FK -> `categorias(valor)` `on update cascade on delete restrict` | No se borra una categoría con artículos |
-| `universidad` | `text` | not null, default `''` | Sede del vendedor |
-| `vendedor` | `text` | not null, default `'UniMarket'` | Nombre visible del vendedor |
-| `vendedor_id` | `uuid` | FK -> `perfiles(id)` `on delete set null` | Dueño de la publicación |
-| `distancia` | `numeric(6,2)` | not null, default `0` | Distancia en km |
-| `condicion` | `text` | not null, default `'Nuevo (Sellado)'` | Estado del producto |
-| `stock` | `integer` | not null, default `0`, check `>= 0` | Unidades disponibles |
-| `stock_guardado` | `integer` | nullable | Stock previo a marcarlo "Agotado" |
-| `sku` | `text` | not null, default `''` | Código interno |
-| `entrega` | `text` | not null, default `'A convenir'` | Punto de entrega |
-| `universidades_venta` | `text[]` | not null, default `{}` | Sedes que pueden comprarlo (vacío = todas) |
-| `fotos` | `text[]` | not null, default `{}` | Fotos (data URLs) |
-| `creado_en` | `timestamptz` | not null, default `now()` | Fecha de publicación |
+| Columna                     | Tipo              | Restricciones                                                                  | Descripción                                                  |
+| --------------------------- | ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| `id`                      | `bigint`        | PK, `generated always as identity`                                           | Identificador                                                 |
+| `nombre`                  | `text`          | not null                                                                       | Título del producto                                          |
+| `descripcion`             | `text`          | not null, default `''`                                                       | Detalle                                                       |
+| `precio`                  | `numeric(12,2)` | not null, check `>= 0`                                                       | Precio unitario                                               |
+| `calificacion`            | `numeric(2,1)`  | not null, default `0`, check entre 0 y 5                                     | Promedio de estrellas (solo lo cambia `calificar_articulo`) |
+| `calificaciones_cantidad` | `integer`       | not null, default `0`                                                        | Cuántas calificaciones tiene                                 |
+| `categoria`               | `text`          | not null, FK -> `categorias(valor)` `on update cascade on delete restrict` | No se borra una categoría con artículos                     |
+| `universidad`             | `text`          | not null, default `''`                                                       | Sede del vendedor                                             |
+| `vendedor`                | `text`          | not null, default `'UniMarket'`                                              | Nombre visible del vendedor                                   |
+| `vendedor_id`             | `uuid`          | FK -> `perfiles(id)` `on delete set null`                                  | Dueño de la publicación                                     |
+| `distancia`               | `numeric(6,2)`  | not null, default `0`                                                        | Distancia en km                                               |
+| `condicion`               | `text`          | not null, default `'Nuevo (Sellado)'`                                        | Estado del producto                                           |
+| `stock`                   | `integer`       | not null, default `0`, check `>= 0`                                        | Unidades disponibles                                          |
+| `stock_guardado`          | `integer`       | nullable                                                                       | Stock previo a marcarlo "Agotado"                             |
+| `sku`                     | `text`          | not null, default `''`                                                       | Código interno                                               |
+| `entrega`                 | `text`          | not null, default `'A convenir'`                                             | Punto de entrega                                              |
+| `universidades_venta`     | `text[]`        | not null, default `{}`                                                       | Sedes que pueden comprarlo (vacío = todas)                   |
+| `fotos`                   | `text[]`        | not null, default `{}`                                                       | Fotos (data URLs)                                             |
+| `creado_en`               | `timestamptz`   | not null, default `now()`                                                    | Fecha de publicación                                         |
 
 Índices: `articulos_categoria_idx (categoria)` y `articulos_vendedor_idx (vendedor_id)`.
 
+**`calificaciones`**: una fila por comprador y artículo (solo se escribe con `calificar_articulo`).
+
+| Columna         | Tipo            | Restricciones                                     | Descripción             |
+| --------------- | --------------- | ------------------------------------------------- | ------------------------ |
+| `articulo_id` | `bigint`      | PK, FK -> `articulos(id)` `on delete cascade` | Artículo calificado     |
+| `user_id`     | `uuid`        | PK, FK -> `perfiles(id)` `on delete cascade`  | Quien califica           |
+| `puntaje`     | `smallint`    | not null, check entre 1 y 5                       | Estrellas dadas          |
+| `creada_en`   | `timestamptz` | not null, default `now()`                       | Fecha del último cambio |
+
 **`ordenes`**: compras realizadas (solo se crean con `crear_orden`).
 
-| Columna | Tipo | Restricciones | Descripción |
-|---|---|---|---|
-| `folio` | `text` | PK, default `'BOL-' \|\| nextval('folio_seq')` | Número de boleta: `BOL-100001`, `BOL-100002`... |
-| `user_id` | `uuid` | FK -> `perfiles(id)` `on delete set null` | Cliente (queda vacío si se borra la cuenta) |
-| `cliente_nombre` | `text` | not null, default `''` | Copia del nombre al comprar |
-| `cliente_correo` | `text` | not null | Copia del correo al comprar |
-| `estado` | `text` | not null, default `'Pagada'`, check `Pagada`, `Pendiente` o `Anulada` | Lo cambia el admin |
-| `metodo_pago` | `text` | not null, default `''` | Tarjeta de crédito, débito, etc. |
-| `ultimos_digitos` | `text` | not null, default `''` | Últimos 4 dígitos de la tarjeta |
-| `autorizacion` | `text` | not null, default `''` | Código de autorización simulado |
-| `lineas` | `jsonb` | not null, default `[]` | Productos comprados (ver abajo) |
-| `total` | `numeric(12,2)` | not null, default `0` | Calculado en el servidor |
-| `creada_en` | `timestamptz` | not null, default `now()` | Fecha de compra |
+| Columna             | Tipo              | Restricciones                                                                 | Descripción                                         |
+| ------------------- | ----------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `folio`           | `text`          | PK, default `'BOL-' \|\| nextval('folio_seq')`                                | Número de boleta: `BOL-100001`, `BOL-100002`... |
+| `user_id`         | `uuid`          | FK -> `perfiles(id)` `on delete set null`                                 | Cliente (queda vacío si se borra la cuenta)         |
+| `cliente_nombre`  | `text`          | not null, default `''`                                                      | Copia del nombre al comprar                          |
+| `cliente_correo`  | `text`          | not null                                                                      | Copia del correo al comprar                          |
+| `estado`          | `text`          | not null, default `'Pagada'`, check `Pagada`, `Pendiente` o `Anulada` | Lo cambia el admin                                   |
+| `metodo_pago`     | `text`          | not null, default `''`                                                      | Tarjeta de crédito, débito, etc.                   |
+| `ultimos_digitos` | `text`          | not null, default `''`                                                      | Últimos 4 dígitos de la tarjeta                    |
+| `autorizacion`    | `text`          | not null, default `''`                                                      | Código de autorización simulado                    |
+| `lineas`          | `jsonb`         | not null, default `[]`                                                      | Productos comprados (ver abajo)                      |
+| `total`           | `numeric(12,2)` | not null, default `0`                                                       | Calculado en el servidor                             |
+| `creada_en`       | `timestamptz`   | not null, default `now()`                                                   | Fecha de compra                                      |
 
 Índice: `ordenes_correo_idx (lower(cliente_correo))` para el historial por correo. Secuencia: `folio_seq` (inicia en 100001).
 
@@ -179,34 +198,40 @@ Cada elemento de `lineas` guarda una copia de lo comprado, así la boleta no cam
 
 ### Reglas que impone la base
 
-| Regla | Dónde |
-|---|---|
-| El correo es único | `perfiles.correo`, `categorias.etiqueta` |
-| Precio y stock nunca negativos | check en `articulos` |
-| No se borra una categoría con artículos | FK `restrict` |
-| Borrar un usuario no borra sus artículos ni sus órdenes | FK `set null` |
-| Borrar la cuenta de Auth borra el perfil | FK `cascade` |
-| Siempre queda al menos un administrador | trigger `proteger_perfiles` |
-| Solo un admin cambia roles | trigger `proteger_perfiles` |
+| Regla                                                                 | Dónde                                       |
+| --------------------------------------------------------------------- | -------------------------------------------- |
+| El correo es único                                                   | `perfiles.correo`, `categorias.etiqueta` |
+| Precio y stock nunca negativos                                        | check en `articulos`                       |
+| No se borra una categoría con artículos                             | FK `restrict`                              |
+| Borrar un usuario no borra sus artículos ni sus órdenes             | FK `set null`                              |
+| Borrar la cuenta de Auth borra el perfil                              | FK `cascade`                               |
+| Un usuario califica un artículo una sola vez (puede cambiar su voto) | PK de `calificaciones`                     |
+| Solo califica quien compró y no es el vendedor                       | `calificar_articulo`                       |
+| Siempre queda al menos un administrador                               | trigger `proteger_perfiles`                |
+| Solo un admin cambia roles                                            | trigger `proteger_perfiles`                |
 
 ### Funciones y triggers
 
-| Elemento | Qué hace |
-|---|---|
-| `al_registrarse` (trigger en `auth.users`) | Crea la fila de `perfiles` con los datos del registro. **Siempre** con rol `cliente`. |
-| `proteger_perfiles_trg` (trigger en `perfiles`) | Solo un admin puede cambiar roles; el correo no se puede modificar desde `perfiles`; no deja quitar ni borrar al único administrador. |
-| `es_admin()` | Devuelve `true` si quien consulta tiene `rol = 'admin'`. La usan las políticas. |
-| `crear_orden(lineas, metodo, digitos, autorizacion)` | La única vía de compra. Valida sesión, bolsa y stock; calcula el total con los precios de la base; descuenta el stock y genera el folio, todo en una sola transacción. |
-| `eliminar_usuario(id)` | Solo admin. Borra la cuenta de Auth y el perfil cae en cascada. |
+| Elemento                                                 | Qué hace                                                                                                                                                                  |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `al_registrarse` (trigger en `auth.users`)           | Crea la fila de `perfiles` con los datos del registro. **Siempre** con rol `cliente`.                                                                            |
+| `proteger_perfiles_trg` (trigger en `perfiles`)      | Solo un admin puede cambiar roles; el correo no se puede modificar desde `perfiles`; no deja quitar ni borrar al único administrador.                                   |
+| `es_admin()`                                           | Devuelve `true` si quien consulta tiene `rol = 'admin'`. La usan las políticas.                                                                                       |
+| `crear_orden(lineas, metodo, digitos, autorizacion)`   | La única vía de compra. Valida sesión, bolsa y stock; calcula el total con los precios de la base; descuenta el stock y genera el folio, todo en una sola transacción. |
+| `calificar_articulo(id, puntaje)`                      | Guarda o cambia la calificación (1 a 5) y recalcula promedio y cantidad. Solo si el usuario compró el artículo (orden pagada) y no es el vendedor.                      |
+| `estado_calificacion(id)`                              | Dice a la pantalla si el usuario puede calificar (o el motivo) y qué puntaje dio.                                                                                         |
+| `proteger_calificacion_trg` (trigger en `articulos`) | Evita que el promedio se edite a mano: solo cambia desde `calificar_articulo`.                                                                                           |
+| `eliminar_usuario(id)`                                 | Solo admin. Borra la cuenta de Auth y el perfil cae en cascada.                                                                                                            |
 
 ### Quién puede hacer qué (RLS)
 
-| Tabla | Sin sesión | Cliente | Admin |
-|---|---|---|---|
-| `perfiles` | nada | ver y editar solo el suyo (sin cambiar rol) | ver, editar y eliminar todos |
-| `categorias` | leer | leer | leer, crear, editar y borrar |
-| `articulos` | leer | leer; crear, editar y borrar los suyos | todo |
-| `ordenes` | nada | ver las suyas; comprar con `crear_orden` | ver todas y cambiar el estado |
+| Tabla              | Sin sesión | Cliente                                             | Admin                         |
+| ------------------ | ----------- | --------------------------------------------------- | ----------------------------- |
+| `perfiles`       | nada        | ver y editar solo el suyo (sin cambiar rol)         | ver, editar y eliminar todos  |
+| `categorias`     | leer        | leer                                                | leer, crear, editar y borrar  |
+| `articulos`      | leer        | leer; crear, editar y borrar los suyos              | todo                          |
+| `calificaciones` | nada        | ver las suyas; calificar con `calificar_articulo` | ver todas                     |
+| `ordenes`        | nada        | ver las suyas; comprar con `crear_orden`          | ver todas y cambiar el estado |
 
 Los clientes no pueden insertar en `ordenes` directamente: la política de inserción solo admite al admin,
 y la compra entra por `crear_orden`, así nadie puede falsear precios, totales ni stock.
@@ -252,30 +277,30 @@ que usan una base en memoria (`src/tests/supabaseFalso.js`) con la misma lógica
 
 ## Equivalencias HTML -> React
 
-| Antes | Ahora (ruta) | Archivo |
-|---|---|---|
-| `index.html` | `/` | `src/pages/Catalogo.jsx` |
-| (nueva) | `/` sin sesión y `/quienes-somos` | `src/pages/QuienesSomos.jsx` (portada pública; con sesión, `/` muestra el catálogo) |
-| `login.html` | `/login` | `src/pages/Login.jsx` |
-| `registro.html` | `/registro` | `src/pages/Registro.jsx` |
-| `publicar.html` | `/publicar` | `src/pages/Publicar.jsx` |
-| `panel-vendedor.html` | `/panel-vendedor` | `src/pages/PanelVendedor.jsx` |
-| `bolsa.html` | `/bolsa` | `src/pages/Bolsa.jsx` |
-| `pago.html` | `/pago` | `src/pages/Pago.jsx` |
-| `pedidos.html` | `/pedidos` | `src/pages/Pedidos.jsx` |
-| `perfil.html` | `/perfil` | `src/pages/Perfil.jsx` |
+| Antes                   | Ahora (ruta)                           | Archivo                                                                                    |
+| ----------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `index.html`          | `/`                                  | `src/pages/Catalogo.jsx`                                                                 |
+| (nueva)                 | `/` sin sesión y `/quienes-somos` | `src/pages/QuienesSomos.jsx` (portada pública; con sesión, `/` muestra el catálogo) |
+| `login.html`          | `/login`                             | `src/pages/Login.jsx`                                                                    |
+| `registro.html`       | `/registro`                          | `src/pages/Registro.jsx`                                                                 |
+| `publicar.html`       | `/publicar`                          | `src/pages/Publicar.jsx`                                                                 |
+| `panel-vendedor.html` | `/panel-vendedor`                    | `src/pages/PanelVendedor.jsx`                                                            |
+| `bolsa.html`          | `/bolsa`                             | `src/pages/Bolsa.jsx`                                                                    |
+| `pago.html`           | `/pago`                              | `src/pages/Pago.jsx`                                                                     |
+| `pedidos.html`        | `/pedidos`                           | `src/pages/Pedidos.jsx`                                                                  |
+| `perfil.html`         | `/perfil`                            | `src/pages/Perfil.jsx`                                                                   |
 
-| Antes | Ahora |
-|---|---|
-| `js/datos.js` (funciones en `window`) | `src/data/datos.js` (módulo ES, se importa) |
-| `js/interfaz.js` (clase `MenuPerfil`) | `src/components/MenuPerfil.jsx` |
-| `js/publicar.js` (`SelectorModal`, `CargadorFotos`, `FormularioPublicacion`) | `SelectorModal.jsx` + estado dentro de `Publicar.jsx` |
-| `js/catalogo.js` | estado + `useMemo` dentro de `Catalogo.jsx` |
-| funciones repetidas en cada `<script>` (`escaparHtml`, `obtenerColorImagen`, `obtenerLineasDeBolsa`...) | `src/utils/utilidades.js` (una sola vez) |
-| `haySesionActiva()` + redirección manual en cada página | `AuthContext` + `components/Rutas.jsx` |
-| carrito leído/escrito en cada página | `CarritoContext` (el contador del header se actualiza solo) |
-| header copiado en 3 páginas | `src/components/Header.jsx` |
-| `css/*.css` | `src/styles/*.css` (sin cambios, salvo 2 clases renombradas) |
+| Antes                                                                                                           | Ahora                                                          |
+| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `js/datos.js` (funciones en `window`)                                                                       | `src/data/datos.js` (módulo ES, se importa)                 |
+| `js/interfaz.js` (clase `MenuPerfil`)                                                                       | `src/components/MenuPerfil.jsx`                              |
+| `js/publicar.js` (`SelectorModal`, `CargadorFotos`, `FormularioPublicacion`)                            | `SelectorModal.jsx` + estado dentro de `Publicar.jsx`      |
+| `js/catalogo.js`                                                                                              | estado + `useMemo` dentro de `Catalogo.jsx`                |
+| funciones repetidas en cada `<script>` (`escaparHtml`, `obtenerColorImagen`, `obtenerLineasDeBolsa`...) | `src/utils/utilidades.js` (una sola vez)                     |
+| `haySesionActiva()` + redirección manual en cada página                                                     | `AuthContext` + `components/Rutas.jsx`                     |
+| carrito leído/escrito en cada página                                                                          | `CarritoContext` (el contador del header se actualiza solo)  |
+| header copiado en 3 páginas                                                                                    | `src/components/Header.jsx`                                  |
+| `css/*.css`                                                                                                   | `src/styles/*.css` (sin cambios, salvo 2 clases renombradas) |
 
 ## Cambios a tener en cuenta
 
@@ -291,18 +316,18 @@ que usan una base en memoria (`src/tests/supabaseFalso.js`) con la misma lógica
 
 ## Componentes (`src/components/`): 10
 
-| # | Componente | Qué hace | Dónde se usa |
-|---|---|---|---|
-| 1 | `Header` | Barra superior: logo, buscador, perfil y carrito | Catálogo, Publicar, Panel vendedor |
-| 2 | `Footer` | Pie de página con beneficios, filtros rápidos y copyright | Catálogo |
-| 3 | `Logo` | Logo que lleva al inicio | Header, Footer, Login, Registro, Perfil, Pedidos, Bolsa, Pago |
-| 4 | `MenuPerfil` | Botón de perfil con menú desplegable | Header |
-| 5 | `SelectorModal` | Selector de una opción dentro de un modal | Publicar |
-| 6 | `GuardiaRuta` | Controla quién puede entrar a cada página | App |
-| 7 | `TarjetaArticulo` | Tarjeta de un producto en la grilla | Catálogo |
-| 8 | `ModalProducto` | Detalle del producto y botón "Agregar a la bolsa" | Catálogo |
-| 9 | `BannerPagina` | Banner azul con título y botón de volver | Bolsa, Pedidos |
-| 10 | `EstadoVacio` | Mensaje "no hay nada" con botón de acción | Bolsa, Pedidos |
+| #  | Componente          | Qué hace                                                   | Dónde se usa                                                 |
+| -- | ------------------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
+| 1  | `Header`          | Barra superior: logo, buscador, perfil y carrito            | Catálogo, Publicar, Panel vendedor                           |
+| 2  | `Footer`          | Pie de página con beneficios, filtros rápidos y copyright | Catálogo                                                     |
+| 3  | `Logo`            | Logo que lleva al inicio                                    | Header, Footer, Login, Registro, Perfil, Pedidos, Bolsa, Pago |
+| 4  | `MenuPerfil`      | Botón de perfil con menú desplegable                      | Header                                                        |
+| 5  | `SelectorModal`   | Selector de una opción dentro de un modal                  | Publicar                                                      |
+| 6  | `GuardiaRuta`     | Controla quién puede entrar a cada página                 | App                                                           |
+| 7  | `TarjetaArticulo` | Tarjeta de un producto en la grilla                         | Catálogo                                                     |
+| 8  | `ModalProducto`   | Detalle del producto y botón "Agregar a la bolsa"          | Catálogo                                                     |
+| 9  | `BannerPagina`    | Banner azul con título y botón de volver                  | Bolsa, Pedidos                                                |
+| 10 | `EstadoVacio`     | Mensaje "no hay nada" con botón de acción                 | Bolsa, Pedidos                                                |
 
 Las páginas (`src/pages/`) arman estos componentes y manejan el estado de cada pantalla.
 
@@ -312,27 +337,96 @@ El administrador es una cuenta con `rol = 'admin'` en la tabla `perfiles`.
 Al iniciar sesión entra directo a `/admin`; el menú de perfil muestra "Administración" solo si el rol es admin.
 La seguridad real está en las políticas RLS de la base (un cliente no puede leer órdenes ajenas ni cambiar roles).
 
-| Ruta | Vista |
-|---|---|
-| `/admin` | Dashboard (métricas, módulos, últimas órdenes) |
-| `/admin/ordenes`, `/admin/ordenes/:folio` | Órdenes y boleta (cambio de estado, imprimir) |
-| `/admin/productos`, `/nuevo`, `/:id`, `/:id/editar`, `/criticos` | CRUD de productos y stock crítico |
-| `/admin/categorias`, `/nueva`, `/:valor/editar` | CRUD de categorías (alimentan catálogo y publicar) |
-| `/admin/usuarios`, `/nuevo`, `/:correo`, `/:correo/editar`, `/:correo/historial` | CRUD de usuarios e historial de compras |
-| `/admin/reportes` | Ventas por categoría y mes, más vendidos, stock crítico, CSV |
-| `/admin/perfil` | Perfil del administrador |
+| Ruta                                                                                       | Vista                                                           |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| `/admin`                                                                                 | Dashboard (métricas, módulos, últimas órdenes)              |
+| `/admin/ordenes`, `/admin/ordenes/:folio`                                              | Órdenes y boleta (cambio de estado, imprimir)                  |
+| `/admin/productos`, `/nuevo`, `/:id`, `/:id/editar`, `/criticos`                 | CRUD de productos y stock crítico                              |
+| `/admin/categorias`, `/nueva`, `/:valor/editar`                                      | CRUD de categorías (alimentan catálogo y publicar)            |
+| `/admin/usuarios`, `/nuevo`, `/:correo`, `/:correo/editar`, `/:correo/historial` | CRUD de usuarios e historial de compras                         |
+| `/admin/reportes`                                                                        | Ventas por categoría y mes, más vendidos, stock crítico, CSV |
+| `/admin/perfil`                                                                          | Perfil del administrador                                        |
 
 Usa Bootstrap 5 solo dentro de `/admin` (se carga y se quita al entrar/salir)
 para no chocar con Tailwind de la tienda. Los datos viven en `src/data/datos.js`.
 
 ## Pruebas
 
-```bash
-npm run test            # Vitest: las 10 pruebas de componentes React (src/tests)
-npm run test:coverage   # Vitest + cobertura
-npm run test:karma      # Jasmine + Karma: las mismas 10 pruebas, en Chrome real
-npm run test:extra      # Vitest: pruebas adicionales de la capa de datos (src/pruebas-extra, 87)
-npm run test:todo       # Vitest: las 97 pruebas juntas
-npm run test:karma:todo # Jasmine + Karma: las 97 pruebas juntas
+Hay 10 pruebas oficiales de componentes (en dos versiones, Vitest y Jasmine/Karma) y 98 pruebas
+adicionales de la capa de datos. Las oficiales están ordenadas por proceso:
+
+```
+src/tests/componentes/
+├── vitest/  (.test.jsx)   y   karma/  (.spec.js)
+│   ├── 1-renderizado-correcto/       01 SelectorModal · 02 TarjetaMetrica
+│   ├── 2-renderizado-condicional/    03 MensajeError · 04 InsigniaStock
+│   ├── 3-propiedades-props/          05 EstadoVacio · 06 InsigniaEstadoOrden
+│   ├── 4-estado-state/               07 FormularioCategoria · 08 SelectorModal
+│   └── 5-eventos/                    09 BuscadorFiltros · 10 FormularioCategoria
 ```
 
+### Comandos generales
+
+| Comando                         | Qué hace                                                  |
+| ------------------------------- | ---------------------------------------------------------- |
+| `npm run test`                | Vitest: las 10 pruebas oficiales                           |
+| `npm run test:watch`          | Vitest en modo vigilancia (se repite al guardar)           |
+| `npm run test:coverage`       | Vitest + porcentaje de cobertura de las 10 oficiales       |
+| `npm run test:coverage:extra` | Vitest + porcentaje de cobertura de las 98 adicionales     |
+| `npm run test:coverage:todo`  | Vitest + porcentaje de cobertura de las 108 juntas         |
+| `npm run test:extra`          | Vitest: las 98 pruebas adicionales (`src/pruebas-extra`) |
+| `npm run test:todo`           | Vitest: las 108 pruebas juntas                             |
+| `npm run test:karma`          | Jasmine + Karma en Chrome: las 10 oficiales                |
+| `npm run test:karma:todo`     | Jasmine + Karma en Chrome: las 108 juntas                  |
+
+### Porcentaje de alcance (cobertura)
+
+Los comandos `test:coverage*` corren las pruebas y muestran en la terminal una tabla con el
+porcentaje de código que se ejecutó (configurada en el bloque `coverage` de `vite.config.js`,
+con el proveedor `v8`):
+
+- **% Stmts**: sentencias ejecutadas.
+- **% Branch**: ramas de decisión (`if`, `?:`, `&&`) recorridas.
+- **% Funcs**: funciones llamadas al menos una vez.
+- **% Lines**: líneas ejecutadas (el número que suele citarse como "cobertura").
+
+Además se genera un reporte navegable en `coverage/index.html` (verde = probado, rojo = sin probar).
+La carpeta `coverage/` no se sube a GitHub. Las pruebas y `main.jsx` no cuentan en el cálculo.
+
+### Ejecutar solo una prueba o un grupo (Vitest)
+
+```bash
+# Una prueba por su nombre (texto o parte del título)
+npx vitest run src/tests -t "MensajeError"
+npx vitest run src/tests -t "5 EstadoVacio"
+
+# Un archivo (basta una parte del nombre)
+npx vitest run 04-insignia-stock
+npx vitest run src/tests/componentes/vitest/2-renderizado-condicional/04-insignia-stock.test.jsx
+
+# Una carpeta completa (un proceso)
+npx vitest run src/tests/componentes/vitest/5-eventos
+
+# Una prueba adicional por nombre o archivo
+npx vitest run src/pruebas-extra -t "formatearPrecio"
+npx vitest run src/pruebas-extra/utilidades.test.js
+
+# Mostrar el nombre de cada prueba
+npx vitest run src/tests --reporter=verbose
+```
+
+### Ejecutar solo una prueba o un grupo (Jasmine + Karma)
+
+`--grep` filtra por nombre y `--archivos` por archivo o carpeta:
+
+```bash
+npx karma start karma.conf.cjs --grep="MensajeError"
+npx karma start karma.conf.cjs --grep="5) EstadoVacio"
+npx karma start karma.conf.cjs --archivos="src/tests/componentes/karma/5-eventos/*.spec.js"
+npx karma start karma.conf.cjs --archivos="src/tests/componentes/karma/4-estado-state/07-*.spec.js"
+
+# Con las 108 pruebas
+npm run test:karma:todo -- --grep="Estrellas"
+```
+
+Karma necesita Chrome o Chromium; si no lo encuentra, define `CHROME_BIN` con su ruta.

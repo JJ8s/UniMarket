@@ -8,6 +8,7 @@ import Publicar from './pages/Publicar';
 import PanelVendedor from './pages/PanelVendedor';
 import Bolsa from './pages/Bolsa';
 import Pago from './pages/Pago';
+import Compras from './pages/Compras';
 import Pedidos from './pages/Pedidos';
 import Perfil from './pages/Perfil';
 import rutasAdmin from './admin/rutasAdmin';
@@ -29,7 +30,7 @@ export default function App() {
       <main className="max-w-xl mx-auto p-8">
         <h1 className="text-2xl font-bold mb-3">Falta configurar Supabase</h1>
         <p className="mb-2">Crea un archivo <code>.env</code> en la raíz del proyecto con:</p>
-        <pre className="bg-gray-100 p-3 rounded text-sm mb-2">{'VITE_SUPABASE_URL=https://TU-PROYECTO.supabase.co\nVITE_SUPABASE_ANON_KEY=tu-anon-key'}</pre>
+        <pre className="bg-gray-100 p-3 rounded text-sm mb-2">{'VITE_SUPABASE_URL=https://TU-PROYECTO.supabase.co\nVITE_SUPABASE_ANON_KEY=tu-clave-publishable'}</pre>
         <p>Luego reinicia <code>npm run dev</code>. Los pasos completos están en el README.</p>
       </main>
     );
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="/bolsa" element={<Bolsa />} />
         <Route path="/pago" element={<Pago />} />
         <Route path="/pedidos" element={<Pedidos />} />
+        <Route path="/compras" element={<Compras />} />
         <Route path="/perfil" element={<Perfil />} />
       </Route>
 

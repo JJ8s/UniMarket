@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ESTADOS_ORDEN, actualizarEstadoOrden, obtenerOrden } from '../../data/datos';
 import useConsulta from '../../hooks/useConsulta';
+import { descargarBoletaPdf } from '../../utils/boletaPdf';
 import { formatearFechaHora, formatearPrecio } from '../../utils/utilidades';
 import EncabezadoPagina from '../components/EncabezadoPagina';
 import InsigniaEstadoOrden from '../components/InsigniaEstadoOrden';
@@ -41,6 +42,9 @@ export default function BoletaOrden() {
   return (
     <>
       <EncabezadoPagina titulo={`Boleta ${orden.folio}`} subtitulo={formatearFechaHora(orden.creadaEn)}>
+        <button type="button" className="btn btn-primary" onClick={() => descargarBoletaPdf(orden)}>
+          <i className="fa-solid fa-file-pdf"></i> Descargar PDF
+        </button>
         <button type="button" className="btn btn-outline-secondary" onClick={() => window.print()}>
           <i className="fa-solid fa-print"></i> Imprimir
         </button>

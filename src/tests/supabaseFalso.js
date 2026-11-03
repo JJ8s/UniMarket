@@ -51,6 +51,7 @@ export function crearSupabaseFalso() {
     categorias: CATEGORIAS.map((c) => ({ ...c })),
     articulos: [],
     ordenes: [],
+    calificaciones: [],
   };
   const cuentas = [
     { id: ID_ADMIN, email: 'admin@unimarket.edu', password: 'admin123' },
@@ -60,7 +61,7 @@ export function crearSupabaseFalso() {
   const oyentes = [];
 
   const completarArticulo = (f) => ({
-    id: sigueId++, descripcion: '', calificacion: 0, universidad: '', vendedor: 'UniMarket', vendedor_id: null,
+    id: sigueId++, descripcion: '', calificacion: 0, calificaciones_cantidad: 0, universidad: '', vendedor: 'UniMarket', vendedor_id: null,
     distancia: 0, condicion: 'Nuevo (Sellado)', stock: 0, stock_guardado: null, sku: '', entrega: 'A convenir',
     universidades_venta: [], fotos: [], creado_en: marca(), ...f,
   });
@@ -189,6 +190,32 @@ export function crearSupabaseFalso() {
         };
         db.ordenes.push(orden);
         return { data: structuredClone(orden), error: null };
+      }
+      if (nombre === 'estado_calificacion' || nombre === 'calificar_articulo') {
+        const uid = sesion?.user.id;
+        const perfil = db.perfiles.find((p) => p.id === uid);
+        const idArt = Number(args.p_articulo_id);
+        const art = db.articulos.find((a) => a.id === idArt);
+        let motivo = null;
+        if (!perfil) motivo = 'Inicia sesión para calificar.';
+        else if (!art) motivo = 'El artículo ya no existe.';
+        else if (art.vendedor_id === uid) motivo = 'No puedes calificar tu propio artículo.';
+        else if (!db.ordenes.some((o) => o.estado === 'Pagada' && (o.user_id === uid || o.cliente_correo.toLowerCase() === perfil.correo)
+          && o.lineas.some((l) => Number(l.idArticulo) === idArt))) motivo = 'Solo puedes calificar artículos que compraste.';
+
+        if (nombre === 'estado_calificacion') {
+          const mia = db.calificaciones.find((c) => c.articulo_id === idArt && c.user_id === uid);
+          return { data: { motivo, puntaje: mia ? mia.puntaje : null }, error: null };
+        }
+        const puntaje = args.p_puntaje;
+        if (!Number.isInteger(puntaje) || puntaje < 1 || puntaje > 5) return { data: null, error: error('La calificación debe ser entre 1 y 5.', 'P0001') };
+        if (motivo) return { data: null, error: error(motivo, 'P0001') };
+        const previa = db.calificaciones.find((c) => c.articulo_id === idArt && c.user_id === uid);
+        if (previa) previa.puntaje = puntaje; else db.calificaciones.push({ articulo_id: idArt, user_id: uid, puntaje });
+        const votos = db.calificaciones.filter((c) => c.articulo_id === idArt);
+        art.calificacion = Math.round((votos.reduce((s, c) => s + c.puntaje, 0) / votos.length) * 10) / 10;
+        art.calificaciones_cantidad = votos.length;
+        return { data: structuredClone(art), error: null };
       }
       const { p_id } = args;
       if (nombre !== 'eliminar_usuario') return { data: null, error: error('funcion desconocida', '42883') };

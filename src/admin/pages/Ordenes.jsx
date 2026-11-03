@@ -4,6 +4,7 @@ import { ESTADOS_ORDEN, cargarOrdenes } from '../../data/datos';
 import useConsulta from '../../hooks/useConsulta';
 import { descargarCsv } from '../../utils/archivos';
 import { convertirACsv } from '../../utils/reportes';
+import { descargarBoletaPdf } from '../../utils/boletaPdf';
 import { formatearFechaHora, formatearPrecio, normalizarTexto } from '../../utils/utilidades';
 import BuscadorFiltros from '../components/BuscadorFiltros';
 import EncabezadoPagina from '../components/EncabezadoPagina';
@@ -73,6 +74,9 @@ export default function Ordenes() {
                   <td className="text-end">{formatearPrecio(orden.total)}</td>
                   <td><InsigniaEstadoOrden estado={orden.estado} /></td>
                   <td className="text-end">
+                    <button type="button" className="btn btn-sm btn-outline-secondary me-1" title="Descargar PDF" onClick={() => descargarBoletaPdf(orden)}>
+                      <i className="fa-solid fa-file-pdf"></i> PDF
+                    </button>
                     <Link to={`/admin/ordenes/${orden.folio}`} className="btn btn-sm btn-outline-primary">Ver boleta</Link>
                   </td>
                 </tr>
